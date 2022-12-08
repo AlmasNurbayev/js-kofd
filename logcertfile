@@ -1,0 +1,75 @@
+CONNECTED(00000003)
+---
+Certificate chain
+ 0 s:CN = *.kofd.kz
+   i:C = GB, ST = Greater Manchester, L = Salford, O = Sectigo Limited, CN = Sectigo RSA Domain Validation Secure Server CA
+   a:PKEY: rsaEncryption, 2048 (bit); sigalg: RSA-SHA256
+   v:NotBefore: Feb  8 00:00:00 2022 GMT; NotAfter: Mar 10 23:59:59 2023 GMT
+---
+Server certificate
+-----BEGIN CERTIFICATE-----
+MIIGJjCCBQ6gAwIBAgIRAOaM+keZxg2D2mSHSy6RmBgwDQYJKoZIhvcNAQELBQAw
+gY8xCzAJBgNVBAYTAkdCMRswGQYDVQQIExJHcmVhdGVyIE1hbmNoZXN0ZXIxEDAO
+BgNVBAcTB1NhbGZvcmQxGDAWBgNVBAoTD1NlY3RpZ28gTGltaXRlZDE3MDUGA1UE
+AxMuU2VjdGlnbyBSU0EgRG9tYWluIFZhbGlkYXRpb24gU2VjdXJlIFNlcnZlciBD
+QTAeFw0yMjAyMDgwMDAwMDBaFw0yMzAzMTAyMzU5NTlaMBQxEjAQBgNVBAMMCSou
+a29mZC5rejCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAO+UCMeoXx47
+zDNEBv/AYO5x+hqyLVamD/9zg4IK8UWtYK4+jzYUJAgccfPrzzdLoFC2ou1404aa
+5k9GmVaV7wiEvObuxmW/mZUmqh9fm7RO581IDYt3ZWs8Z8qjBAgwCTph5IpluVzK
+RLewuPjIuDxX4AuRwQ5ukweuuSnZoDn3PV8HFAyCjC0gw9nIFcyIxmIQwbqGq7x7
+ocy//v4jVpD01GXz7h1yzQE36JryDF1HYuxKWVi8PRpZhxvuj/67mD6mYNBFu0om
+C4HCcY/a92pQVZhgxPcf29iU0aCs0sf4U7KkYE01YgFAeYCglgkQGGTWSqTuv7sR
+KJ4EI8eL9cMCAwEAAaOCAvUwggLxMB8GA1UdIwQYMBaAFI2MXsRUrYrhd+mb+ZsF
+4bgBjWHhMB0GA1UdDgQWBBSN42qx5zLr/Q1ZdUGRQTqZpclc9TAOBgNVHQ8BAf8E
+BAMCBaAwDAYDVR0TAQH/BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUH
+AwIwSQYDVR0gBEIwQDA0BgsrBgEEAbIxAQICBzAlMCMGCCsGAQUFBwIBFhdodHRw
+czovL3NlY3RpZ28uY29tL0NQUzAIBgZngQwBAgEwgYQGCCsGAQUFBwEBBHgwdjBP
+BggrBgEFBQcwAoZDaHR0cDovL2NydC5zZWN0aWdvLmNvbS9TZWN0aWdvUlNBRG9t
+YWluVmFsaWRhdGlvblNlY3VyZVNlcnZlckNBLmNydDAjBggrBgEFBQcwAYYXaHR0
+cDovL29jc3Auc2VjdGlnby5jb20wHQYDVR0RBBYwFIIJKi5rb2ZkLmt6ggdrb2Zk
+Lmt6MIIBfwYKKwYBBAHWeQIEAgSCAW8EggFrAWkAdwCt9776fP8QyIudPZwePhhq
+tGcpXc+xDCTKhYY069yCigAAAX7YTibBAAAEAwBIMEYCIQD132YOWzGdLO72u28D
+0M3jOotPtK6I9xVKK+j3rv+gRgIhAM7/DGQWF7XxxVbzj2uEEjunRIUsf+sBdD1J
+fe2Nm22eAHYAejKMVNi3LbYg6jjgUh7phBZwMhOFTTvSK8E6V6NS61IAAAF+2E4m
+jAAABAMARzBFAiBdiJRJH2qOz11kgIbK+leDAMnhdN5+LF2b0l5CZQiKVgIhAP49
+X90Pne7U/FuzfeOPVd02v3M8+LMyzHpwI3TKM9K/AHYA6D7Q2j71BjUy51covIlr
+yQPTy9ERa+zraeF3fW0GvW4AAAF+2E4mYwAABAMARzBFAiEAzTAPVfnxGkMyK62l
+qhYd1x7gBg9qQsWpFy5JW9kt1jQCIBVPcXdXJBecppJaW0q6sQWk9Od/mo58T3pD
+OB6LG41HMA0GCSqGSIb3DQEBCwUAA4IBAQCMt2bGqojkdSPRyzKDbtye5DE58mnV
+63k0rysLbx8yTikvOl1WRcS8puCRXszR8pSop1Cp8nV3nMC51I+f6hHyIeZt1dmP
+Nd2egrUeYtvuCc/Q8GdC5pFqLyFp6HPb5e+tRSdq85L/FMy/xV4F8yvO7AAKCFDb
+3HCzhFCWRelheGqcJiXC1A5pA3A6QqHWJCu5P2NMSsitFATDcQjaHq6kkis5yKj1
+9WDICsYpYvnXzkVMLxu84s6osZbwxAsSqXY6fvnq6scTvEwLTydiWdOHT+waHHzU
+N1m/tBw2/wZMJh6ieL4daLhsFqYW8fDZkVDkmEtB8z/muBk7KmO0LD+i
+-----END CERTIFICATE-----
+subject=CN = *.kofd.kz
+issuer=C = GB, ST = Greater Manchester, L = Salford, O = Sectigo Limited, CN = Sectigo RSA Domain Validation Secure Server CA
+---
+No client certificate CA names sent
+Peer signing digest: SHA512
+Peer signature type: RSA
+Server Temp Key: ECDH, prime256v1, 256 bits
+---
+SSL handshake has read 2089 bytes and written 443 bytes
+Verification error: unable to verify the first certificate
+---
+New, TLSv1.2, Cipher is ECDHE-RSA-AES256-GCM-SHA384
+Server public key is 2048 bit
+Secure Renegotiation IS supported
+Compression: NONE
+Expansion: NONE
+No ALPN negotiated
+SSL-Session:
+    Protocol  : TLSv1.2
+    Cipher    : ECDHE-RSA-AES256-GCM-SHA384
+    Session-ID: F81391B851A78757889C7DA039ECF655227C72D0A1F8120672291EBED9131393
+    Session-ID-ctx: 
+    Master-Key: F401D7F9E3AAF156D61A6C44B74C53A31596324C553A4256C187C19ECB87333FA8EF94BA8ECC97B01C56AC2F3DACB2D4
+    PSK identity: None
+    PSK identity hint: None
+    SRP username: None
+    Start Time: 1670477272
+    Timeout   : 7200 (sec)
+    Verify return code: 21 (unable to verify the first certificate)
+    Extended master secret: no
+---
