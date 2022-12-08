@@ -1,6 +1,8 @@
 const axios = require("axios");
 const https = require("https");
 
+const errorAr = [];
+
 async function getJWT() {
   const agent = new https.Agent({
     rejectUnauthorized: false,
@@ -28,20 +30,23 @@ async function getJWT() {
 
   try {
       const response = await axios(config);
-      console.log("2");
+//      console.log("2");
       console.log(typeof(response));
-       let fs = require('fs');
-       fs.writeFile('response-post.txt', String(response.data.data.jwt), error2 =>{});
+      let fs = require('fs');
+      fs.writeFile('response-post.txt', JSON.stringify(response.data), error2 =>{});
+      if (response.data.data == null) {
+        writeError(JSON.stringify(response.data.error), 'getJWT');  
+      }
       return String(response.data.data.jwt);
-    }
+     }
     catch (error) {
-      console.log("3");
-       let fs = require('fs');
-       fs.writeFile('error-post.txt', String(error), error2 =>{});
+      writeError(error, 'getJWT');
       return String(error);
     };
 }
 //config.headers = {'Authorization': `Bearer ${tokenStr}`}
+
+
 
 async function getData() {
   const agent = new https.Agent({
@@ -56,33 +61,47 @@ async function getData() {
     organizationXin: "800727301256",
   };
 
-  let token = getJWT();
-  console.log(typeof(token));
+  let token = "Bearer " + await getJWT();
+  console.log(token);
   let fs = require('fs');
   fs.writeFile('jwt.txt', String(token), error2 =>{});
 
-  // const config = {
-  //   method: "get",
-  //   url: 'https://cabinet.kofd.kz/api/operations?skip=0&take=20&cashboxId=33812',
-  //   headers: {
-  //     "Content-Type": "application/json",
-  //     'Authorization': token
-  //   },
-  //   data: JSON.stringify(data),
-  //   httpsAgent: agent,
-  // };
+  const config = {
+    method: "get",
+    url: 'https://cabinet.kofd.kz/api/operations?skip=0&take=40&cashboxId=33812',
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": token,
+      "Host": "cabinet.kofd.kz",
+      "Connection": "keep-alive"
+    },
+    data: JSON.stringify(data),
+    httpsAgent: agent,
+  };
+
+  try {
+    const res = await axios(config);
+    console.log(res.data)
+    if (res.data.error) {
+      writeError(JSON.stringify(res.data.error), 'getData');  
+    }
+    let fs = require('fs');
+    fs.writeFile('response-get.txt', JSON.stringify(res.data), error2 =>{});
+
+  } catch (error) {
+    writeError(error, 'getData');
+  }
+}
 
 
-
-  // try {
-  //   const res = await axios(config);
-  //   console.log(res.data)
-
-  // } catch (error) {
-  //   console.log(error);
-  //   let fs = require('fs');
-  //   fs.writeFile('error-get.txt', JSON.stringify(error), error2 =>{});
-  // }
+function writeError(error, point) {
+  errorAr.push({
+   date: new Date(),
+   text: String(error),
+   point: point
+  });
+  let fs = require('fs');
+  fs.writeFile('errors.txt', JSON.stringify(errorAr), error2 =>{});
 }
 
 console.log(getData());
