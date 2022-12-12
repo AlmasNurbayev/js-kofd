@@ -80,16 +80,19 @@ function writeError(error, point) {
     fs.writeFile('db/errors.txt', JSON.stringify(errorAr), error2 => { });
 }
 
-function clientQuery(item) {
+async function clientQuery(item) {
     let client = new Client({
         user: 'ps',
         host: 'localhost',
         database: 'kofd',
         password: 'PS31415926',
+        connectionTimeoutMillis: 5000,
+        query_timeout: 2000,
+        idle_in_transaction_session_timeout: 2000,
         port: 5432
     });
 
-    client.connect()
+    await client.connect()
         .then((result) => {
             client.query(item);
             console.log("1");
