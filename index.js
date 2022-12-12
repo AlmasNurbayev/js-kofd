@@ -1,14 +1,14 @@
 const axios = require("axios");
 const https = require("https");
-const fs = require('fs');
+const fs = require("fs");
+
+const agent = new https.Agent({
+  rejectUnauthorized: false,
+});
 
 const errorAr = [];
 
 async function getJWT(iin, pass, kassa_id) {
-  const agent = new https.Agent({
-    rejectUnauthorized: false,
-  });
-
   const data = {
     credentials: {
       iin: iin,
@@ -30,64 +30,68 @@ async function getJWT(iin, pass, kassa_id) {
   console.log("1");
 
   try {
-      const response = await axios(config);
-//      console.log("2");
-      console.log(typeof(response));
-      fs.writeFile('response-post.txt', JSON.stringify(response.data), error2 =>{});
-      if (response.data.data == null) {
-        writeError(JSON.stringify(response.data.error), 'getJWT');  
-      }
-      return response.data.data.jwt;
-     }
-    catch (error) {
-      writeError(error, 'getJWT');
-      return String(error);
-    };
+    const response = await axios(config);
+    //      console.log("2");
+    console.log(typeof response);
+    fs.writeFile(
+      "response-post.txt",
+      JSON.stringify(response.data),
+      (error2) => {}
+    );
+    if (response.data.data == null) {
+      writeError(JSON.stringify(response.data.error), "getJWT");
+    }
+    return response.data.data.jwt;
+  } catch (error) {
+    writeError(error, "getJWT");
+    return String(error);
+  }
 }
 //config.headers = {'Authorization': `Bearer ${tokenStr}`}
 
-
-
 async function getData(iin, pass, kassa_id) {
-  const agent = new https.Agent({
-    rejectUnauthorized: false,
-  });
-
-  let token = "Bearer " + await getJWT(iin, pass, kassa_id);
-  fs.writeFile('jwt.txt', String(token), error2 =>{});
+  const token = "Bearer " + (await getJWT(iin, pass, kassa_id));
+  fs.writeFile("jwt.txt", String(token), (error2) => {});
 
   const config = {
     method: "get",
     url: `https://cabinet.kofd.kz/api/operations?skip=0&take=80&cashboxId=${kassa_id}`,
     headers: {
       "Content-Type": "application/json",
-      "Authorization": token,
-      "Host": "cabinet.kofd.kz",
-      "Connection": "keep-alive"
+      Authorization: token,
+      Host: "cabinet.kofd.kz", // в принципе не нужен
+      Connection: "keep-alive", // в принципе не нужен
     },
     httpsAgent: agent,
   };
 
   try {
     const res = await axios(config);
-    console.log(res.data)
+    console.log(res.data);
     if (res.data.error) {
-      writeError(JSON.stringify(res.data.error), 'getData');  
+      writeError(JSON.stringify(res.data.error), "getData");
     }
-    fs.writeFile('response-get.txt', JSON.stringify(res.data), error2 =>{});
-
+    fs.writeFile("response-get.txt", JSON.stringify(res.data), (error2) => {});
   } catch (error) {
-    writeError(error, 'getData');
+    writeError(error, "getData");
   }
 }
 
 function writeError(error, point) {
   errorAr.push({
-   date: new Date(),
-   text: String(error),
-   point: point
+    date: new Date(),
+    text: String(error),
+    point: point,
   });
-  fs.writeFile('errors.txt', JSON.stringify(errorAr), error2 =>{});
+  fs.writeFile("errors.txt", JSON.stringify(errorAr), (error2) => {});
 }
 
-console.log(getData("800727301256", "Aw31415926!", "33812"));
+// запускать либо так
+(async () => {
+  console.log(await getData("800727301256", "Aw31415926!", "33812"));
+})();
+
+// либо так
+// getData("800727301256", "Aw31415926!", "33812").then(res => {
+//   console.log(res)
+// })
