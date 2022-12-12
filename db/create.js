@@ -143,8 +143,8 @@ function clientQuery(item) {
     // await client.end();
 }
 
-sql.forEach((item) => {
-    if (item.status) {
-        console.log('found error in ' & String(item.desciption));
-    }
-});
+// sql.forEach((item) => {
+//     if (item.status) {
+//         console.log('found error in ' & String(item.desciption));
+//     }
+// });
