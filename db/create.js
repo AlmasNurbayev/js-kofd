@@ -6,7 +6,7 @@ const sql = fs
   .readFileSync(resolve(__dirname, "../sql/initial.sql"))
   .toString();
 
-const sqlConnectionString = "postgres://ps:PS31415926@localhost/kofd";
+const sqlConnectionString = "postgres://ps:PS31415926@localhost:5432/kofd";
 const client = new Client(sqlConnectionString);
 
 client.connect();
