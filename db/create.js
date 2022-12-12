@@ -65,7 +65,7 @@ sql.push({
 megascript = ' ';
 sql.forEach((item) => {
     megascript = megascript + String(item.sql);
-    
+
     //clientQuery(item);
 })
 
@@ -88,32 +88,42 @@ function clientQuery(item) {
         password: 'PS31415926',
         port: 5432
     });
-    
-    client
-        .connect()
-        .then(() => {
+
+    client.connect()
+        .then((result) => {
             client.query(item);
+            console.log("1");
+            console.log(result);
+            //fs.writeFile('db/create_result1.txt', String(result), error2 => { });
         })
         .catch(err => {
+            console.log("3");
             console.log('connection error');
             console.log(err);
             writeError('connection error' & " ===== " & JSON.stringify(err))
-            //item.status = true
-        .then(result => {
-            console.log(result);
-            fs.writeFile('db/create_result.txt', JSON.stringify(result), error2 => { });
-            })
-        .catch((e) => {
-            console.log('query error');
-            console.log(e);
-            writeError('query error' & " ===== " & JSON.stringify(e))
+                .then(result => {
+                    console.log("2");
+                    console.log(result);
+                    fs.writeFile('db/create_result2.txt', JSON.stringify(result), error2 => { });
+                })
+                .catch((e) => {
+                    console.log("4");
+                    console.log('query error');
+                    console.log(e);
+                    writeError('query error' & " ===== " & JSON.stringify(e))
                     //item.status = true;
-            })
-        .finally(client.end())
+                })
+                .finally(() => {
+                    //client.end();
+                    console.log("6");
+                })
         })
-        .finally(client.end());
-        
-        
+        .finally(() => {
+            client.end();
+            console.log("5");
+        });
+
+
 
     // let client = new Client({
     //     user: 'ps',
