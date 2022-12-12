@@ -1,5 +1,5 @@
 -- create organization
-ALTER SCHEMA "public" OWNER TO localuser;
+ALTER SCHEMA "public" OWNER TO ps;
 
 CREATE TABLE "public".organization (id smallint PRIMARY KEY, BIN varchar, name varchar);
 
