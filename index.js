@@ -1,5 +1,6 @@
 const axios = require("axios");
 const https = require("https");
+const fs = require('fs');
 
 const errorAr = [];
 
@@ -32,12 +33,11 @@ async function getJWT() {
       const response = await axios(config);
 //      console.log("2");
       console.log(typeof(response));
-      let fs = require('fs');
       fs.writeFile('response-post.txt', JSON.stringify(response.data), error2 =>{});
       if (response.data.data == null) {
         writeError(JSON.stringify(response.data.error), 'getJWT');  
       }
-      return String(response.data.data.jwt);
+      return response.data.data.jwt;
      }
     catch (error) {
       writeError(error, 'getJWT');
@@ -53,29 +53,18 @@ async function getData() {
     rejectUnauthorized: false,
   });
 
-  const data = {
-    credentials: {
-      iin: "800727301256",
-      password: "Aw31415926!",
-    },
-    organizationXin: "800727301256",
-  };
-
   let token = "Bearer " + await getJWT();
-  console.log(token);
-  let fs = require('fs');
   fs.writeFile('jwt.txt', String(token), error2 =>{});
 
   const config = {
     method: "get",
-    url: 'https://cabinet.kofd.kz/api/operations?skip=0&take=40&cashboxId=33812',
+    url: 'https://cabinet.kofd.kz/api/operations?skip=0&take=80&cashboxId=33812',
     headers: {
       "Content-Type": "application/json",
       "Authorization": token,
       "Host": "cabinet.kofd.kz",
       "Connection": "keep-alive"
     },
-    data: JSON.stringify(data),
     httpsAgent: agent,
   };
 
@@ -85,7 +74,6 @@ async function getData() {
     if (res.data.error) {
       writeError(JSON.stringify(res.data.error), 'getData');  
     }
-    let fs = require('fs');
     fs.writeFile('response-get.txt', JSON.stringify(res.data), error2 =>{});
 
   } catch (error) {
@@ -93,14 +81,12 @@ async function getData() {
   }
 }
 
-
 function writeError(error, point) {
   errorAr.push({
    date: new Date(),
    text: String(error),
    point: point
   });
-  let fs = require('fs');
   fs.writeFile('errors.txt', JSON.stringify(errorAr), error2 =>{});
 }
 
