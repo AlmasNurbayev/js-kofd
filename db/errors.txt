@@ -1,0 +1,1 @@
+[{"date":"2022-12-12T12:11:54.890Z","text":"0","point":"create kassa"},{"date":"2022-12-12T12:11:54.891Z","text":"0","point":"create transaction"}]

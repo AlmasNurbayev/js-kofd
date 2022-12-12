@@ -1,68 +1,140 @@
 const { Client } = require('pg');
-const client = new Client({
-    user: 'ps',
-    host: 'localhost',
-    database: 'kofd',
-    password: 'PS31415926',
-    port: 5432  
-}); 
+const fs = require('fs');
+const errorAr = [];
+const sql = [];
 
-client.connect();
 
-console.log('1 - create organization');
-client.query(`
-ALTER SCHEMA "public" OWNER TO ps;
 
-CREATE TABLE "public".organization (
-	id smallint NOT NULL,
-	"BIN" varchar,
-	name varchar,
-	CONSTRAINT organization_pk PRIMARY KEY (id)
-);
-ALTER TABLE "public".organization OWNER TO ps;
-
-CREATE TABLE "public".kassa (
-	id smallint,
-	snumber varchar,
-	znumber varchar,
-	knumber varchar,
-	name varchar,
-	id_organization smallint REFERENCES "public".organization (id)
-
-);
-COMMENT ON COLUMN "public".kassa.snumber IS E'serial number, like 010102360873';
-COMMENT ON COLUMN "public".kassa.znumber IS E'Zavod number, like SWK00426370';
-COMMENT ON COLUMN "public".kassa.knumber IS E'Inhouse number KOFD. 5 numbers, like 34012';
-COMMENT ON COLUMN "public".kassa.name IS E'name, like Incore-Евразия-3';
-COMMENT ON COLUMN "public".kassa.id_organization IS E'linked table';
-ALTER TABLE "public".kassa OWNER TO ps;
-`, (err, data) => {
-    if (err) 
-        throw new Error(err);
-    console.log(data, err);
-    client.end();  
+sql.push({
+    desciption: 'create organization',
+    status: false,
+    sql: `
+    ALTER SCHEMA "public" OWNER TO ps;
+    
+    CREATE TABLE "public".organization (
+        id smallint PRIMARY KEY,
+        BIN varchar,
+        name varchar
+    );
+    ALTER TABLE "public".organization OWNER TO ps;
+    `,
 });
 
-console.log('2 - create kassa');
-client.query(`
-CREATE TABLE "public".kassa (
-	id smallint,
-	snumber varchar,
-	znumber varchar,
-	knumber varchar,
-	name varchar,
-	id_organization smallint REFERENCES "public".organization (id)
+sql.push({
+    desciption: 'create kassa',
+    status: false,
+    sql: `CREATE TABLE "public".kassa (
+        id smallint PRIMARY KEY,
+        snumber varchar,
+        znumber varchar,
+        knumber varchar,
+        name varchar,
+        id_organization smallint REFERENCES "public".organization (id)
+    );
+    COMMENT ON COLUMN "public".kassa.snumber IS E'serial number, like 010102360873';
+    COMMENT ON COLUMN "public".kassa.znumber IS E'Zavod number, like SWK00426370';
+    COMMENT ON COLUMN "public".kassa.knumber IS E'Inhouse number KOFD. 5 numbers, like 34012';
+    COMMENT ON COLUMN "public".kassa.name IS E'name, like Incore-EU-3';
+    COMMENT ON COLUMN "public".kassa.id_organization IS E'linked table';
+    ALTER TABLE "public".kassa OWNER TO ps;
+    `,
+});
 
-);
-COMMENT ON COLUMN "public".kassa.snumber IS E'serial number, like 010102360873';
-COMMENT ON COLUMN "public".kassa.znumber IS E'Zavod number, like SWK00426370';
-COMMENT ON COLUMN "public".kassa.knumber IS E'Inhouse number KOFD. 5 numbers, like 34012';
-COMMENT ON COLUMN "public".kassa.name IS E'name, like Incore-Евразия-3';
-COMMENT ON COLUMN "public".kassa.id_organization IS E'linked table';
-ALTER TABLE "public".kassa OWNER TO ps;
-`, (err, data) => {
-    if (err) 
-        throw new Error(err);
-    console.log(data, err);
-    client.end();  
+sql.push({
+    desciption: 'create transaction',
+    status: false,
+    sql: `CREATE TABLE "public".transaction (
+        id varchar,
+        onlineFiscalNumber varchar,
+        offlineFiscalNumber varchar,
+        systemDate timestamptz,
+        operationDate timestamptz,
+        type_operation smallint, 
+        subType smallint,
+        sum_operation numeric,
+        availableSum numeric,
+        paymentTypes smallint,
+        shift smallint,
+        id_organization smallint REFERENCES "public".organization (id),
+        id_kassa smallint REFERENCES "public".kassa (id)
+    );
+    ALTER TABLE "public".kassa OWNER TO ps;
+    `,
+});
+
+megascript = ' ';
+sql.forEach((item) => {
+    megascript = megascript + String(item.sql);
+    
+    //clientQuery(item);
+})
+
+clientQuery(megascript);
+
+function writeError(error, point) {
+    errorAr.push({
+        date: new Date(),
+        text: String(error),
+        point: point
+    });
+    fs.writeFile('db/errors.txt', JSON.stringify(errorAr), error2 => { });
+}
+
+function clientQuery(item) {
+    let client = new Client({
+        user: 'ps',
+        host: 'localhost',
+        database: 'kofd',
+        password: 'PS31415926',
+        port: 5432
+    });
+    
+    client
+        .connect()
+        .then(() => {
+            client.query(item);
+        })
+        .catch(err => {
+            console.log('connection error');
+            console.log(err);
+            writeError('connection error' & " ===== " & JSON.stringify(err))
+            //item.status = true
+        .then(result => {
+            console.log(result);
+            fs.writeFile('db/create_result.txt', JSON.stringify(result), error2 => { });
+            })
+        .catch((e) => {
+            console.log('query error');
+            console.log(e);
+            writeError('query error' & " ===== " & JSON.stringify(e))
+                    //item.status = true;
+            })
+        .finally(client.end())
+        })
+        .finally(client.end());
+        
+        
+
+    // let client = new Client({
+    //     user: 'ps',
+    //     host: 'localhost',
+    //     database: 'kofd',
+    //     password: 'PS31415926',
+    //     port: 5432
+    // });
+
+    // await client.connect();
+    // await client.query(item.sql, (err, data) => {
+    //     if (err)
+    //     throw new Error(err);
+    //     writeError(String(data) &  " ===== " & JSON.stringify(err), item.desciption);
+    //     item.status = true;
+    // });
+    // await client.end();
+}
+
+sql.forEach((item) => {
+    if (item.status) {
+        console.log('found error in ' & String(item.desciption));
+    }
 });

@@ -4,17 +4,17 @@ const fs = require('fs');
 
 const errorAr = [];
 
-async function getJWT() {
+async function getJWT(iin, pass, kassa_id) {
   const agent = new https.Agent({
     rejectUnauthorized: false,
   });
 
   const data = {
     credentials: {
-      iin: "800727301256",
-      password: "Aw31415926!",
+      iin: iin,
+      password: pass,
     },
-    organizationXin: "800727301256",
+    organizationXin: iin,
   };
 
   const config = {
@@ -48,17 +48,17 @@ async function getJWT() {
 
 
 
-async function getData() {
+async function getData(iin, pass, kassa_id) {
   const agent = new https.Agent({
     rejectUnauthorized: false,
   });
 
-  let token = "Bearer " + await getJWT();
+  let token = "Bearer " + await getJWT(iin, pass, kassa_id);
   fs.writeFile('jwt.txt', String(token), error2 =>{});
 
   const config = {
     method: "get",
-    url: 'https://cabinet.kofd.kz/api/operations?skip=0&take=80&cashboxId=33812',
+    url: `https://cabinet.kofd.kz/api/operations?skip=0&take=80&cashboxId=${kassa_id}`,
     headers: {
       "Content-Type": "application/json",
       "Authorization": token,
@@ -90,4 +90,4 @@ function writeError(error, point) {
   fs.writeFile('errors.txt', JSON.stringify(errorAr), error2 =>{});
 }
 
-console.log(getData());
+console.log(getData("800727301256", "Aw31415926!", "33812"));
