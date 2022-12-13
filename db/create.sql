@@ -3,8 +3,7 @@ ALTER SCHEMA "public" OWNER TO ps;
 CREATE TABLE "public".organization (
 	id smallint PRIMARY KEY,
 	BIN varchar,
-	name varchar
-);
+	name varchar);
 ALTER TABLE "public".organization OWNER TO ps;
 
 -- create kassa
@@ -14,8 +13,7 @@ CREATE TABLE "public".kassa (
     znumber varchar,
     knumber varchar,
     name varchar,
-    id_organization smallint REFERENCES "public".organization (id)
-);
+    id_organization smallint REFERENCES "public".organization (id));
 COMMENT ON COLUMN "public".kassa.snumber IS E'serial number, like 010102360873';
 COMMENT ON COLUMN "public".kassa.znumber IS E'Zavod number, like SWK00426370';
 COMMENT ON COLUMN "public".kassa.knumber IS E'Inhouse number KOFD. 5 numbers, like 34012';
@@ -37,6 +35,6 @@ CREATE TABLE "public".transaction (
     paymentTypes smallint,
     shift smallint,
     id_organization smallint REFERENCES "public".organization (id),
-    id_kassa smallint REFERENCES "public".kassa (id)
-);
+    id_kassa smallint REFERENCES "public".kassa (id));
 ALTER TABLE "public".transaction OWNER TO ps;
+asdadsads
