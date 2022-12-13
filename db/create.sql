@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS "public".kassa, "public".organization, "public".transaction CASCADE;
+
 -- create organization
 ALTER SCHEMA "public" OWNER TO ps;
 CREATE TABLE "public".organization (
