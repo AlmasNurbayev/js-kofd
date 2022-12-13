@@ -2,16 +2,16 @@
 ALTER SCHEMA "public" OWNER TO ps;
 CREATE TABLE "public".organization (
 	id smallint PRIMARY KEY,
-	BIN varchar,
+	BIN varchar UNIQUE,
 	name varchar);
 ALTER TABLE "public".organization OWNER TO ps;
 
 -- create kassa
 CREATE TABLE "public".kassa (
     id smallint PRIMARY KEY,
-    snumber varchar,
+    snumber varchar UNIQUE,
     znumber varchar,
-    knumber varchar,
+    knumber varchar UNIQUE,
     name varchar,
     id_organization smallint REFERENCES "public".organization (id));
 COMMENT ON COLUMN "public".kassa.snumber IS E'serial number, like 010102360873';
@@ -23,7 +23,7 @@ ALTER TABLE "public".kassa OWNER TO ps;
 
 -- create transaction
 CREATE TABLE "public".transaction (
-    id varchar,
+    id varchar UNIQUE,
     onlineFiscalNumber varchar,
     offlineFiscalNumber varchar,
     systemDate timestamptz,
@@ -37,4 +37,3 @@ CREATE TABLE "public".transaction (
     id_organization smallint REFERENCES "public".organization (id),
     id_kassa smallint REFERENCES "public".kassa (id));
 ALTER TABLE "public".transaction OWNER TO ps;
-asdadsads
