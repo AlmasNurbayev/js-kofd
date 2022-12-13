@@ -1,0 +1,1 @@
+[{"date":"2022-12-13T13:43:50.730Z","text":"{\"code\":5,\"text\":\"[\\\"The value \\\\u002733812__\\\\u0027 is not valid for CashboxId.\\\"]\"}","point":"getData"}]
