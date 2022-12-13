@@ -3,6 +3,12 @@ const https = require("https");
 const fs = require("fs");
 //const { resolve } = require("path");
 
+fs.unlink("get/response-post.txt", (err) => {});
+fs.unlink("get/jwt.txt", (err) => {});
+fs.unlink("get/response-get.txt", (err) => {});
+fs.unlink("get/errors.txt", (err) => {});
+fs.unlink("get/response.txt", (err) => {});
+
 const agent = new https.Agent({
   rejectUnauthorized: false,
 });
@@ -35,11 +41,7 @@ async function getJWT(iin, pass, kassa_id) {
     const response = await axios(config);
     //      console.log("2");
     console.log(typeof response);
-    fs.writeFile(
-      "get/response-post.txt",
-      JSON.stringify(response.data),
-      (error2) => {}
-    );
+    fs.writeFile("get/response-post.txt", JSON.stringify(response.data),(error2) => {});
     if (response.data.data == null) {
       writeError(JSON.stringify(response.data.error), "getJWT");
     }
