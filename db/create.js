@@ -1,24 +1,33 @@
 const { Client } = require('pg');
 const fs = require('fs');
 const errorAr = [];
-let  sql = "";
 
-fs.readFile('db/create.sql', (err, data) => {
+fs.unlink("db/errors.txt", (err) => {});
+fs.unlink("db/create_result1.txt", (err) => {});
+fs.unlink("db/result.txt", (err) => {});
+
+fs.readFile('db/create.sql', "utf8", (err, data) => {
   sql = data;
     //console.log(sql);
   if (err) {
     writeError(JSON.stringify(err), "read sql-script");
     throw err;
   }
+
+  
+  b = clientQuery2(sql);
+  //fs.writeFile('db/result.txt', JSON.stringify(b), error2 => { });
+  console.log(b);
 });
+
 
 function writeError(error, point) {
   errorAr.push({
     date: new Date(),
-    text: string(error),
+    text: error,
     point: point
   });
-  fs.writeFile('db/errors.txt', JSON.stringify(errorAr), error2 => { });
+  fs.writeFileSync('db/errors.txt', JSON.stringify(errorAr), error2 => {console.log("Error write file errors") });
 }
 
 
@@ -36,7 +45,7 @@ function clientQuery2(item) {
     port: 5432
   });
 
-  let result = undefined;
+  let result = {error: ""};
 
   client
     .connect()
@@ -46,26 +55,24 @@ function clientQuery2(item) {
       throw new Error(e);
     })
     .then(() => {
-        return client.query(item).then((res) => {
+        return client.query(item).then((res) => {  
         result = res;
         fs.writeFile('db/create_result1.txt', JSON.stringify(result), error2 => { });
       });
     })
     .catch((e) => {
       // что-то тут делаешь
-      writeError(e, "query");
+      writeError(JSON.stringify(e), "query");
       throw new Error(e);
     })
     .finally(() => {
-      //return client.end();
       client.end();
+      //result;
     });
-
   return result;
 }
 
- let b = clientQuery2(sql);
- console.log(b);
+
 
 
 
