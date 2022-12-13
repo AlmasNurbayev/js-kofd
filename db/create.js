@@ -13,13 +13,10 @@ fs.readFile('db/create.sql', "utf8", (err, data) => {
     writeError(JSON.stringify(err), "read sql-script");
     throw err;
   }
-
-  
   b = clientQuery2(sql);
-  //fs.writeFile('db/result.txt', JSON.stringify(b), error2 => { });
   console.log(b);
+  //fs.writeFile('db/result.txt', JSON.stringify(b), error2 => { });
 });
-
 
 function writeError(error, point) {
   errorAr.push({
@@ -29,8 +26,6 @@ function writeError(error, point) {
   });
   fs.writeFileSync('db/errors.txt', JSON.stringify(errorAr), error2 => {console.log("Error write file errors") });
 }
-
-
 
 function clientQuery2(item) {
   
