@@ -1,6 +1,7 @@
 const axios = require("axios");
 const https = require("https");
 const fs = require("fs");
+//const { resolve } = require("path");
 
 const agent = new https.Agent({
   rejectUnauthorized: false,
@@ -25,16 +26,17 @@ async function getJWT(iin, pass, kassa_id) {
     },
     data: JSON.stringify(data),
     httpsAgent: agent,
+    timeout: 2000
   };
 
-  console.log("1");
+  //console.log("1");
 
   try {
     const response = await axios(config);
     //      console.log("2");
     console.log(typeof response);
     fs.writeFile(
-      "response-post.txt",
+      "get/response-post.txt",
       JSON.stringify(response.data),
       (error2) => {}
     );
@@ -51,27 +53,27 @@ async function getJWT(iin, pass, kassa_id) {
 
 async function getData(iin, pass, kassa_id) {
   const token = "Bearer " + (await getJWT(iin, pass, kassa_id));
-  fs.writeFile("jwt.txt", String(token), (error2) => {});
+  fs.writeFile("get/jwt.txt", String(token), (error2) => {});
 
   const config = {
     method: "get",
-    url: `https://cabinet.kofd.kz/api/operations?skip=0&take=80&cashboxId=${kassa_id}`,
+    url: `https://cabinet.kofd.kz/api/operations?skip=0&take=2&cashboxId=${kassa_id}`,
     headers: {
       "Content-Type": "application/json",
       Authorization: token,
-      Host: "cabinet.kofd.kz", // в принципе не нужен
-      Connection: "keep-alive", // в принципе не нужен
     },
     httpsAgent: agent,
+    timeout: 2000
   };
 
   try {
     const res = await axios(config);
-    console.log(res.data);
+    //console.log(res.data);
     if (res.data.error) {
       writeError(JSON.stringify(res.data.error), "getData");
     }
-    fs.writeFile("response-get.txt", JSON.stringify(res.data), (error2) => {});
+    fs.writeFile("get/response-get.txt", JSON.stringify(res.data), (error2) => {});
+    return res.data;
   } catch (error) {
     writeError(error, "getData");
   }
@@ -83,15 +85,20 @@ function writeError(error, point) {
     text: String(error),
     point: point,
   });
-  fs.writeFile("errors.txt", JSON.stringify(errorAr), (error2) => {});
+  fs.writeFile("get/errors.txt", JSON.stringify(errorAr), (error2) => {});
 }
 
 // запускать либо так
-(async () => {
-  console.log(await getData("800727301256", "Aw31415926!", "33812"));
-})();
+// (async () => {
+//   console.log(await getData("800727301256", "Aw31415926!", "33812"));
+// })();
 
 // либо так
-// getData("800727301256", "Aw31415926!", "33812").then(res => {
-//   console.log(res)
-// })
+ getData("800727301256", "Aw31415926!", "33812").then(res => {
+   fs.writeFile("get/response.txt", JSON.stringify(res), (error2) => {});
+   console.log(res); // if res.error == constain error
+ })
+ .catch(err => {
+    console.log("4");
+    console.log(err);
+ })

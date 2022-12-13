@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "createDB": "node db/create.js"
+    "get": "node get/index.js",
+    "create": "node db/create.js"
   },
   "author": "",
   "license": "ISC",
