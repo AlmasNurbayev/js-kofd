@@ -44,7 +44,7 @@ async function getJWT(iin, pass) {
     return res.data.data.jwt;
   } catch (e) {
     writeError(e, 'getJWT');
-    return String(e);
+    throw e;
   }
 }
 

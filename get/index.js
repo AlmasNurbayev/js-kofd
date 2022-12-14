@@ -10,10 +10,13 @@ const myFunc = async () => {
   const listKassa = res[0].rows;
   const listOrg = res[1].rows;
 
-  const arrJWT = [];
   for (let i = 0; i < listOrg.length; i++) {
     const el = listOrg[i];
-    arrJWT.push(await getJWT(el.bin, el.password_kofd));
+    try {
+      el['jwt'] = await getJWT(el.bin, el.password_kofd);
+    } catch (e) {
+      el['jwt'] = '';
+    }
   }
 
   // тут дальше делай, что тебе нужно с async/await
