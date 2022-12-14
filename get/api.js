@@ -85,7 +85,7 @@ async function getOperationsData(jwt, kassa_id) {
 /**
  * @description Any query to DB
  * @param {*} query
- * @returns {Promise<string|null|Error>}
+ * @returns {Promise<string|Error>}
  */
 async function getQuery(query) {
   const client = new Client({
@@ -112,7 +112,7 @@ async function getQuery(query) {
     return res;
   } catch (e) {
     await writeError(e.stack, 'getKassa-query');
-    return null;
+    throw new Error(e);
   } finally {
     await client.end();
   }
