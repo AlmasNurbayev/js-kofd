@@ -6,7 +6,24 @@ fs.unlink("db/errors.txt", (err) => { });
 fs.unlink("db/create_result1.txt", (err) => { });
 fs.unlink("db/result.txt", (err) => { });
 
-runScript('db/create.sql');
+runall();
+
+async function runall() {
+
+     try {
+        await runScript('db/create.sql');
+        try {
+            await runScript('db/insert.sql');
+        } 
+        catch (err) {
+            throw err;
+        }
+    } catch (err) {
+        throw err;
+    }
+
+}
+
 
 async function runScript(path) {
     fs.readFile(path, "utf8", (err, data) => {
@@ -15,23 +32,17 @@ async function runScript(path) {
             writeError(JSON.stringify(err), "read sql-script", path);
             throw err;
         }
-        clientQuery(sql, path).then(res => {
-            console.log("yes!");
-            console.log(JSON.stringify(res));
+        return clientQuery(sql, path).then(res => {
+            console.log(path + ":   yes!");
+            //console.log(JSON.stringify(res));
         })
             .catch(err => {
-                console.log("fuck!");
+                console.log(path + ":    fuck!");
                 console.log(err.stack);
             });
         //console.log(path + " === " + clientQuery(sql, path));
     });
 
-
-
-    // if (errorAr.length == 0) {
-    //     return true;
-    // }
-    // else return false;    
 }
 
 function writeError(error, point, path) {
@@ -45,7 +56,7 @@ function writeError(error, point, path) {
 }
 
 async function clientQuery(query, path) {
-
+    
     const client = new Client({
         user: 'ps',
         host: 'localhost',
@@ -59,6 +70,17 @@ async function clientQuery(query, path) {
 
     try {
         res = await  client.connect();
+        try {
+            res = await client.query(query);
+            fs.writeFile('db/create_result1.txt', JSON.stringify(res), error2 => { });
+            return res;
+        } catch (err) {
+            writeError(JSON.stringify(err.stack), "query", path);
+            //console.error('query error', err.stack);
+            throw err;
+        } finally {
+            client.end();
+        }
     } catch (err) {
         writeError(JSON.stringify(err.stack), "connect", path);
         //console.error('query error', err.stack);
@@ -68,15 +90,5 @@ async function clientQuery(query, path) {
      
     }
 
-    try {
-        res = await client.query(query);
-        fs.writeFile('db/create_result1.txt', JSON.stringify(res), error2 => { });
-        return res;
-    } catch (err) {
-        writeError(JSON.stringify(err.stack), "query", path);
-        //console.error('query error', err.stack);
-        throw err;
-    } finally {
-        client.end();
-    }
+
 }
