@@ -123,22 +123,19 @@ async function getQuery(query) {
     port: 5432
   });
 
-
-
   try {
-    res = await client.connect();
-    try {
-      res = await client.query(query);
-      //console.log(res)
-      fs.writeFile("get/kassa-get.txt", JSON.stringify(res), (error2) => { });
-      return res;
-    } catch (err) {
-      writeError(JSON.stringify(err.stack), "getKassa-connect");
-      //console.error('query error', err.stack);
-      throw err;
-    } finally {
-
-    }
+    await client.connect();
+  } catch (err) {
+    writeError(JSON.stringify(err.stack), "getKassa-connect");
+    //console.error('query error', err.stack);
+    throw err;
+  }
+  
+  try {
+    let res = await client.query(query);
+    //console.log(res)
+    fs.writeFile("get/kassa-get.txt", JSON.stringify(res), (error2) => { });
+    return res;
   } catch (err) {
     writeError(JSON.stringify(err.stack), "getKassa-query");
     //console.error('query error', err.stack);
@@ -155,38 +152,38 @@ const queryAllOrganization = `select * FROM "public".organization`;
 
 // get list of org & kassa form db 
 Promise.all([getQuery(queryAllKassa), getQuery(queryAllOrganization)]).then(res => {
-  ArrJWT = [];
+  let arrJWT = [];
   listKassa = res[0].rows;
   console.table(listKassa);
   listOrg = res[1].rows;
   listOrg.forEach(element => {
-    ArrJWT.push(getJWT(element.bin, element.password_kofd));
+    arrJWT.push(getJWT(element.bin, element.password_kofd));
   });
   // get JWT for all organization
-  Promise.all(ArrJWT).then(res => {
+  return Promise.all(arrJWT).then(res => {
     //console.log(JSON.stringify(res));
-    listOrg.forEach((element,index) => {
+    listOrg.forEach((element, index) => {
       element['jwt'] = res[index];
     });
     // merge listOrg and listKassa
     listKassa.forEach(elementKassa => {
       listOrg.forEach(elementOrg => {
-         if (elementKassa.bin === elementOrg.bin) {
-            elementKassa['jwt'] = elementOrg.jwt;
+        if (elementKassa.bin === elementOrg.bin) {
+          elementKassa['jwt'] = elementOrg.jwt;
 
-            ArrGet = [];
-            ArrGet.push(getData(elementKassa.jwt, elementKassa.knumber));
-            
-            // get data for all kassa
-            Promise.all(ArrGet).then(res => {
-              fs.writeFile("get/response.txt", JSON.stringify(res), (error2) => {});
-              console.log(res);
-            })
-            .catch (err => {
+          let arrGet = [];
+          arrGet.push(getData(elementKassa.jwt, elementKassa.knumber));
+
+          // get data for all kassa
+          return Promise.all(arrGet).then(res => {
+            fs.appendFile("get/response.txt", JSON.stringify(res) + "\n", (error2) => { });
+            console.log(res);
+          })
+            .catch(err => {
               console.log(err.stack);
             });
-         }
-      }); 
+        }
+      });
     });
     // console.table(listOrg);
     // console.table(listKassa);
@@ -194,7 +191,7 @@ Promise.all([getQuery(queryAllKassa), getQuery(queryAllOrganization)]).then(res 
     .catch(err => {
       console.log(err.stack);
     });
-}).catch (err => {
+}).catch(err => {
   console.log(err.stack);
 });
 
