@@ -34,14 +34,14 @@ async function getJWT(iin, pass) {
   };
 
   try {
-    const response = await axios(config);
+    const res = await axios(config);
 
-    writeLog('response-post.txt', response.data);
+    writeLog('response-post.txt', res.data);
 
-    if (response.data.data == null) {
-      writeError(JSON.stringify(response.data.error), 'getJWT');
+    if (res.data.data == null) {
+      writeError(JSON.stringify(res.data.error), 'getJWT');
     }
-    return response.data.data.jwt;
+    return res.data.data.jwt;
   } catch (error) {
     writeError(error, 'getJWT');
     return String(error);
@@ -103,9 +103,9 @@ async function getQuery(query) {
   });
 
   try {
-    res = await client.connect();
+    await client.connect();
     try {
-      res = await client.query(query);
+      const res = await client.query(query);
       //console.log(res)
       fs.writeFile('get/kassa-get.txt', JSON.stringify(res), () => {});
       return res;
