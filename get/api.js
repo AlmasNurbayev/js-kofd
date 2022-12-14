@@ -85,7 +85,11 @@ async function getData(jwt, kassa_id) {
   }
 }
 
-// Any query to DB
+/**
+ * @description Any query to DB
+ * @param {*} query
+ * @returns
+ */
 async function getQuery(query) {
   const client = new Client({
     user: 'ps',
