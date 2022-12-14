@@ -1,13 +1,16 @@
 const axios = require("axios");
 const https = require("https");
 const fs = require("fs");
-//const { resolve } = require("path");
+const { Client } = require('pg');
+const { resolve } = require("path");
 
-fs.unlink("get/response-post.txt", (err) => {});
-fs.unlink("get/jwt.txt", (err) => {});
-fs.unlink("get/response-get.txt", (err) => {});
-fs.unlink("get/errors.txt", (err) => {});
-fs.unlink("get/response.txt", (err) => {});
+
+// delete all temporary files
+fs.unlink("get/response-post.txt", (err) => { });
+fs.unlink("get/jwt.txt", (err) => { });
+fs.unlink("get/response-get.txt", (err) => { });
+fs.unlink("get/errors.txt", (err) => { });
+fs.unlink("get/response.txt", (err) => { });
 
 const agent = new https.Agent({
   rejectUnauthorized: false,
@@ -15,7 +18,8 @@ const agent = new https.Agent({
 
 const errorAr = [];
 
-async function getJWT(iin, pass, kassa_id) {
+// Get token from KOFD
+async function getJWT(iin, pass) {
   const data = {
     credentials: {
       iin: iin,
@@ -41,7 +45,7 @@ async function getJWT(iin, pass, kassa_id) {
     const response = await axios(config);
     //      console.log("2");
     console.log(typeof response);
-    fs.writeFile("get/response-post.txt", JSON.stringify(response.data),(error2) => {});
+    fs.writeFile("get/response-post.txt", JSON.stringify(response.data), (error2) => { });
     if (response.data.data == null) {
       writeError(JSON.stringify(response.data.error), "getJWT");
     }
@@ -51,11 +55,12 @@ async function getJWT(iin, pass, kassa_id) {
     return String(error);
   }
 }
-//config.headers = {'Authorization': `Bearer ${tokenStr}`}
 
-async function getData(iin, pass, kassa_id) {
-  const token = "Bearer " + (await getJWT(iin, pass, kassa_id));
-  fs.writeFile("get/jwt.txt", String(token), (error2) => {});
+
+// get transaction data form KOFD
+async function getData(jwt, kassa_id) {
+  const token = "Bearer " + jwt;
+  fs.writeFile("get/jwt.txt", String(token), (error2) => { });
 
   const config = {
     method: "get",
@@ -74,7 +79,7 @@ async function getData(iin, pass, kassa_id) {
     if (res.data.error) {
       writeError(JSON.stringify(res.data.error), "getData");
     }
-    fs.writeFile("get/response-get.txt", JSON.stringify(res.data), (error2) => {});
+    fs.writeFile("get/response-get.txt", JSON.stringify(res.data), (error2) => { });
     return res.data;
   } catch (error) {
     writeError(error, "getData");
@@ -87,7 +92,7 @@ function writeError(error, point) {
     text: String(error),
     point: point,
   });
-  fs.writeFile("get/errors.txt", JSON.stringify(errorAr), (error2) => {});
+  fs.writeFile("get/errors.txt", JSON.stringify(errorAr), (error2) => { });
 }
 
 // запускать либо так
@@ -95,12 +100,89 @@ function writeError(error, point) {
 //   console.log(await getData("800727301256", "Aw31415926!", "33812"));
 // })();
 
-// либо так
- getData("800727301256", "Aw31415926!", "33812").then(res => {
-   fs.writeFile("get/response.txt", JSON.stringify(res), (error2) => {});
-   console.log(res); // if res.error == constain error
- })
- .catch(err => {
-    console.log("4");
-    console.log(err);
- })
+// ВРЕМЕННО ОТКЛЮЧЕНО!
+//  getData("800727301256", "Aw31415926!", "33812").then(res => {
+//    fs.writeFile("get/response.txt", JSON.stringify(res), (error2) => {});
+//    console.log(res); // if res.error == constain error
+//  })
+//  .catch(err => {
+//     console.log("4");
+//     console.log(err);
+//  })
+
+// Any query to DB
+async function getQuery(query) {
+  const client = new Client({
+    user: 'ps',
+    host: 'localhost',
+    database: 'kofd',
+    password: 'PS31415926',
+    connectionTimeoutMillis: 2000,
+    query_timeout: 1000,
+    idle_in_transaction_session_timeout: 1000,
+    port: 5432
+  });
+
+
+
+  try {
+    res = await client.connect();
+    try {
+      res = await client.query(query);
+      //console.log(res)
+      fs.writeFile("get/kassa-get.txt", JSON.stringify(res), (error2) => { });
+      return res;
+    } catch (err) {
+      writeError(JSON.stringify(err.stack), "getKassa-connect");
+      //console.error('query error', err.stack);
+      throw err;
+    } finally {
+
+    }
+  } catch (err) {
+    writeError(JSON.stringify(err.stack), "getKassa-query");
+    //console.error('query error', err.stack);
+    throw err;
+  } finally {
+    client.end();
+  }
+}
+
+
+const queryAllKassa = `select organization.bin, organization.name_org, organization.password_kofd, kassa.*  FROM "public".organization
+join "public".kassa on "public".kassa.id_organization  = "public".organization.id`;
+const queryAllOrganization = `select * FROM "public".organization`;
+
+// get list of org & kassa form db 
+Promise.all([getQuery(queryAllKassa), getQuery(queryAllOrganization)]).then(res => {
+  ArrJWT = [];
+  listKassa = res[0].rows;
+  console.table(listKassa);
+  listOrg = res[1].rows;
+  listOrg.forEach(element => {
+    ArrJWT.push(getJWT(element.bin, element.password_kofd));
+  });
+  // get JWT for all organization
+  Promise.all(ArrJWT).then(res => {
+    //console.log(JSON.stringify(res));
+    listOrg.forEach((element,index) => {
+      element['jwt'] = res[index];
+    });
+    // merge listOrg and listKassa
+    listKassa.forEach(elementKassa => {
+      listOrg.forEach(elementOrg => {
+         if (elementKassa.bin === elementOrg.bin) {
+            elementKassa['jwt'] = elementOrg.jwt;
+         }
+      }); 
+    });
+    // console.table(listOrg);
+    // console.table(listKassa);
+  })
+    .catch(err => {
+      console.log(err.stack);
+    });
+}).catch (err => {
+  console.log(err.stack);
+});
+

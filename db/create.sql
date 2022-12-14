@@ -5,7 +5,8 @@ ALTER SCHEMA "public" OWNER TO ps;
 CREATE TABLE "public".organization (
 	id smallint PRIMARY KEY,
 	BIN varchar UNIQUE,
-	name varchar);
+	name_org varchar,
+    password_kofd varchar);
 ALTER TABLE "public".organization OWNER TO ps;
 
 -- create kassa
@@ -14,12 +15,12 @@ CREATE TABLE "public".kassa (
     snumber varchar UNIQUE,
     znumber varchar,
     knumber varchar UNIQUE,
-    name varchar,
+    name_kassa varchar,
     id_organization smallint REFERENCES "public".organization (id));
 COMMENT ON COLUMN "public".kassa.snumber IS E'serial number, like 010102360873';
 COMMENT ON COLUMN "public".kassa.znumber IS E'Zavod number, like SWK00426370';
 COMMENT ON COLUMN "public".kassa.knumber IS E'Inhouse number KOFD. 5 numbers, like 34012';
-COMMENT ON COLUMN "public".kassa.name IS E'name, like Incore-EU-3';
+COMMENT ON COLUMN "public".kassa.name_kassa IS E'name, like Incore-EU-3';
 COMMENT ON COLUMN "public".kassa.id_organization IS E'linked table';
 ALTER TABLE "public".kassa OWNER TO ps;
 
