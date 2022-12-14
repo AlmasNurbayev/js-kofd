@@ -6,13 +6,8 @@ join "public".kassa on "public".kassa.id_organization  = "public".organization.i
 const queryAllOrganization = `select * FROM "public".organization`;
 
 const myFunc = async () => {
-  const res = await Promise.all([getQuery(queryAllKassa), getQuery(queryAllOrganization)]);
-  const listKassa = res[0].rows;
-  const listOrg = res[1].rows;
-
-  // ! можно и так
-  // const listKassa = (await getQuery(queryAllKassa)).rows;
-  // const listOrg = (await getQuery(queryAllOrganization)).rows;
+  const listKassa = (await getQuery(queryAllKassa)).rows;
+  const listOrg = (await getQuery(queryAllOrganization)).rows;
 
   for (let i = 0; i < listOrg.length; i++) {
     const el = listOrg[i];

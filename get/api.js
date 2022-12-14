@@ -11,7 +11,7 @@ const agent = new https.Agent({
  * @description Get token from KOFD
  * @param {*} iin
  * @param {*} pass
- * @returns {Promise<string|null>}
+ * @returns {Promise<string|Error>}
  */
 async function getJWT(iin, pass) {
   const data = {
@@ -36,13 +36,14 @@ async function getJWT(iin, pass) {
   try {
     const res = await axios(config);
     writeLog('response-post.txt', res.data);
-    if (res.data.data == null) {
-      await writeError(res.data.error, 'getJWT');
+    if (!res.data.data) {
+      await writeError(res.data, 'getJWT');
+      return;
     }
     return res.data.data.jwt;
   } catch (e) {
     await writeError(e, 'getJWT');
-    return null;
+    throw new Error(e);
   }
 }
 
@@ -50,11 +51,9 @@ async function getJWT(iin, pass) {
  * @description Get transaction data form KOFD
  * @param {*} jwt
  * @param {*} kassa_id
- * @returns {Promise<string|null>}
+ * @returns {Promise<string|Error>}
  */
-async function getData(jwt, kassa_id) {
-  await writeLog('jwt.txt', response.data);
-
+async function getOperationsData(jwt, kassa_id) {
   const token = 'Bearer ' + jwt;
 
   const config = {
@@ -75,18 +74,18 @@ async function getData(jwt, kassa_id) {
       await writeError(res.data.error, 'getData');
     }
 
-    await writeLog(`response-${kassa_id}.txt`, response.data);
+    await writeLog(`response-${kassa_id}.txt`, res.data);
     return res.data;
   } catch (e) {
     await writeError(e, 'getData');
-    return null;
+    throw new Error(e);
   }
 }
 
 /**
  * @description Any query to DB
  * @param {*} query
- * @returns {Promise<string|null>}
+ * @returns {Promise<string|null|Error>}
  */
 async function getQuery(query) {
   const client = new Client({
@@ -104,7 +103,7 @@ async function getQuery(query) {
     await client.connect();
   } catch (e) {
     await writeError(JSON.stringify(e.stack), 'getKassa-connect');
-    throw e;
+    throw new Error(e);
   }
 
   try {
@@ -115,10 +114,10 @@ async function getQuery(query) {
     await writeError(e.stack, 'getKassa-query');
     return null;
   } finally {
-    client.end();
+    await client.end();
   }
 }
 
 exports.getJWT = getJWT;
-exports.getData = getData;
+exports.getData = getOperationsData;
 exports.getQuery = getQuery;
