@@ -7,8 +7,8 @@ const queryAllOrganization = `select * FROM "public".organization`;
 
 const myFunc = async () => {
   const res = await Promise.all([getQuery(queryAllKassa), getQuery(queryAllOrganization)]);
-  listKassa = res[0].rows;
-  listOrg = res[1].rows;
+  const listKassa = res[0].rows;
+  const listOrg = res[1].rows;
 
   const arrJWT = [];
   for (let i = 0; i < listOrg.length; i++) {
