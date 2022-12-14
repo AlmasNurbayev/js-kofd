@@ -106,18 +106,15 @@ async function getQuery(query) {
     await client.connect();
     try {
       const res = await client.query(query);
-      //console.log(res)
       fs.writeFile('get/kassa-get.txt', JSON.stringify(res), () => {});
       return res;
     } catch (err) {
       writeError(JSON.stringify(err.stack), 'getKassa-connect');
-      //console.error('query error', err.stack);
       throw err;
     } finally {
     }
   } catch (err) {
     writeError(JSON.stringify(err.stack), 'getKassa-query');
-    //console.error('query error', err.stack);
     throw err;
   } finally {
     client.end();
