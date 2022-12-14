@@ -79,7 +79,7 @@ async function getData(jwt, kassa_id) {
     if (res.data.error) {
       writeError(JSON.stringify(res.data.error), "getData");
     }
-    fs.writeFile("get/response-get.txt", JSON.stringify(res.data), (error2) => { });
+    fs.writeFile("get/response-" + kassa_id + ".txt", JSON.stringify(res.data), (error2) => { });
     return res.data;
   } catch (error) {
     writeError(error, "getData");
@@ -173,6 +173,18 @@ Promise.all([getQuery(queryAllKassa), getQuery(queryAllOrganization)]).then(res 
       listOrg.forEach(elementOrg => {
          if (elementKassa.bin === elementOrg.bin) {
             elementKassa['jwt'] = elementOrg.jwt;
+
+            ArrGet = [];
+            ArrGet.push(getData(elementKassa.jwt, elementKassa.knumber));
+            
+            // get data for all kassa
+            Promise.all(ArrGet).then(res => {
+              fs.writeFile("get/response.txt", JSON.stringify(res), (error2) => {});
+              console.log(res);
+            })
+            .catch (err => {
+              console.log(err.stack);
+            });
          }
       }); 
     });
