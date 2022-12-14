@@ -10,6 +10,10 @@ const myFunc = async () => {
   const listKassa = res[0].rows;
   const listOrg = res[1].rows;
 
+  // ! можно и так
+  // const listKassa = (await getQuery(queryAllKassa)).rows;
+  // const listOrg = (await getQuery(queryAllOrganization)).rows;
+
   for (let i = 0; i < listOrg.length; i++) {
     const el = listOrg[i];
     try {
