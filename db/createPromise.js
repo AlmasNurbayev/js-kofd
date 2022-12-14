@@ -1,12 +1,10 @@
-const fs = require("fs");
-const { resolve } = require("path");
-const { Client } = require("pg");
+const fs = require('fs');
+const { resolve } = require('path');
+const { Client } = require('pg');
 
-const sql = fs
-  .readFileSync(resolve(__dirname, "../sql/initial.sql"))
-  .toString();
+const sql = fs.readFileSync(resolve(__dirname, '../sql/initial.sql')).toString();
 
-const sqlConnectionString = "postgres://ps:PS31415926@localhost:5432/kofd";
+const sqlConnectionString = 'postgres://ps:PS31415926@localhost:5432/kofd';
 const client = new Client(sqlConnectionString);
 
 client.connect();

@@ -2,43 +2,42 @@ const { Client } = require('pg');
 const fs = require('fs');
 const errorAr = [];
 
-fs.unlink("db/errors.txt", (err) => { });
-fs.unlink("db/create_result1.txt", (err) => { });
-fs.unlink("db/result.txt", (err) => { });
+fs.unlink('db/errors.txt', (err) => {});
+fs.unlink('db/create_result1.txt', (err) => {});
+fs.unlink('db/result.txt', (err) => {});
 
+fs.readFile('db/create.sql', 'utf8', (err, data) => {
+  sql = data;
+  //console.log(sql);
+  if (err) {
+    writeError(JSON.stringify(err), 'read sql-script');
+    throw err;
+  }
+  b = clientQuery2(sql)
+    .then((res) => {
+      console.log(res);
+    })
+    .catch((er) => {
+      console.log(er);
+      writeError(JSON.stringify(er), 'total');
+    });
+  console.log(b);
 
-  fs.readFile('db/create.sql', "utf8", (err, data) => {
-    sql = data;
-    //console.log(sql);
-    if (err) {
-      writeError(JSON.stringify(err), "read sql-script");
-      throw err;
-    }
-    b = clientQuery2(sql)
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((er) => {
-        console.log(er);
-        writeError(JSON.stringify(er), "total");
-      });
-    console.log(b);
-
-    //fs.writeFile('db/result.txt', JSON.stringify(b), error2 => { });
-  });
-
+  //fs.writeFile('db/result.txt', JSON.stringify(b), error2 => { });
+});
 
 function writeError(error, point) {
   errorAr.push({
     date: new Date(),
     text: error,
-    point: point
+    point: point,
   });
-  fs.writeFileSync('db/errors.txt', JSON.stringify(errorAr), error2 => { console.log("Error write file errors") });
+  fs.writeFileSync('db/errors.txt', JSON.stringify(errorAr), (error2) => {
+    console.log('Error write file errors');
+  });
 }
 
 async function clientQuery2(item) {
-
   const client = new Client({
     user: 'ps',
     host: 'localhost',
@@ -47,32 +46,31 @@ async function clientQuery2(item) {
     connectionTimeoutMillis: 2000,
     query_timeout: 1000,
     idle_in_transaction_session_timeout: 1000,
-    port: 5432
+    port: 5432,
   });
 
-  let result = { error: "" };
+  let result = { error: '' };
 
   client
     .connect()
     .catch((e) => {
       // что-то тут делаешь
-      writeError(JSON.stringify(e), "connect");
+      writeError(JSON.stringify(e), 'connect');
       throw new Error(e);
     })
     .then(() => {
       return client.query(item).then((res) => {
         result = res;
-        fs.writeFile('db/create_result1.txt', JSON.stringify(result), error2 => { });
+        fs.writeFile('db/create_result1.txt', JSON.stringify(result), (error2) => {});
         return result;
       });
     })
     .catch((e) => {
       // что-то тут делаешь
-      writeError(JSON.stringify(e), "query");
+      writeError(JSON.stringify(e), 'query');
       return e;
       //return result;
       //throw new Error(e);
-
     })
     .finally(() => {
       client.end();
@@ -80,32 +78,26 @@ async function clientQuery2(item) {
     });
 }
 
-
-
-
-
-
 //  b = clientQuery2(sql).then((res) => {
 //    console.log(res);
 //  });
 
-  // let client = new Client({
-  //     user: 'ps',
-  //     host: 'localhost',
-  //     database: 'kofd',
-  //     password: 'PS31415926',
-  //     port: 5432
-  // });
+// let client = new Client({
+//     user: 'ps',
+//     host: 'localhost',
+//     database: 'kofd',
+//     password: 'PS31415926',
+//     port: 5432
+// });
 
-  // await client.connect();
-  // await client.query(item.sql, (err, data) => {
-  //     if (err)
-  //     throw new Error(err);
-  //     writeError(String(data) &  " ===== " & JSON.stringify(err), item.desciption);
-  //     item.status = true;
-  // });
-  // await client.end();
-
+// await client.connect();
+// await client.query(item.sql, (err, data) => {
+//     if (err)
+//     throw new Error(err);
+//     writeError(String(data) &  " ===== " & JSON.stringify(err), item.desciption);
+//     item.status = true;
+// });
+// await client.end();
 
 // sql.forEach((item) => {
 //     if (item.status) {
