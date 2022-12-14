@@ -13,7 +13,7 @@ function writeError(error, point) {
     text: String(error),
     point: point,
   });
-  writeLog(`errors.txt"`, errorArr);
+  writeLog('errors.txt', errorArr);
 }
 
 exports.writeError = writeError;
