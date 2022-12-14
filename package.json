@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "clear:logs": "rimraf ./get/logs/* && rimraf ./db/logs/*",
     "get": "node get/index.js",
     "create": "node db/create.js"
   },
