@@ -6,7 +6,8 @@
   "scripts": {
     "clear:logs": "rimraf ./get/logs/* && rimraf ./db/logs/*",
     "get": "npm run clear:logs && node get/index.js",
-    "create": "npm run clear:logs && node db/create.js"
+    "create": "npm run clear:logs && node db/create.js",
+    "prettier": "prettier --write ."
   },
   "author": "",
   "license": "ISC",
@@ -15,6 +16,7 @@
     "fs": "0.0.1-security",
     "pg": "8.8.0",
     "postgres": "3.3.2",
+    "prettier": "2.8.1",
     "rimraf": "3.0.2"
   }
 }
