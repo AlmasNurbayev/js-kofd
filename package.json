@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "clear:logs": "rimraf ./get/logs/* && rimraf ./db/logs/*",
-    "get": "npm run clear:logs && node get/index.js",
-    "create": "npm run clear:logs && node db/create.js",
+    "preget": "rimraf ./get/logs/*",
+    "get": "node get/index.js",
+    "precreate": "rimraf ./db/logs/*",
+    "create": "node db/create.js",
     "prettier": "prettier --write ."
   },
   "author": "",
