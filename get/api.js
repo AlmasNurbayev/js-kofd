@@ -11,7 +11,7 @@ const agent = new https.Agent({
  * @description Get token from KOFD
  * @param {*} iin
  * @param {*} pass
- * @returns
+ * @returns {Promise<string|null>}
  */
 async function getJWT(iin, pass) {
   const data = {
@@ -35,16 +35,14 @@ async function getJWT(iin, pass) {
 
   try {
     const res = await axios(config);
-
     writeLog('response-post.txt', res.data);
-
     if (res.data.data == null) {
-      writeError(JSON.stringify(res.data.error), 'getJWT');
+      await writeError(res.data.error, 'getJWT');
     }
     return res.data.data.jwt;
   } catch (e) {
-    writeError(e, 'getJWT');
-    throw e;
+    await writeError(e, 'getJWT');
+    return null;
   }
 }
 
@@ -52,12 +50,12 @@ async function getJWT(iin, pass) {
  * @description Get transaction data form KOFD
  * @param {*} jwt
  * @param {*} kassa_id
- * @returns
+ * @returns {Promise<string|null>}
  */
 async function getData(jwt, kassa_id) {
-  const token = 'Bearer ' + jwt;
+  await writeLog('jwt.txt', response.data);
 
-  writeLog('jwt.txt', response.data);
+  const token = 'Bearer ' + jwt;
 
   const config = {
     method: 'get',
@@ -74,21 +72,21 @@ async function getData(jwt, kassa_id) {
     const res = await axios(config);
 
     if (res.data.error) {
-      writeError(JSON.stringify(res.data.error), 'getData');
+      await writeError(res.data.error, 'getData');
     }
 
-    writeLog(`response-${kassa_id}.txt"`, response.data);
-
+    await writeLog(`response-${kassa_id}.txt`, response.data);
     return res.data;
   } catch (e) {
-    writeError(e, 'getData');
+    await writeError(e, 'getData');
+    return null;
   }
 }
 
 /**
  * @description Any query to DB
  * @param {*} query
- * @returns
+ * @returns {Promise<string|null>}
  */
 async function getQuery(query) {
   const client = new Client({
@@ -105,23 +103,17 @@ async function getQuery(query) {
   try {
     await client.connect();
   } catch (e) {
-    writeError(JSON.stringify(e.stack), 'getKassa-connect');
+    await writeError(JSON.stringify(e.stack), 'getKassa-connect');
     throw e;
   }
 
   try {
-    try {
-      const res = await client.query(query);
-      fs.writeFile('get/kassa-get.txt', JSON.stringify(res), () => {});
-      return res;
-    } catch (e) {
-      writeError(JSON.stringify(e.stack), 'getKassa-connect');
-      throw e;
-    } finally {
-    }
+    const res = await client.query(query);
+    await writeLog(`kassa-get.txt`, res);
+    return res;
   } catch (e) {
-    writeError(JSON.stringify(e.stack), 'getKassa-query');
-    throw e;
+    await writeError(e.stack, 'getKassa-query');
+    return null;
   } finally {
     client.end();
   }

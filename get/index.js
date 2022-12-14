@@ -16,11 +16,11 @@ const myFunc = async () => {
 
   for (let i = 0; i < listOrg.length; i++) {
     const el = listOrg[i];
-    try {
-      el['jwt'] = await getJWT(el.bin, el.password_kofd);
-    } catch (e) {
-      el['jwt'] = '';
+    const jwt = await getJWT(el.bin, el.password_kofd);
+    if (!jwt) {
+      console.error('Не удалось получить JWT');
     }
+    el['jwt'] = jwt;
   }
 
   // тут дальше делай, что тебе нужно с async/await
