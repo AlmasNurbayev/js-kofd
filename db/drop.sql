@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS "public".kassa, "public".organization, "public".transaction CASCADE;

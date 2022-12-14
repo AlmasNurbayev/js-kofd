@@ -64,7 +64,7 @@ async function getData(jwt, kassa_id) {
 
   const config = {
     method: "get",
-    url: `https://cabinet.kofd.kz/api/operations?skip=0&take=2&cashboxId=${kassa_id}`,
+    url: `https://cabinet.kofd.kz/api/operations?skip=0&take=10&cashboxId=${kassa_id}`,
     headers: {
       "Content-Type": "application/json",
       Authorization: token,

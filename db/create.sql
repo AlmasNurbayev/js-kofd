@@ -1,5 +1,3 @@
-DROP TABLE IF EXISTS "public".kassa, "public".organization, "public".transaction CASCADE;
-
 -- create organization
 ALTER SCHEMA "public" OWNER TO ps;
 CREATE TABLE "public".organization (
@@ -27,7 +25,7 @@ ALTER TABLE "public".kassa OWNER TO ps;
 -- create transaction
 CREATE TABLE "public".transaction (
     id varchar UNIQUE,
-    onlineFiscalNumber varchar,
+    onlineFiscalNumber varchar UNIQUE,
     offlineFiscalNumber varchar,
     systemDate timestamptz,
     operationDate timestamptz,
