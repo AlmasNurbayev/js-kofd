@@ -5,9 +5,9 @@ function writeLog(name, data) {
   fs.writeFile(resolve(__dirname, './logs', name), JSON.stringify(data), () => {});
 }
 
-const errorArr = [];
-
 function writeError(error, point) {
+  const errorArr = [];
+
   errorArr.push({
     date: new Date(),
     text: String(error),
