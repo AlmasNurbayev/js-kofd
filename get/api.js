@@ -42,9 +42,9 @@ async function getJWT(iin, pass) {
       writeError(JSON.stringify(res.data.error), 'getJWT');
     }
     return res.data.data.jwt;
-  } catch (error) {
-    writeError(error, 'getJWT');
-    return String(error);
+  } catch (e) {
+    writeError(e, 'getJWT');
+    return String(e);
   }
 }
 
@@ -80,8 +80,8 @@ async function getData(jwt, kassa_id) {
     writeLog(`response-${kassa_id}.txt"`, response.data);
 
     return res.data;
-  } catch (error) {
-    writeError(error, 'getData');
+  } catch (e) {
+    writeError(e, 'getData');
   }
 }
 
@@ -104,18 +104,24 @@ async function getQuery(query) {
 
   try {
     await client.connect();
+  } catch (e) {
+    writeError(JSON.stringify(e.stack), 'getKassa-connect');
+    throw e;
+  }
+
+  try {
     try {
       const res = await client.query(query);
       fs.writeFile('get/kassa-get.txt', JSON.stringify(res), () => {});
       return res;
-    } catch (err) {
-      writeError(JSON.stringify(err.stack), 'getKassa-connect');
-      throw err;
+    } catch (e) {
+      writeError(JSON.stringify(e.stack), 'getKassa-connect');
+      throw e;
     } finally {
     }
-  } catch (err) {
-    writeError(JSON.stringify(err.stack), 'getKassa-query');
-    throw err;
+  } catch (e) {
+    writeError(JSON.stringify(e.stack), 'getKassa-query');
+    throw e;
   } finally {
     client.end();
   }
