@@ -43,37 +43,40 @@ async function clientQuery(path) {
         port: 5432
     });
 
-    fs.readFile(path, "utf8", (err, data) => {
-        query = data;
-        if (err) {
-            writeError(JSON.stringify(err), "read sql-script", path);
-            throw err;
-        }
-        try {
-            res =   client.connect();
-            try {
-                res =  client.query(query);
-                fs.writeFile('db/create_result1.txt', JSON.stringify(res), error2 => { });
-                //console.log(res);
-                //client.end();
-                return res;
-            } catch (err) {
-                writeError(JSON.stringify(err.stack), "query", path);
-                //console.error('query error', err.stack);
-                throw err;
-            } finally {
-                //client.end();
-            }
-        } catch (err) {
-            writeError(JSON.stringify(err.stack), "connect", path);
-            //console.error('query error', err.stack);
-            //client.end();
-            throw err;
-        } finally {
-            //client.end();
-        }
+    let query = "";
+    try {
+        query = String(fs.readFileSync(path));
+    }
+    catch (err) {
+        writeError(JSON.stringify(err.stack), "reading script", path);
+        throw new Error(err);
+    }
+    // fs.readFile(path, "utf8", (err, data) => {
+    //     query = data;
+    //     if (err) {
+    //         writeError(JSON.stringify(err), "read sql-script", path);
+    //         throw err;
+    //     }
     
-    
-    }); 
+    try {
+        await client.connect();
+    } catch (err) {
+        writeError(JSON.stringify(err.stack), "connect", path);
+        throw new Error(err);
+    }
 
+    try {
+        let res = await client.query(query);
+        fs.writeFile('db/create_result1.txt', JSON.stringify(res), error2 => { });
+        //console.log(res);
+        //client.end();
+        return res;
+    } catch (err) {
+        writeError(JSON.stringify(err.stack), "query", path);
+        //console.error('query error', err.stack);
+        throw new Error(err);
+    } finally {
+        client.end();
+    }
+    // });
 }
