@@ -2,12 +2,7 @@ const fs = require('fs');
 const { resolve } = require('path');
 
 function writeLog(name, data) {
-  console.log('-----------------');
-  console.log(name);
-  console.log(data);
-  console.log('-----------------');
-
-  fs.writeFileSync(resolve(__dirname, './logs', name), JSON.stringify(data), () => {});
+  fs.writeFileSync(resolve(__dirname, './logs', name), JSON.stringify(data));
 }
 
 function writeError(error, point) {
