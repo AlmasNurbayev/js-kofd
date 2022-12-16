@@ -6,19 +6,19 @@ fs.unlink("db/errors.txt", (err) => { });
 fs.unlink("db/create_result1.txt", (err) => { });
 fs.unlink("db/result.txt", (err) => { });
 
-runall();
-
-async function runall() {
-
-     try {
-        await clientQuery('db/drop.sql');
-        await clientQuery('db/create.sql');
-        await clientQuery('db/insert.sql');
-    } catch (err) {
-        throw err;
+(async () => {
+    await runAll();
+  })();
+  
+  async function runAll() {
+    try {
+      await clientQuery('db/drop.sql');
+      await clientQuery('db/create.sql');
+      await clientQuery('db/insert.sql');
+    } catch (e) {
+      throw e;
     }
-
-}
+  }
 
 function writeError(error, point, path) {
     errorAr.push({
@@ -27,7 +27,7 @@ function writeError(error, point, path) {
         point: point,
         path: path
     });
-    fs.writeFileSync('db/errors.txt', JSON.stringify(errorAr), error2 => { console.log("Error write file errors") });
+    fs.writeFile('db/errors.txt', JSON.stringify(errorAr), error2 => { console.log("Error write file errors") });
 }
 
 async function clientQuery(path) {
@@ -48,7 +48,7 @@ async function clientQuery(path) {
         query = String(fs.readFileSync(path));
     }
     catch (err) {
-        writeError(JSON.stringify(err.stack), "reading script", path);
+        writeError(JSON.stringify(err.stack), "reading script");
         throw new Error(err);
     }
     // fs.readFile(path, "utf8", (err, data) => {
@@ -61,7 +61,7 @@ async function clientQuery(path) {
     try {
         await client.connect();
     } catch (err) {
-        writeError(JSON.stringify(err.stack), "connect", path);
+        writeError(JSON.stringify(err.stack), "connect " + path);
         throw new Error(err);
     }
 
@@ -72,7 +72,7 @@ async function clientQuery(path) {
         //client.end();
         return res;
     } catch (err) {
-        writeError(JSON.stringify(err.stack), "query", path);
+        writeError(JSON.stringify(err.stack), "query " + path);
         //console.error('query error', err.stack);
         throw new Error(err);
     } finally {
@@ -80,3 +80,4 @@ async function clientQuery(path) {
     }
     // });
 }
+

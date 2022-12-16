@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "get": "node get/index.js",
-    "create": "node db/create.js"
+    "create": "node db/load.js",
+    "public": "node get/public.js"
   },
   "author": "",
   "license": "ISC",

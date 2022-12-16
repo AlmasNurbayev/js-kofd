@@ -25,7 +25,7 @@ ALTER TABLE "public".kassa OWNER TO ps;
 -- create transaction
 CREATE TABLE "public".transaction (
     id varchar UNIQUE,
-    onlineFiscalNumber varchar UNIQUE,
+    onlineFiscalNumber varchar,
     offlineFiscalNumber varchar,
     systemDate timestamptz,
     operationDate timestamptz,
@@ -33,8 +33,9 @@ CREATE TABLE "public".transaction (
     subType smallint,
     sum_operation numeric,
     availableSum numeric,
-    paymentTypes smallint,
+    paymentTypes varchar,
     shift smallint,
+    uploadDate timestamptz,
     id_organization smallint REFERENCES "public".organization (id),
     id_kassa smallint REFERENCES "public".kassa (id));
 ALTER TABLE "public".transaction OWNER TO ps;
