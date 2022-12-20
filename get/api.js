@@ -1,13 +1,24 @@
 const axios = require("axios");
 const https = require("https");
+const moment = require('moment');
 const fs = require("fs");
 const { Client } = require('pg');
-const { resolve } = require("path");
 const { writeError, writeLog } = require('../logs/logs-utils.js');
 
 const agent = new https.Agent({
     rejectUnauthorized: false,
   });
+
+const dateMode = {
+    mode1: 'текущий день',
+    mode2: 'текущая неделя',
+    mode3: 'текущий месяц',
+    mode4: 'текущий год',
+    mode1: 'прошлый день',
+    mode2: 'прошлая неделя',
+    mode3: 'прошлый месяц',
+    mode4: 'прошлый год'
+  };
 
 /**
  * @description Get token from KOFD
@@ -32,7 +43,7 @@ async function getJWT(iin, pass) {
     },
     data: JSON.stringify(data),
     httpsAgent: agent,
-    timeout: 2000
+    timeout: 4000
   };
 
   //console.log("1");
@@ -60,13 +71,17 @@ async function getJWT(iin, pass) {
  * @param {*} kassa_id
  * @returns {Promise<string|Error>}
  */
-async function getTransaction(count ,jwt, kassa_id) {
+async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_organization, dateMode) {
     const token = "Bearer " + jwt;
     await writeLog(`jwt.txt`, String(token));
   
+    if (dateMode != '') {
+      dateString = getStringFilter(dateMode)[0];
+    };
+    //skip=0&take=${count} - убрано кол-во операций
     const config = {
       method: "get",
-      url: `https://cabinet.kofd.kz/api/operations?skip=0&take=${count}&cashboxId=${kassa_id}`,
+      url: `https://cabinet.kofd.kz/api/operations?${dateString}&cashboxId=${knumber}`,
       headers: {
         "Content-Type": "application/json",
         Authorization: token,
@@ -74,7 +89,7 @@ async function getTransaction(count ,jwt, kassa_id) {
       httpsAgent: agent,
       timeout: 2000
     };
-  
+    
     try {
       const res = await axios(config);
       //console.log(res.data);
@@ -82,8 +97,10 @@ async function getTransaction(count ,jwt, kassa_id) {
         await writeError(res.data.error, 'getData');
         return;
       }
-      res.data['knumber'] = kassa_id;
-      await writeLog(`response-${kassa_id}.txt`, res.data, false);
+      res.data['id_kassa'] = id_kassa;
+      res.data['name_kassa'] = name_kassa;
+      res.data['id_organization'] = id_organization;
+      await writeLog(`response-${knumber}.txt`, res.data, false);
       return res.data;
     } catch (e) {
       await writeError(e, 'getData');
@@ -102,9 +119,9 @@ async function getTransaction(count ,jwt, kassa_id) {
       host: 'localhost',
       database: 'kofd',
       password: 'PS31415926',
-      connectionTimeoutMillis: 2000,
-      query_timeout: 1000,
-      idle_in_transaction_session_timeout: 1000,
+      connectionTimeoutMillis: 4000,
+      query_timeout: 4000,
+      idle_in_transaction_session_timeout: 2000,
       port: 5432
     });
   
@@ -130,7 +147,71 @@ async function getTransaction(count ,jwt, kassa_id) {
     }
   }
   
+  // 
+    
+  /**
+ * @description recieve string for adding to filter GET in UTI encode
+ * @param {string} mode
+ * @returns {string} string
+ */
+
+  function getStringFilter(mode, begin, end) {
+    console.log(mode);
+    moment.updateLocale();
+    moment.updateLocale('en', {
+      week : {
+          dow : 1,
+          doy : 4
+       }
+  });
+    if (mode === 'текущий день') {
+      dateStart = moment().startOf('day');
+      dateEnd = moment().endOf('day');
+    } else if (mode === 'текущая неделя') {
+      dateStart = moment().startOf('week');
+      dateEnd = moment().endOf('week');
+    } else if (mode === 'текущий месяц') {
+      dateStart = moment().startOf('month');
+      dateEnd = moment().endOf('month');
+    } else if (mode === 'текущий квартал') {
+      dateStart = moment().startOf('quarter');
+      dateEnd = moment().endOf('quarter');
+    } else if (mode === 'текущий год') {
+      dateStart = moment().startOf('year');
+      dateEnd = moment().endOf('year');
+    } else if (mode === 'прошлый день') { // 
+      dateStart = moment().add(-1,'d').startOf('day');
+      dateEnd = moment().add(-1,'d').endOf('day');
+    } else if (mode === 'прошлая неделя') {
+      dateStart = moment().add(-1,'w').startOf('week');
+      dateEnd = moment().add(-1,'w').endOf('week');
+    } else if (mode === 'прошлый месяц') {
+      dateStart = moment().add(-1,'m').startOf('month');
+      dateEnd = moment().add(-1,'m').endOf('month');
+    } else if (mode === 'прошлый квартал') {
+      dateStart = moment().add(-1,'Q').startOf('quarter');
+      dateEnd = moment().add(-1,'Q').endOf('quarter');
+    } else if (mode === 'прошлый год') {
+      dateStart = moment().add(-1,'y').startOf('year');
+      dateEnd = moment().add(-1,'y').endOf('year');
+    } else {
+      dateStart = moment(begin).startOf('day');
+      dateEnd = moment(end).endOf('day');
+    };
+    dateStart = dateStart.format('YYYY-MM-DD[T]HH:mm:ss.SSSZ');
+    dateEnd = dateEnd.format('YYYY-MM-DD[T]HH:mm:ss.SSSZ');
+
+    //&filter=[["operationDate",">=","2022-12-18T00:00:00.000+06:00"],"and",["operationDate","<","2022-12-22T00:00:00.000+06:00"]]
+    let s1 = `&requireTotalCount=true&sort=[{"selector":"operationDate","desc":true}]&filter=[["operationDate",">=","${dateStart}"],"and",["operationDate","<=","${dateEnd}"]]`;
+    let s2 = encodeURI(s1).replaceAll(',','%2C').replaceAll(':','%3A').replaceAll('+', '%2B'); // остались :+,
+    //s2 = s2.replaceAll();
+
+    return [s2, dateStart, dateEnd, mode];
+  }
+
+  //console.log(getStringFilter('текущий квартал'));
 
 exports.getJWT = getJWT;
 exports.getTransaction = getTransaction;
 exports.getQuery = getQuery;
+exports.getStringFilter = getStringFilter;
