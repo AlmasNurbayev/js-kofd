@@ -1,6 +1,8 @@
 const { Client } = require('pg');
 const fs = require('fs');
 const errorAr = [];
+const dotenv = require("dotenv");
+dotenv.config();
 
 fs.unlink("db/errors.txt", (err) => { });
 fs.unlink("db/create_result1.txt", (err) => { });
@@ -33,14 +35,14 @@ function writeError(error, point, path) {
 async function clientQuery(path) {
     console.log("begin " + path);
     const client = new Client({
-        user: 'ps',
-        host: 'localhost',
-        database: 'kofd',
-        password: 'PS31415926',
+        user: process.env.PGUSER,
+        host: process.env.PGHOST,
+        database: process.env.PGDATABASE,
+        password: process.env.PGPASSWORD,
+        port: process.env.PGPORT,        
         connectionTimeoutMillis: 2000,
         query_timeout: 1000,
         idle_in_transaction_session_timeout: 1000,
-        port: 5432
     });
 
     let query = "";

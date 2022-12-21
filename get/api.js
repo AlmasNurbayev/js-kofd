@@ -4,6 +4,8 @@ const moment = require('moment');
 const fs = require("fs");
 const { Client } = require('pg');
 const { writeError, writeLog } = require('../logs/logs-utils.js');
+const dotenv = require("dotenv");
+dotenv.config();
 
 const agent = new https.Agent({
     rejectUnauthorized: false,
@@ -87,7 +89,7 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
         Authorization: token,
       },
       httpsAgent: agent,
-      timeout: 2000
+      timeout: 4000
     };
     
     try {
@@ -115,14 +117,14 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
  */
   async function getQuery(query) {
     const client = new Client({
-      user: 'ps',
-      host: 'localhost',
-      database: 'kofd',
-      password: 'PS31415926',
+      user: process.env.PGUSER,
+      host: process.env.PGHOST,
+      database: process.env.PGDATABASE,
+      password: process.env.PGPASSWORD,
+      port: process.env.PGPORT,
       connectionTimeoutMillis: 4000,
       query_timeout: 4000,
       idle_in_transaction_session_timeout: 2000,
-      port: 5432
     });
   
     try {
@@ -210,6 +212,7 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
   }
 
   //console.log(getStringFilter('текущий квартал'));
+  //console.log([0,1]);
 
 exports.getJWT = getJWT;
 exports.getTransaction = getTransaction;
