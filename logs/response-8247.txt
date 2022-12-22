@@ -1,1 +1,0 @@
-{"data":[],"totalCount":0,"groupCount":-1,"summary":null,"id_kassa":4,"name_kassa":"Solutions-Мухамедханова","id_organization":2}

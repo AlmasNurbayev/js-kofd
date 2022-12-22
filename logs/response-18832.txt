@@ -1,1 +1,0 @@
-{"data":[],"totalCount":0,"groupCount":-1,"summary":null,"id_kassa":3,"name_kassa":"Solutions-Евразия-3","id_organization":2}
