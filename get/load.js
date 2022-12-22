@@ -2,22 +2,7 @@ const fs = require("fs");
 const { getJWT, getTransaction, getQuery } = require('./api');
 const { writeError, writeLog } = require('../logs/logs-utils.js');
 const count = 1000; // count of transaction get from kofd
-const tableSumAll = {
-  sumSale: 0,
-  sumSaleCard: 0,
-  sumSaleCash: 0,
-  sumSaleMixed: 0,
-  sumReturn: 0,
-  sumReturnCard: 0,
-  sumReturnCash: 0,
-  sumReturnMixed: 0,
-  sumAll: 0,
-  sumAllCard: 0,
-  sumAllCash: 0,
-  sumAllMixed: 0,
-  countChecks: 0,
-  obj: []
-};
+
 
 // dee all temporary files
 fs.unlink("logs/response-post.txt", (err) => { });
@@ -31,10 +16,27 @@ fs.unlink("logs/response.txt", (err) => { });
 
 // get list of org & kassa form db 
 async function load(period) {
+  const tableSumAll = {
+    sumSale: 0,
+    sumSaleCard: 0,
+    sumSaleCash: 0,
+    sumSaleMixed: 0,
+    sumReturn: 0,
+    sumReturnCard: 0,
+    sumReturnCash: 0,
+    sumReturnMixed: 0,
+    sumAll: 0,
+    sumAllCard: 0,
+    sumAllCash: 0,
+    sumAllMixed: 0,
+    countChecks: 0,
+    obj: []
+  };
   const queryAllKassa = `select organization.bin, organization.name_org, organization.password_kofd, kassa.*  FROM "public".organization
   join "public".kassa on "public".kassa.id_organization  = "public".organization.id`;
   const queryAllOrganization = `select * FROM "public".organization`;
-  await Promise.all([getQuery(queryAllKassa), getQuery(queryAllOrganization)]).then(res => {
+  try {
+    await Promise.all([getQuery(queryAllKassa), getQuery(queryAllOrganization)]).then(res => {
     arrJWT = [];
     listKassa = res[0].rows;
     //console.table(listKassa);
@@ -42,8 +44,15 @@ async function load(period) {
     listOrg.forEach(element => {
       arrJWT.push(getJWT(element.bin, element.password_kofd));
     });
-    // get JWT for all organization
-    Promise.all(arrJWT).then(res => {
+  })}
+  catch (err) {
+    console.log(err.stack);
+    writeError(err.stack, 'getTransaction - promise get kassa and org ');
+    throw new Error(err);
+  }
+
+  try {
+    await Promise.all(arrJWT).then(res => {
       //console.log(JSON.stringify(res));
       listOrg.forEach((element, index) => {
         element['jwt'] = res[index];
@@ -62,38 +71,32 @@ async function load(period) {
           }
         });
       });
-      Promise.all(arrGet).then(res2 => {
-        //console.log(res);
-        res2.forEach((element3) => {
-          console.log(element3.name_kassa + ", " + element3.data.length + ", " + element3.id_kassa + ",  " + element3.id_organization);
-          writeOperation(element3, element3.id_kassa, element3.name_kassa, element3.id_organization);
-          writeLog(`response.txt`, element3, true);
-          writeLog(`summary.txt`, tableSumAll, false);
-          getSummary(getStat(element3, element3.id_kassa, element3.name_kassa, element3.id_organization));
-        });
-        //fs.appendFile("get/response.txt", JSON.stringify(res) + "\n", (error2) => { });
-        return tableSumAll;
-      })
-        .catch(err => {
-          writeError(err.stack, 'getTransaction');
-          console.log(err.stack);
-          throw new Error(err);
-        });
-      // console.table(listOrg);
-      // console.table(listKassa);
-    })
-      .catch(err => {
-        console.log(err.stack);
-        writeError(err.stack, 'getTransaction');
-        throw new Error(err);
-      });
-  }).catch(err => {
+    });
+  } catch (err) {
     console.log(err.stack);
-    writeError(err.stack, 'getTransaction');
-    throw new Error(err);
-  });
-};
+    writeError(err.stack, 'getTransaction - promise get jwt and transactions');
+    throw new Error(err);    
+  }
 
+  try {
+    await Promise.all(arrGet).then(res2 => {
+      res2.forEach((element3) => {
+        console.log(element3.name_kassa + ", " + element3.data.length + ", " + element3.id_kassa + ",  " + element3.id_organization);
+        writeOperation(element3, element3.id_kassa, element3.name_kassa, element3.id_organization);
+        writeLog(`response.txt`, element3, true);
+        getSummary(tableSumAll, getStat(element3, element3.id_kassa, element3.name_kassa, element3.id_organization));
+      });
+      //fs.appendFile("get/response.txt", JSON.stringify(res) + "\n", (error2) => { });
+      writeLog(`summary.txt`, tableSumAll, false);
+      console.log(tableSumAll);
+      return tableSumAll;
+    });
+  } catch (err) {
+    writeError(err.stack, 'getTransaction - promise get summary');
+    console.log(err.stack);
+    throw new Error(err);
+  }
+}    
 
 // insert to db from recieved transaction 
 async function writeOperation(res, id_kassa, name_kassa, id_organization) {
@@ -235,7 +238,7 @@ function getStat(res, knumber, name_kassa, id_organization) {
   };
 }
 
-function getSummary(obj) {
+function getSummary(tableSumAll, obj) {
   
   try { 
   tableSumAll.sumSale += obj.sumSale;
@@ -261,10 +264,8 @@ function getSummary(obj) {
 }
 
 (async () => {
-  console.log(await load('последний день'));
+  console.log(await JSON.stringify(load('текущая неделя')));
 })();
-
-
 
 
 exports.load = load;
