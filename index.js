@@ -2,14 +2,14 @@ const { Telegraf, Markup } = require('telegraf');
 const { load } = require('./get/load.js');
 
 const dotenv = require("dotenv");
-const { writeError } = require('./logs/logs-utils.js');
+const { writeError, writeLog } = require('./logs/logs-utils.js');
 dotenv.config();
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 
 bot.start((ctx) => {
-  console.log('Id пользователя:', ctx.from.id);
+  //console.log('Id пользователя:', ctx.from.id);
 
   return ctx.reply('Добро пожаловать! Это бот для просмотра статистики касс');
 });
@@ -27,8 +27,8 @@ bot.command('menu', async (ctx) => {
       Markup.button.callback("прошлый месяц", "1")],
       [Markup.button.callback("текущий квартал", "2"),
       Markup.button.callback("прошлый квартал", "2")],
-      [Markup.button.callback("текущий год", "2"),
-      Markup.button.callback("прошлый год", "2")]
+      //[Markup.button.callback("текущий год", "2"),
+      //Markup.button.callback("прошлый год", "2")]
       // ['button 1', 'button 2'], // Row1 with 2 buttons
       // ['button 3', 'button 4'], // Row2 with 2 buttons
       // ['button 5', 'button 6', 'button 7'] // Row3 with 3 buttons
@@ -91,27 +91,27 @@ bot.hears('прошлый год', async (ctx) => {
 async function ReplyData(mode, ctx) {
   await ctx.reply('формируются данные по запросу ... ');
   message = 'произошла ошибка - попробуйте позже';
-  console.log('recieve request: ' + mode);
+  console.log('recieve request: ' + mode + " от пользователя " + ctx.from.id);
+  writeLog(`bot_request.txt`, String(new Date()) + ': recieve request: ' + mode + " от пользователя " + ctx.from.id + " / " + ctx.from.username);
   try {
     //ctx.reply("не рано ли?");
     //if (ctx.message.text == 'последний день') {
       await load(mode).then(res => {
         message = `Сумма всех продаж за период: ${mode}
-        Чистое поступление: ${res.sumAll.toLocaleString('ru-RU')}
-          кеш: ${res.sumAllCash.toLocaleString('ru-RU')}
-          карта: ${res.sumAllCard.toLocaleString('ru-RU')}
-          смешано: ${res.sumAllMixed.toLocaleString('ru-RU')}
-        В т.ч.:
-          Продажи: ${res.sumSale.toLocaleString('ru-RU')}
-          Возвраты: ${res.sumReturn.toLocaleString('ru-RU')} 
+Чистое поступление: ${res.sumAll.toLocaleString('ru-RU')}
+  кеш: ${res.sumAllCash.toLocaleString('ru-RU')}
+  карта: ${res.sumAllCard.toLocaleString('ru-RU')}
+  смешано: ${res.sumAllMixed.toLocaleString('ru-RU')}
+  В т.ч.:
+  Продажи: ${res.sumSale.toLocaleString('ru-RU')}
+  Возвраты: ${res.sumReturn.toLocaleString('ru-RU')} 
 
-        Данные по кассам:`;
+Данные по кассам:`;
         res.obj.forEach((element) => {
           if (element.sumSale != 0) {
             message += `
-              - касса ${element.name_kassa}
-              Чистое поступление: ${element.sumAll.toLocaleString('ru-RU')}               
-              В т.ч. продажи ${element.sumSale.toLocaleString('ru-RU')}, возвраты ${element.sumReturn.toLocaleString('ru-RU')} 
+ - ${element.name_kassa} поступило: ${element.sumAll.toLocaleString('ru-RU')}               
+    в т.ч. продажи ${element.sumSale.toLocaleString('ru-RU')}, возвраты ${element.sumReturn.toLocaleString('ru-RU')} 
             `; 
           };
         });
