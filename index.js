@@ -14,8 +14,6 @@ bot.start((ctx) => {
   return ctx.reply('Добро пожаловать! Это бот для просмотра статистики касс');
 });
 
-
-
 bot.command('menu', async (ctx) => {
   return await ctx.reply('Выберите период запроса', Markup
     .keyboard([[
@@ -92,7 +90,7 @@ async function ReplyData(mode, ctx) {
   await ctx.reply('формируются данные по запросу ... ');
   message = 'произошла ошибка - попробуйте позже';
   console.log('recieve request: ' + mode + " от пользователя " + ctx.from.id);
-  writeLog(`bot_request.txt`, String(new Date()) + ': recieve request: ' + mode + " от пользователя " + ctx.from.id + " / " + ctx.from.username);
+  writeLog(`bot_request.txt`, String(new Date()) + ': recieve request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username);
   try {
     //ctx.reply("не рано ли?");
     //if (ctx.message.text == 'последний день') {
