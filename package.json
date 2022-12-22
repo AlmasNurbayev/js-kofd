@@ -1,4 +1,4 @@
-{
+{  
   "name": "js-kofd",
   "version": "1.0.0",
   "description": "",
@@ -7,7 +7,8 @@
     "get": "node get/load.js",
     "api": "node get/api.js",
     "create": "node db/load.js",
-    "public": "node get/public.js"
+    "public": "node get/public.js",
+    "index": "node index.js"
   },
   "author": "",
   "license": "ISC",
@@ -16,6 +17,7 @@
     "dotenv": "^16.0.3",
     "fs": "^0.0.1-security",
     "moment": "^2.29.4",
-    "pg": "^8.8.0"
+    "pg": "^8.8.0",
+    "telegraf": "^4.11.2"
   }
 }

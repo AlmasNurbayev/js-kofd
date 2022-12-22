@@ -53,7 +53,7 @@ async function getJWT(iin, pass) {
   try {
     const response = await axios(config);
     //      console.log("2");
-    console.log(typeof response);
+    //console.log(typeof response);
     writeLog('response-post.txt', response.data);
     if (response.data.data == null) {
       await writeError(response.data, 'getJWT');
@@ -158,7 +158,7 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
  */
 
   function getStringFilter(mode, begin, end) {
-    console.log(mode);
+    //console.log(mode);
     moment.updateLocale();
     moment.updateLocale('en', {
       week : {

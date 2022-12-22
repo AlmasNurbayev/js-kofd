@@ -27,26 +27,23 @@ fs.unlink("logs/response-get.txt", (err) => { });
 fs.unlink("logs/response.txt", (err) => { });
 
 
-const queryAllKassa = `select organization.bin, organization.name_org, organization.password_kofd, kassa.*  FROM "public".organization
-join "public".kassa on "public".kassa.id_organization  = "public".organization.id`;
-const queryAllOrganization = `select * FROM "public".organization`;
-
-
 
 
 // get list of org & kassa form db 
-(async () => {
-
-  Promise.all([getQuery(queryAllKassa), getQuery(queryAllOrganization)]).then(res => {
+async function load(period) {
+  const queryAllKassa = `select organization.bin, organization.name_org, organization.password_kofd, kassa.*  FROM "public".organization
+  join "public".kassa on "public".kassa.id_organization  = "public".organization.id`;
+  const queryAllOrganization = `select * FROM "public".organization`;
+  await Promise.all([getQuery(queryAllKassa), getQuery(queryAllOrganization)]).then(res => {
     arrJWT = [];
     listKassa = res[0].rows;
-    console.table(listKassa);
+    //console.table(listKassa);
     listOrg = res[1].rows;
     listOrg.forEach(element => {
       arrJWT.push(getJWT(element.bin, element.password_kofd));
     });
     // get JWT for all organization
-    return Promise.all(arrJWT).then(res => {
+    Promise.all(arrJWT).then(res => {
       //console.log(JSON.stringify(res));
       listOrg.forEach((element, index) => {
         element['jwt'] = res[index];
@@ -59,24 +56,23 @@ const queryAllOrganization = `select * FROM "public".organization`;
         listOrg.forEach(elementOrg => {
           if (elementKassa.bin === elementOrg.bin) {
             elementKassa['jwt'] = elementOrg.jwt;
-            arrGet.push(getTransaction(count, elementKassa.jwt, elementKassa.knumber, elementKassa.id, elementKassa.name_kassa, elementKassa.id_organization, 'текущий месяц'));
+            arrGet.push(getTransaction(count, elementKassa.jwt, elementKassa.knumber, elementKassa.id, elementKassa.name_kassa, elementKassa.id_organization, period));
             //arrKnumber.push(elementKassa.knumber);
             // get data for all kassa
           }
         });
       });
-      return Promise.all(arrGet).then(res2 => {
+      Promise.all(arrGet).then(res2 => {
         //console.log(res);
         res2.forEach((element3) => {
           console.log(element3.name_kassa + ", " + element3.data.length + ", " + element3.id_kassa + ",  " + element3.id_organization);
-          getSummary(getStat(element3, element3.id_kassa, element3.name_kassa, element3.id_organization));
           writeOperation(element3, element3.id_kassa, element3.name_kassa, element3.id_organization);
-          writeLog(`response.txt`, JSON.stringify(element3), true);
-          writeLog(`summary.txt`, JSON.stringify(tableSumAll), false);
+          writeLog(`response.txt`, element3, true);
+          writeLog(`summary.txt`, tableSumAll, false);
+          getSummary(getStat(element3, element3.id_kassa, element3.name_kassa, element3.id_organization));
         });
         //fs.appendFile("get/response.txt", JSON.stringify(res) + "\n", (error2) => { });
-        //console.log(arrKnumber);
-        console.log(tableSumAll);
+        return tableSumAll;
       })
         .catch(err => {
           writeError(err.stack, 'getTransaction');
@@ -96,15 +92,13 @@ const queryAllOrganization = `select * FROM "public".organization`;
     writeError(err.stack, 'getTransaction');
     throw new Error(err);
   });
-})();
+};
 
 
 // insert to db from recieved transaction 
 async function writeOperation(res, id_kassa, name_kassa, id_organization) {
   if (res.data.length == 0) { return };
   try {
-
-
     sql = `INSERT INTO "public".transaction (
     id,
     onlineFiscalNumber,
@@ -265,3 +259,12 @@ function getSummary(obj) {
     throw new Error(err);
   };
 }
+
+(async () => {
+  console.log(await load('последний день'));
+})();
+
+
+
+
+exports.load = load;
