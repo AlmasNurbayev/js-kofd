@@ -18,9 +18,17 @@ bot.start((ctx) => {
 
 bot.command('menu', async (ctx) => {
   return await ctx.reply('Выберите период запроса', Markup
-    .keyboard([
-      Markup.button.callback("последний день", "1"),
-      Markup.button.callback("последняя неделя", "2")
+    .keyboard([[
+      Markup.button.callback("текущий день", "1"),
+      Markup.button.callback("прошлый день", "2")],
+      [Markup.button.callback("текущая неделя", "2"),
+      Markup.button.callback("прошлая неделя", "2")],
+      [Markup.button.callback("текущий месяц", "2"),
+      Markup.button.callback("прошлый месяц", "1")],
+      [Markup.button.callback("текущий квартал", "2"),
+      Markup.button.callback("прошлый квартал", "2")],
+      [Markup.button.callback("текущий год", "2"),
+      Markup.button.callback("прошлый год", "2")]
       // ['button 1', 'button 2'], // Row1 with 2 buttons
       // ['button 3', 'button 4'], // Row2 with 2 buttons
       // ['button 5', 'button 6', 'button 7'] // Row3 with 3 buttons
@@ -30,28 +38,94 @@ bot.command('menu', async (ctx) => {
   )
 })
 
-bot.hears('последний день', async (ctx) => {
+bot.hears('текущий день', async (ctx) => {
+  mode = 'текущий день';
+  ReplyData(mode, ctx);
+});
+
+bot.hears('текущая неделя', async (ctx) => {
+  mode = 'текущая неделя';
+  ReplyData(mode, ctx);
+});
+
+bot.hears('текущий месяц', async (ctx) => {
+  mode = 'текущий месяц';
+  ReplyData(mode, ctx);
+});
+
+bot.hears('текущий квартал', async (ctx) => {
+  mode = 'текущий квартал';
+  ReplyData(mode, ctx);
+});
+
+bot.hears('текущий год', async (ctx) => {
+  mode = 'текущий год';
+  ReplyData(mode, ctx);
+});
+
+bot.hears('прошлый день', async (ctx) => {
+  mode = 'прошлый день';
+  ReplyData(mode, ctx);
+});
+
+bot.hears('прошлая неделя', async (ctx) => {
+  mode = 'прошлая неделя';
+  ReplyData(mode, ctx);
+});
+
+bot.hears('прошлый месяц', async (ctx) => {
+  mode = 'прошлый месяц';
+  ReplyData(mode, ctx);
+});
+
+bot.hears('прошлый квартал', async (ctx) => {
+  mode = 'прошлый квартал';
+  ReplyData(mode, ctx);
+});
+
+bot.hears('прошлый год', async (ctx) => {
+  mode = 'прошлый год';
+  ReplyData(mode, ctx);
+});
+
+async function ReplyData(mode, ctx) {
   await ctx.reply('формируются данные по запросу ... ');
+  message = 'произошла ошибка - попробуйте позже';
+  console.log('recieve request: ' + mode);
   try {
     //ctx.reply("не рано ли?");
     //if (ctx.message.text == 'последний день') {
-      
-      await load('последний день').then(res => {
-        console.log(res);
-        ctx.sendMessage(ctx.message.chat.id, JSON.stringify(res));
+      await load(mode).then(res => {
+        message = `Сумма всех продаж за период: ${mode}
+        Чистое поступление: ${res.sumAll.toLocaleString('ru-RU')}
+          кеш: ${res.sumAllCash.toLocaleString('ru-RU')}
+          карта: ${res.sumAllCard.toLocaleString('ru-RU')}
+          смешано: ${res.sumAllMixed.toLocaleString('ru-RU')}
+        В т.ч.:
+          Продажи: ${res.sumSale.toLocaleString('ru-RU')}
+          Возвраты: ${res.sumReturn.toLocaleString('ru-RU')} 
+
+        Данные по кассам:`;
+        res.obj.forEach((element) => {
+          if (element.sumSale != 0) {
+            message += `
+              - касса ${element.name_kassa}
+              Чистое поступление: ${element.sumAll.toLocaleString('ru-RU')}               
+              В т.ч. продажи ${element.sumSale.toLocaleString('ru-RU')}, возвраты ${element.sumReturn.toLocaleString('ru-RU')} 
+            `; 
+          };
+        });
      })
      .catch(err => {
-       ctx.reply('произошла ошибка - попробуйте позже');
        writeError(err.stack, 'bot.hears - load');
      });
     }
   //}
   catch {
-    ctx.reply('произошла ошибка - попробуйте позже');
     writeError(err.stack, 'bot.hears - load');
   }
-});
-
+  ctx.reply(message);
+}
 
 
 bot.command('quit', async (ctx) => {
@@ -65,7 +139,7 @@ bot.command('quit', async (ctx) => {
 bot.on('text', async (ctx) => {
   // Explicit usage
 
-  await ctx.telegram.sendMessage(ctx.message.chat.id, `Hello Anelya`);
+  await ctx.telegram.sendMessage(ctx.message.chat.id, `Команда не распознана`);
 
   // Using context shortcut
   //await ctx.reply(`Hello ${ctx.state.role}`);
@@ -90,10 +164,6 @@ bot.on('inline_query', async (ctx) => {
   // Using context shortcut
   await ctx.answerInlineQuery(result);
 });
-
-
-
-
 
 
 bot.launch();

@@ -81,16 +81,16 @@ async function load(period) {
   try {
     await Promise.all(arrGet).then(res2 => {
       res2.forEach((element3) => {
-        console.log(element3.name_kassa + ", " + element3.data.length + ", " + element3.id_kassa + ",  " + element3.id_organization);
+        //console.log(element3.name_kassa + ", " + element3.data.length + ", " + element3.id_kassa + ",  " + element3.id_organization);
         writeOperation(element3, element3.id_kassa, element3.name_kassa, element3.id_organization);
         writeLog(`response.txt`, element3, true);
         getSummary(tableSumAll, getStat(element3, element3.id_kassa, element3.name_kassa, element3.id_organization));
       });
       //fs.appendFile("get/response.txt", JSON.stringify(res) + "\n", (error2) => { });
       writeLog(`summary.txt`, tableSumAll, false);
-      console.log(tableSumAll);
-      return tableSumAll;
+      //console.log(tableSumAll);
     });
+    return tableSumAll;
   } catch (err) {
     writeError(err.stack, 'getTransaction - promise get summary');
     console.log(err.stack);
@@ -264,7 +264,7 @@ function getSummary(tableSumAll, obj) {
 }
 
 (async () => {
-  console.log(await JSON.stringify(load('текущая неделя')));
+  //console.log(await load('текущая неделя'));
 })();
 
 
