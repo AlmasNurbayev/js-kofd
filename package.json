@@ -6,8 +6,7 @@
   "scripts": {
     "get": "node get/load.js",
     "api": "node get/api.js",
-    "create": "node db/load.js",
-    "public": "node get/public.js",
+    "create": "node db/create.js",
     "index": "node index.js"
   },
   "author": "",

@@ -1,3 +1,5 @@
+"use strict";
+
 const fs = require("fs");
 const { getJWT, getTransaction, getQuery } = require('./api');
 const { writeError, writeLog } = require('../logs/logs-utils.js');
@@ -30,14 +32,19 @@ async function load(period) {
     sumAllCash: 0,
     sumAllMixed: 0,
     countChecks: 0,
+    dateStart: '',
+    dateEnd: '',
     obj: []
   };
   const queryAllKassa = `select organization.bin, organization.name_org, organization.password_kofd, kassa.*  FROM "public".organization
   join "public".kassa on "public".kassa.id_organization  = "public".organization.id`;
   const queryAllOrganization = `select * FROM "public".organization`;
+
+  let listKassa, listOrg;
+  let arrJWT = [];
+  let arrGet = [];
   try {
     let res = await Promise.all([getQuery(queryAllKassa), getQuery(queryAllOrganization)]);
-    arrJWT = [];
     listKassa = res[0].rows;
     //console.table(listKassa);
     listOrg = res[1].rows;
@@ -60,7 +67,7 @@ async function load(period) {
     //console.table(listOrg);
     // merge listOrg and listKassa
     // arrKnumber = [];
-    arrGet = [];
+
     listKassa.forEach(elementKassa => {
       listOrg.forEach(elementOrg => {
         if (elementKassa.bin === elementOrg.bin) {
@@ -84,7 +91,7 @@ async function load(period) {
       //console.log(element3.name_kassa + ", " + element3.data.length + ", " + element3.id_kassa + ",  " + element3.id_organization);
       writeOperation(element3, element3.id_kassa, element3.name_kassa, element3.id_organization);
       writeLog(`response.txt`, element3, true);
-      getSummary(tableSumAll, getStat(element3, element3.id_kassa, element3.name_kassa, element3.id_organization));
+      getSummary(tableSumAll, getStat(element3, element3.id_kassa, element3.name_kassa, element3.id_organization, element3.dateStart, element3.dateEnd));
     });
     //fs.appendFile("get/response.txt", JSON.stringify(res) + "\n", (error2) => { });
     writeLog(`summary.txt`, tableSumAll, false);
@@ -95,11 +102,12 @@ async function load(period) {
     console.log(err.stack);
     throw new Error(err);
   }
-}    
+}
 
 // insert to db from recieved transaction 
 async function writeOperation(res, id_kassa, name_kassa, id_organization) {
   if (res.data.length == 0) { return };
+  let sql;
   try {
     sql = `INSERT INTO "public".transaction (
     id,
@@ -116,22 +124,23 @@ async function writeOperation(res, id_kassa, name_kassa, id_organization) {
     uploadDate,
     id_organization,
     id_kassa)
-  VALUES
-  `;
+  VALUES`;
+    
     res.data.forEach((element2, index) => {
-      sql += `(`;
-      arr = []
+      let arr = [];
+      sql += `
+      (`;
       arr.push(`'` + element2.id + `'`);
       if (element2.onlineFiscalNumber == null) {
         arr.push(`'` + `'`);
       } else {
         arr.push(`'` + element2.onlineFiscalNumber + `'`);
-      }
+      };
       if (element2.offlineFiscalNumber == null) {
         arr.push(`'` + `'`);
       } else {
         arr.push(`'` + element2.offlineFiscalNumber + `'`);
-      }
+      };
       arr.push(`'` + element2.systemDate + `'`);
       arr.push(`'` + element2.operationDate + `'`);
       arr.push(`'` + element2.type + `'`);
@@ -139,7 +148,7 @@ async function writeOperation(res, id_kassa, name_kassa, id_organization) {
         arr.push('NULL');
       } else {
         arr.push(`'` + element2.subType + `'`);
-      }
+      };
       arr.push(element2.sum);
       arr.push(element2.availableSum);
       arr.push(`'` + element2.paymentTypes + `'`);
@@ -148,16 +157,17 @@ async function writeOperation(res, id_kassa, name_kassa, id_organization) {
       arr.push(id_organization);
       arr.push(id_kassa);
       sql += arr.join(',');
-      //console.log(index + " / " + element.data.length);
-
       if (index == res.data.length - 1) {
         sql += `)`;
-      } else { sql += `),`; }
+      } else {
+        sql += `),`;
+      };
     });
     sql += `
     ON CONFLICT (id) DO NOTHING;`;
+    //fs.writeFileSync('logs/insert.txt', String(new Date()) + " " + sql);
     //console.log(sql);
-    res2 = await getQuery(sql);
+    let res2 = await getQuery(sql);
     writeLog(`writeOperation.txt`, JSON.stringify(res2), false);
     return res2;
   }
@@ -169,7 +179,7 @@ async function writeOperation(res, id_kassa, name_kassa, id_organization) {
 }
 
 // count statistics from recieved transaction 
-function getStat(res, knumber, name_kassa, id_organization) {
+function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) {
 
   let tableSum = {
     sumSale: 0,
@@ -187,7 +197,9 @@ function getStat(res, knumber, name_kassa, id_organization) {
     countChecks: 0,
     knumber: knumber,
     name_kassa: name_kassa,
-    id_organization: id_organization
+    id_organization: id_organization,
+    dateStart: dateStart,
+    dateEnd: dateEnd
   };
 
   try {
@@ -238,22 +250,24 @@ function getStat(res, knumber, name_kassa, id_organization) {
 }
 
 function getSummary(tableSumAll, obj) {
-  
-  try { 
-  tableSumAll.sumSale += obj.sumSale;
-  tableSumAll.sumSaleCard += obj.sumSaleCard;
-  tableSumAll.sumSaleCash += obj.sumSaleCash;
-  tableSumAll.sumSaleMixed += obj.sumSaleMixed;
-  tableSumAll.sumReturn += obj.sumReturn;
-  tableSumAll.sumReturnCard += obj.sumReturnCard;
-  tableSumAll.sumReturnCash += obj.sumReturnCash;
-  tableSumAll.sumReturnMixed += obj.sumReturnMixed;
-  tableSumAll.sumAll += obj.sumAll;
-  tableSumAll.sumAllCard += obj.sumAllCard;
-  tableSumAll.sumAllCash += obj.sumAllCash;
-  tableSumAll.sumAllMixed += obj.sumAllMixed;
-  tableSumAll.countChecks += obj.countChecks;
-  tableSumAll.obj.push(obj);
+
+  try {
+    tableSumAll.sumSale += obj.sumSale;
+    tableSumAll.sumSaleCard += obj.sumSaleCard;
+    tableSumAll.sumSaleCash += obj.sumSaleCash;
+    tableSumAll.sumSaleMixed += obj.sumSaleMixed;
+    tableSumAll.sumReturn += obj.sumReturn;
+    tableSumAll.sumReturnCard += obj.sumReturnCard;
+    tableSumAll.sumReturnCash += obj.sumReturnCash;
+    tableSumAll.sumReturnMixed += obj.sumReturnMixed;
+    tableSumAll.sumAll += obj.sumAll;
+    tableSumAll.sumAllCard += obj.sumAllCard;
+    tableSumAll.sumAllCash += obj.sumAllCash;
+    tableSumAll.sumAllMixed += obj.sumAllMixed;
+    tableSumAll.countChecks += obj.countChecks;
+    tableSumAll.dateStart = obj.dateStart;
+    tableSumAll.dateEnd = obj.dateEnd;
+    tableSumAll.obj.push(obj);
   }
   catch (err) {
     writeError(err.stack, 'getSummary');
@@ -263,7 +277,7 @@ function getSummary(tableSumAll, obj) {
 }
 
 (async () => {
-  //console.log(await load('текущая неделя'));
+  console.log(await load('текущий день'));
 })();
 
 

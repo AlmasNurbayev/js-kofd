@@ -1,3 +1,5 @@
+"use strict";
+
 const axios = require("axios");
 const https = require("https");
 const moment = require('moment');
@@ -77,8 +79,12 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
     const token = "Bearer " + jwt;
     await writeLog(`jwt.txt`, String(token));
   
+    let dateString, dateStart, dateEnd;
     if (dateMode != '') {
-      dateString = getStringFilter(dateMode)[0];
+      let dateArr = getStringFilter(dateMode);
+      dateString = dateArr[0];
+      dateStart = dateArr[1];
+      dateEnd = dateArr[2];
     };
     //skip=0&take=${count} - убрано кол-во операций
     const config = {
@@ -102,6 +108,8 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
       res.data['id_kassa'] = id_kassa;
       res.data['name_kassa'] = name_kassa;
       res.data['id_organization'] = id_organization;
+      res.data['dateStart'] = dateStart;
+      res.data['dateEnd'] = dateEnd;
       await writeLog(`response-${knumber}.txt`, res.data, false);
       return res.data;
     } catch (e) {
@@ -159,13 +167,15 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
 
   function getStringFilter(mode, begin, end) {
     //console.log(mode);
-    moment.updateLocale();
-    moment.updateLocale('en', {
+    moment.updateLocale('ru');
+    moment.updateLocale('ru', {
       week : {
           dow : 1,
           doy : 4
        }
   });
+  let dateStart, dateEnd;
+
     if (mode === 'текущий день') {
       dateStart = moment().startOf('day');
       dateEnd = moment().endOf('day');

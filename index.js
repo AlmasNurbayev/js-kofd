@@ -1,3 +1,5 @@
+"use strict";
+
 const { Telegraf, Markup } = require('telegraf');
 const { load } = require('./get/load.js');
 
@@ -35,6 +37,7 @@ bot.command('menu', async (ctx) => {
     .resize()
   )
 })
+let mode;
 
 bot.hears('текущий день', async (ctx) => {
   mode = 'текущий день';
@@ -88,14 +91,14 @@ bot.hears('прошлый год', async (ctx) => {
 
 async function ReplyData(mode, ctx) {
   await ctx.reply('формируются данные по запросу ... ');
-  message = 'произошла ошибка - попробуйте позже';
+  let message = 'произошла ошибка - попробуйте позже';
   console.log('recieve request: ' + mode + " от пользователя " + ctx.from.id);
   writeLog(`bot_request.txt`, String(new Date()) + ': recieve request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username);
   try {
     //ctx.reply("не рано ли?");
     //if (ctx.message.text == 'последний день') {
       await load(mode).then(res => {
-        message = `Сумма всех продаж за период: ${mode}
+        message = `Сумма продаж за "${mode}" = ${res.dateStart.slice(0,10)} - ${res.dateEnd.slice(0,10)}
 Чистое поступление: ${res.sumAll.toLocaleString('ru-RU')}
   кеш: ${res.sumAllCash.toLocaleString('ru-RU')}
   карта: ${res.sumAllCard.toLocaleString('ru-RU')}

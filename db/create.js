@@ -1,3 +1,5 @@
+"use strict";
+
 const { Client } = require('pg');
 const fs = require('fs');
 const errorAr = [];
