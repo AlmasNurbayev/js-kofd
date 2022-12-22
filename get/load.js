@@ -36,7 +36,7 @@ async function load(period) {
   join "public".kassa on "public".kassa.id_organization  = "public".organization.id`;
   const queryAllOrganization = `select * FROM "public".organization`;
   try {
-    await Promise.all([getQuery(queryAllKassa), getQuery(queryAllOrganization)]).then(res => {
+    let res = await Promise.all([getQuery(queryAllKassa), getQuery(queryAllOrganization)]);
     arrJWT = [];
     listKassa = res[0].rows;
     //console.table(listKassa);
@@ -44,7 +44,7 @@ async function load(period) {
     listOrg.forEach(element => {
       arrJWT.push(getJWT(element.bin, element.password_kofd));
     });
-  })}
+  }
   catch (err) {
     console.log(err.stack);
     writeError(err.stack, 'getTransaction - promise get kassa and org ');
@@ -52,44 +52,43 @@ async function load(period) {
   }
 
   try {
-    await Promise.all(arrJWT).then(res => {
-      //console.log(JSON.stringify(res));
-      listOrg.forEach((element, index) => {
-        element['jwt'] = res[index];
-      });
-      //console.table(listOrg);
-      // merge listOrg and listKassa
-      // arrKnumber = [];
-      arrGet = [];
-      listKassa.forEach(elementKassa => {
-        listOrg.forEach(elementOrg => {
-          if (elementKassa.bin === elementOrg.bin) {
-            elementKassa['jwt'] = elementOrg.jwt;
-            arrGet.push(getTransaction(count, elementKassa.jwt, elementKassa.knumber, elementKassa.id, elementKassa.name_kassa, elementKassa.id_organization, period));
-            //arrKnumber.push(elementKassa.knumber);
-            // get data for all kassa
-          }
-        });
+    let res = await Promise.all(arrJWT);
+    //console.log(JSON.stringify(res));
+    listOrg.forEach((element, index) => {
+      element['jwt'] = res[index];
+    });
+    //console.table(listOrg);
+    // merge listOrg and listKassa
+    // arrKnumber = [];
+    arrGet = [];
+    listKassa.forEach(elementKassa => {
+      listOrg.forEach(elementOrg => {
+        if (elementKassa.bin === elementOrg.bin) {
+          elementKassa['jwt'] = elementOrg.jwt;
+          arrGet.push(getTransaction(count, elementKassa.jwt, elementKassa.knumber, elementKassa.id, elementKassa.name_kassa, elementKassa.id_organization, period));
+          //arrKnumber.push(elementKassa.knumber);
+          // get data for all kassa
+        }
       });
     });
-  } catch (err) {
+  }
+  catch (err) {
     console.log(err.stack);
     writeError(err.stack, 'getTransaction - promise get jwt and transactions');
-    throw new Error(err);    
+    throw new Error(err);
   }
 
   try {
-    await Promise.all(arrGet).then(res2 => {
-      res2.forEach((element3) => {
-        //console.log(element3.name_kassa + ", " + element3.data.length + ", " + element3.id_kassa + ",  " + element3.id_organization);
-        writeOperation(element3, element3.id_kassa, element3.name_kassa, element3.id_organization);
-        writeLog(`response.txt`, element3, true);
-        getSummary(tableSumAll, getStat(element3, element3.id_kassa, element3.name_kassa, element3.id_organization));
-      });
-      //fs.appendFile("get/response.txt", JSON.stringify(res) + "\n", (error2) => { });
-      writeLog(`summary.txt`, tableSumAll, false);
-      //console.log(tableSumAll);
+    let res2 = await Promise.all(arrGet);
+    res2.forEach((element3) => {
+      //console.log(element3.name_kassa + ", " + element3.data.length + ", " + element3.id_kassa + ",  " + element3.id_organization);
+      writeOperation(element3, element3.id_kassa, element3.name_kassa, element3.id_organization);
+      writeLog(`response.txt`, element3, true);
+      getSummary(tableSumAll, getStat(element3, element3.id_kassa, element3.name_kassa, element3.id_organization));
     });
+    //fs.appendFile("get/response.txt", JSON.stringify(res) + "\n", (error2) => { });
+    writeLog(`summary.txt`, tableSumAll, false);
+    //console.log(tableSumAll);
     return tableSumAll;
   } catch (err) {
     writeError(err.stack, 'getTransaction - promise get summary');
