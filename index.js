@@ -17,7 +17,7 @@ bot.start((ctx) => {
 });
 
 bot.command('menu', async (ctx) => {
-  return await ctx.reply('Выберите период запроса', Markup
+  return await ctx.reply('Выберите период продаж', Markup
     .keyboard([[
       Markup.button.callback("текущий день", "1"),
       Markup.button.callback("прошлый день", "2")],
@@ -37,6 +37,19 @@ bot.command('menu', async (ctx) => {
     .resize()
   )
 })
+
+bot.command('hide_menu', async (ctx) => {
+  // await ctx.editMessageReplyMarkup({
+  //   reply_markup: { remove_keyboard: true },
+  //   });
+    await ctx.reply("меню скрыто",
+    {
+      reply_markup: {
+        remove_keyboard: true,
+      },
+    });    
+});
+
 let mode;
 
 bot.hears('log', async (ctx) => {
