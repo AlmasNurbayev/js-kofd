@@ -4,7 +4,7 @@ const { Telegraf, Markup } = require('telegraf');
 const { load } = require('./get/load.js');
 
 const dotenv = require("dotenv");
-const { writeError, writeLog } = require('./logs/logs-utils.js');
+const { writeError, writeLog, readLog } = require('./logs/logs-utils.js');
 dotenv.config();
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
@@ -38,6 +38,21 @@ bot.command('menu', async (ctx) => {
   )
 })
 let mode;
+
+bot.hears('log', async (ctx) => {
+  //mode = 'текущий день';
+  //ReplyData(mode, ctx);
+  ctx.reply('читаем файл bot_request.txt и возвращаем последние 10 записей ...');
+  let message = 'произошла ошибка - попробуйте позже';
+  
+  try {
+    message = await readLog('bot_request.txt', 10);
+  }
+  catch {
+    writeError(err.stack, 'bot.hears - log');
+  }
+  ctx.reply(message);
+});
 
 bot.hears('текущий день', async (ctx) => {
   mode = 'текущий день';
@@ -93,7 +108,8 @@ async function ReplyData(mode, ctx) {
   await ctx.reply('формируются данные по запросу ... ');
   let message = 'произошла ошибка - попробуйте позже';
   console.log('recieve request: ' + mode + " от пользователя " + ctx.from.id);
-  writeLog(`bot_request.txt`, String(new Date()) + ': recieve request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username);
+  let date = new Date().toLocaleString("ru-RU");
+  writeLog(`bot_request.txt`, String(date + ': recieve request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
   try {
     //ctx.reply("не рано ли?");
     //if (ctx.message.text == 'последний день') {
@@ -116,14 +132,17 @@ async function ReplyData(mode, ctx) {
             `; 
           };
         });
+        writeLog(`bot_request.txt`, String(date + ': SUCCESS request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
      })
      .catch(err => {
        writeError(err.stack, 'bot.hears - load');
+       writeLog(`bot_request.txt`, String(date + ': ERROR request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
      });
     }
   //}
   catch {
     writeError(err.stack, 'bot.hears - load');
+    writeLog(`bot_request.txt`, String(date + ': ERROR request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
   }
   ctx.reply(message);
 }

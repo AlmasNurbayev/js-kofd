@@ -6,6 +6,7 @@
   "scripts": {
     "get": "node get/load.js",
     "api": "node get/api.js",
+    "utils": "node logs/logs-utils.js",
     "create": "node db/create.js",
     "index": "node index.js"
   },
