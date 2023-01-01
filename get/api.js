@@ -198,8 +198,8 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
       dateStart = moment().add(-1,'w').startOf('week');
       dateEnd = moment().add(-1,'w').endOf('week');
     } else if (mode === 'прошлый месяц') {
-      dateStart = moment().add(-1,'m').startOf('month');
-      dateEnd = moment().add(-1,'m').endOf('month');
+      dateStart = moment().add(-1,'M').startOf('month');
+      dateEnd = moment().add(-1,'M').endOf('month');
     } else if (mode === 'прошлый квартал') {
       dateStart = moment().add(-1,'Q').startOf('quarter');
       dateEnd = moment().add(-1,'Q').endOf('quarter');
