@@ -3,6 +3,7 @@
 const fs = require("fs");
 const { getJWT, getTransaction, getQuery } = require('./api');
 const { writeError, writeLog } = require('../logs/logs-utils.js');
+const dotenv = require("dotenv");
 const count = 1000; // count of transaction get from kofd
 
 
@@ -49,7 +50,7 @@ async function load(period) {
     //console.table(listKassa);
     listOrg = res[1].rows;
     listOrg.forEach(element => {
-      arrJWT.push(getJWT(element.bin, element.password_kofd));
+      arrJWT.push(getJWT(element.bin, process.env.KOFDPASSWORD));
     });
   }
   catch (err) {

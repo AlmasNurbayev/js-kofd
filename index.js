@@ -21,12 +21,12 @@ bot.command('menu', async (ctx) => {
     .keyboard([[
       Markup.button.callback("текущий день", "1"),
       Markup.button.callback("прошлый день", "2")],
-      [Markup.button.callback("текущая неделя", "2"),
-      Markup.button.callback("прошлая неделя", "2")],
-      [Markup.button.callback("текущий месяц", "2"),
-      Markup.button.callback("прошлый месяц", "1")],
-      [Markup.button.callback("текущий квартал", "2"),
-      Markup.button.callback("прошлый квартал", "2")],
+    [Markup.button.callback("текущая неделя", "2"),
+    Markup.button.callback("прошлая неделя", "2")],
+    [Markup.button.callback("текущий месяц", "2"),
+    Markup.button.callback("прошлый месяц", "1")],
+    [Markup.button.callback("текущий квартал", "2"),
+    Markup.button.callback("прошлый квартал", "2")],
       //[Markup.button.callback("текущий год", "2"),
       //Markup.button.callback("прошлый год", "2")]
       // ['button 1', 'button 2'], // Row1 with 2 buttons
@@ -42,12 +42,12 @@ bot.command('hide_menu', async (ctx) => {
   // await ctx.editMessageReplyMarkup({
   //   reply_markup: { remove_keyboard: true },
   //   });
-    await ctx.reply("меню скрыто",
+  await ctx.reply("меню скрыто",
     {
       reply_markup: {
         remove_keyboard: true,
       },
-    });    
+    });
 });
 
 let mode;
@@ -57,7 +57,7 @@ bot.hears('log', async (ctx) => {
   //ReplyData(mode, ctx);
   ctx.reply('читаем файл bot_request.txt и возвращаем последние 10 записей ...');
   let message = 'произошла ошибка - попробуйте позже';
-  
+
   try {
     message = await readLog('bot_request.txt', 10);
   }
@@ -126,32 +126,36 @@ async function ReplyData(mode, ctx) {
   try {
     //ctx.reply("не рано ли?");
     //if (ctx.message.text == 'последний день') {
-      await load(mode).then(res => {
-        message = `Сумма продаж за "${mode}" = ${res.dateStart.slice(0,10)} - ${res.dateEnd.slice(0,10)}
-Чистое поступление: ${res.sumAll.toLocaleString('ru-RU')}
-  кеш: ${res.sumAllCash.toLocaleString('ru-RU')}
-  карта: ${res.sumAllCard.toLocaleString('ru-RU')}
-  смешано: ${res.sumAllMixed.toLocaleString('ru-RU')}
-  В т.ч.:
-  Продажи: ${res.sumSale.toLocaleString('ru-RU')}
-  Возвраты: ${res.sumReturn.toLocaleString('ru-RU')} 
+    await load(mode).then(res => {
+      message = `Сумма продаж за "${mode}" = ${res.dateStart.slice(0, 10)} - ${res.dateEnd.slice(0, 10)}
+Чистое поступление: ${res.sumAll.toLocaleString('ru-RU')}`;
 
-Данные по кассам:`;
+      if (res.sumAll > 0) {
+        message += `
+        кеш: ${res.sumAllCash.toLocaleString('ru-RU')}
+        карта: ${res.sumAllCard.toLocaleString('ru-RU')}
+        смешано: ${res.sumAllMixed.toLocaleString('ru-RU')}
+        В т.ч.:
+        Продажи: ${res.sumSale.toLocaleString('ru-RU')}
+        Возвраты: ${res.sumReturn.toLocaleString('ru-RU')} 
+        
+        Данные по кассам:`;
         res.obj.forEach((element) => {
           if (element.sumSale != 0) {
             message += `
  - ${element.name_kassa} поступило: ${element.sumAll.toLocaleString('ru-RU')}               
     в т.ч. продажи ${element.sumSale.toLocaleString('ru-RU')}, возвраты ${element.sumReturn.toLocaleString('ru-RU')} 
-            `; 
+            `;
           };
-        });
-        writeLog(`bot_request.txt`, String(date + ': SUCCESS request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
-     })
-     .catch(err => {
-       writeError(err.stack, 'bot.hears - load');
-       writeLog(`bot_request.txt`, String(date + ': ERROR request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
-     });
-    }
+        })
+      };
+      writeLog(`bot_request.txt`, String(date + ': SUCCESS request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
+    })
+      .catch(err => {
+        writeError(err.stack, 'bot.hears - load');
+        writeLog(`bot_request.txt`, String(date + ': ERROR request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
+      });
+  }
   //}
   catch {
     writeError(err.stack, 'bot.hears - load');
@@ -181,7 +185,7 @@ bot.on('text', async (ctx) => {
 bot.on('callback_query', async (ctx) => {
   // Explicit usage
 
-//}
+  //}
 
   await ctx.telegram.answerCbQuery(ctx.callbackQuery.id);
 
