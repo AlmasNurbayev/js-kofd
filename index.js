@@ -55,11 +55,11 @@ let mode;
 bot.hears('log', async (ctx) => {
   //mode = 'текущий день';
   //ReplyData(mode, ctx);
-  ctx.reply('читаем файл bot_request.txt и возвращаем последние 10 записей ...');
+  ctx.reply('читаем файл bot_request.txt и возвращаем последние 15 записей ...');
   let message = 'произошла ошибка - попробуйте позже';
 
   try {
-    message = await readLog('bot_request.txt', 10);
+    message = await readLog('bot_request.txt', 15);
   }
   catch {
     writeError(err.stack, 'bot.hears - log');
@@ -149,17 +149,20 @@ async function ReplyData(mode, ctx) {
           };
         })
       };
-      writeLog(`bot_request.txt`, String(date + ': SUCCESS request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
+      let date2 = new Date().toLocaleString("ru-RU");
+      writeLog(`bot_request.txt`, String(date2 + ': SUCCESS request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
     })
       .catch(err => {
+        let date2 = new Date().toLocaleString("ru-RU");
         writeError(err.stack, 'bot.hears - load');
-        writeLog(`bot_request.txt`, String(date + ': ERROR request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
+        writeLog(`bot_request.txt`, String(date2 + ': ERROR request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
       });
   }
   //}
   catch {
+    let date2 = new Date().toLocaleString("ru-RU");
     writeError(err.stack, 'bot.hears - load');
-    writeLog(`bot_request.txt`, String(date + ': ERROR request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
+    writeLog(`bot_request.txt`, String(date2 + ': ERROR request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
   }
   ctx.reply(message);
 }
