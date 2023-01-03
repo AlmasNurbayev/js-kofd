@@ -60,6 +60,10 @@ let mode;
 bot.hears('log', async (ctx) => {
   //mode = 'текущий день';
   //ReplyData(mode, ctx);
+  if (isAdmin(ctx.from.id) === false) {
+    ctx.telegram.sendMessage(adminId, 'Получен запрос в бот Cipo ' + mode + ' / ' + ctx.from.id + ' / ' + ctx.from.username);
+};
+  
   ctx.reply('читаем файл bot_request.txt и возвращаем последние 15 записей ...');
   let message = 'произошла ошибка - попробуйте позже';
 
