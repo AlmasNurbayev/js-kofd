@@ -6,13 +6,18 @@ const { load } = require('./get/load.js');
 const dotenv = require("dotenv");
 const { writeError, writeLog, readLog } = require('./logs/logs-utils.js');
 dotenv.config();
+const adminId = '590285714';
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 
+function isAdmin(userId) {
+  if (String(userId) === adminId) {return true}  
+  else {return false}
+}
+
 bot.start((ctx) => {
   //console.log('Id пользователя:', ctx.from.id);
-
   return ctx.reply('Добро пожаловать! Это бот для просмотра статистики касс');
 });
 
@@ -118,6 +123,11 @@ bot.hears('прошлый год', async (ctx) => {
 });
 
 async function ReplyData(mode, ctx) {
+
+  if (isAdmin(ctx.from.id) === false) {
+    ctx.telegram.sendMessage(adminId, 'Получен запрос в бот Cipo ' + mode + ' / ' + ctx.from.id + ' / ' + ctx.from.username);
+};
+
   await ctx.reply('формируются данные по запросу ... ');
   let message = 'произошла ошибка - попробуйте позже';
   console.log('recieve request: ' + mode + " от пользователя " + ctx.from.id);
