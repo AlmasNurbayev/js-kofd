@@ -7,11 +7,18 @@ const fs = require('fs/promises');
 // input data - text of record, 
 // input append - write to end of old file or writing new file
 // return promise
-async function writeLog(name, data, append = true) {
-  if (append) {
-    await fs.appendFile('logs/'+name, JSON.stringify(data) + '\n');
+async function writeLog(name, data, append = true, jsoned = true) {
+
+  if (jsoned) {
+    data = JSON.stringify(data);
   } else {
-    fs.writeFile('logs/'+name, JSON.stringify(data));
+    data = String(data);
+  }
+
+  if (append) {
+    await fs.appendFile('logs/'+name, data + '\n');
+  } else {
+    fs.writeFile('logs/'+name, data);
   };
 }
 

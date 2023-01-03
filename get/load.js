@@ -51,6 +51,7 @@ async function load(period) {
     listOrg = res[1].rows;
     listOrg.forEach(element => {
       arrJWT.push(getJWT(element.bin, process.env.KOFDPASSWORD));
+      console.log('get jwt: ' + element.bin);
     });
   }
   catch (err) {
@@ -278,7 +279,7 @@ function getSummary(tableSumAll, obj) {
 }
 
 (async () => {
-  console.log(await load('текущий день'));
+  //console.log(await load('текущий день'));
 })();
 
 

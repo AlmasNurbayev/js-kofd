@@ -10,6 +10,8 @@ const adminId = '590285714';
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'));
 
 function isAdmin(userId) {
   if (String(userId) === adminId) {return true}  

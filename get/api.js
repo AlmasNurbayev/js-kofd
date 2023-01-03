@@ -146,7 +146,8 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
     try {
       let res = await client.query(query);
       //console.log(res)
-      await writeLog(`query.txt`, res);
+      await writeLog(`sql.txt`, res);
+      await writeLog(`query.txt`, new Date().toLocaleString("ru-RU") + ' /// ' + String(query), true,false);
       return res;
     } catch (e) {
       await writeError(JSON.stringify(e.stack), 'query');
