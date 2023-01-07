@@ -77,7 +77,7 @@ async function getJWT(iin, pass) {
  */
 async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_organization, dateMode) {
     const token = "Bearer " + jwt;
-    await writeLog(`jwt.txt`, String(token));
+    //await writeLog(`jwt.txt`, String(token));
   
     let dateString, dateStart, dateEnd;
     if (dateMode != '') {
