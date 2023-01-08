@@ -4,6 +4,7 @@ const { Client } = require('pg');
 const fs = require('fs');
 const errorAr = [];
 const dotenv = require("dotenv");
+const { writeError, writeLog, logger } = require('../logs/logs-utils.js');
 dotenv.config();
 
 fs.unlink("db/errors.txt", (err) => { });
@@ -16,26 +17,19 @@ fs.unlink("db/result.txt", (err) => { });
   
   async function runAll() {
     try {
+      logger.info('db create - starting runAll');
       await clientQuery('db/drop.sql');
       await clientQuery('db/create.sql');
       await clientQuery('db/insert.sql');
     } catch (e) {
+      await writeError(e.stack, 'db - runAll');  
       throw e;
     }
   }
 
-function writeError(error, point, path) {
-    errorAr.push({
-        date: new Date(),
-        text: error,
-        point: point,
-        path: path
-    });
-    fs.writeFile('db/errors.txt', JSON.stringify(errorAr), error2 => { console.log("Error write file errors") });
-}
-
 async function clientQuery(path) {
     console.log("begin " + path);
+    logger.info('db create - starting clientQuery ' + path);
     const client = new Client({
         user: process.env.PGUSER,
         host: process.env.PGHOST,
@@ -49,10 +43,11 @@ async function clientQuery(path) {
 
     let query = "";
     try {
+        logger.info('db create - clientQuery reading file ' + path);
         query = String(fs.readFileSync(path));
     }
     catch (err) {
-        writeError(JSON.stringify(err.stack), "reading script");
+        writeError(JSON.stringify(err.stack), "db create - reading script");
         throw new Error(err);
     }
     // fs.readFile(path, "utf8", (err, data) => {
@@ -64,13 +59,15 @@ async function clientQuery(path) {
     
     try {
         await client.connect();
+        logger.info('db create - clientQuery connecting db');
     } catch (err) {
-        writeError(JSON.stringify(err.stack), "connect " + path);
+        writeError(JSON.stringify(err.stack), "db create - connect " + path);
         throw new Error(err);
     }
 
     try {
         let res = await client.query(query);
+        logger.info('db create - clientQuery quering db');
         fs.writeFile('db/create_result1.txt', JSON.stringify(res), error2 => { });
         //console.log(res);
         //client.end();
@@ -81,6 +78,7 @@ async function clientQuery(path) {
         throw new Error(err);
     } finally {
         client.end();
+        logger.info('db create - clientQuery ending');
     }
     // });
 }

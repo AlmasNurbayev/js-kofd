@@ -2,7 +2,7 @@
 
 const fs = require("fs");
 const { getJWT, getTransaction, getQuery } = require('./api');
-const { writeError, writeLog } = require('../logs/logs-utils.js');
+const { writeError, writeLog, logger } = require('../logs/logs-utils.js');
 const dotenv = require("dotenv");
 const count = 1000; // count of transaction get from kofd
 
@@ -45,6 +45,7 @@ async function load(period) {
   let arrJWT = [];
   let arrGet = [];
   try {
+    logger.info('load - starting query of kassa and organization');  
     let res = await Promise.all([getQuery(queryAllKassa), getQuery(queryAllOrganization)]);
     listKassa = res[0].rows;
     //console.table(listKassa);
@@ -61,6 +62,7 @@ async function load(period) {
   }
 
   try {
+    logger.info('load - starting POST query receive JWT'); 
     let res = await Promise.all(arrJWT);
     //console.log(JSON.stringify(res));
     listOrg.forEach((element, index) => {
@@ -88,6 +90,7 @@ async function load(period) {
   }
 
   try {
+    logger.info('load - starting GET query receive transaction'); 
     let res2 = await Promise.all(arrGet);
     res2.forEach((element3) => {
       //console.log(element3.name_kassa + ", " + element3.data.length + ", " + element3.id_kassa + ",  " + element3.id_organization);
@@ -111,6 +114,7 @@ async function writeOperation(res, id_kassa, name_kassa, id_organization) {
   if (res.data.length == 0) { return };
   let sql;
   try {
+    logger.info('load - starting query in DB for insert transactions'); 
     sql = `INSERT INTO "public".transaction (
     id,
     onlineFiscalNumber,
@@ -204,6 +208,8 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
     dateEnd: dateEnd
   };
 
+  logger.info(`load - starting get stat for ${knumber} / ${name_kassa} / ${id_organization} / ${dateStart} / ${dateEnd} `); 
+
   try {
     res.data.forEach((element2, index) => {
       if (element2.type == 1) {
@@ -252,6 +258,8 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
 }
 
 function getSummary(tableSumAll, obj) {
+
+  logger.info(`load - starting get summary for ${JSON.stringify(obj)}`); 
 
   try {
     tableSumAll.sumSale += obj.sumSale;

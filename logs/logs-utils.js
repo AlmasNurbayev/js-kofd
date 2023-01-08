@@ -1,6 +1,26 @@
 "use strict";
 
 const fs = require('fs/promises');
+const pino = require('pino');
+const logger = pino({
+  timestamp: () => `,"time":"${new Date().toLocaleString("ru-RU")}"`,
+  transport: {
+    targets: [
+    {
+    level: 'info',
+    target: 'pino/file',
+    options: { destination: 'logs/log_p.txt', append: true }
+  },
+  {
+    level: 'error',
+    target: 'pino/file',
+    options: { destination: 'logs/error_p.txt', append: true }
+  },
+  ]}
+});
+//const logger_l = pino(transport_l);
+
+
 
 // write string  to text file
 // input name - name of file, 
@@ -27,11 +47,12 @@ async function writeLog(name, data, append = true, jsoned = true) {
 // input point - description - place about function
 // return promise
 async function writeError(error, point) {
-  await writeLog('errors.txt', {
-    date: new Date(),
-    text: error,
-    point: point,
-  });
+  logger.error(point + " | " +error.slice(0, 300));
+  // await writeLog('errors.txt', {
+  //   date: new Date(),
+  //   text: error.slice(0, 300),
+  //   point: point,
+  // });
 }
 
 // reading text file
@@ -77,3 +98,4 @@ async function isFileExist(name) {
 exports.writeError = writeError;
 exports.writeLog = writeLog;
 exports.readLog = readLog;
+exports.logger = logger;

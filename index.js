@@ -4,7 +4,7 @@ const { Telegraf, Markup } = require('telegraf');
 const { load } = require('./get/load.js');
 
 const dotenv = require("dotenv");
-const { writeError, writeLog, readLog } = require('./logs/logs-utils.js');
+const { writeError, writeLog, readLog, logger } = require('./logs/logs-utils.js');
 dotenv.config();
 const adminId = '590285714';
 
@@ -20,10 +20,14 @@ function isAdmin(userId) {
 
 bot.start((ctx) => {
   //console.log('Id пользователя:', ctx.from.id);
+  logger.info('index - bot start new user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
   return ctx.reply('Добро пожаловать! Это бот для просмотра статистики касс');
+  
+  
 });
 
 bot.command('menu', async (ctx) => {
+  logger.info('markup building');
   return await ctx.reply('Выберите период продаж', Markup
     .keyboard([[
       Markup.button.callback("текущий день", "1"),
@@ -59,24 +63,72 @@ bot.command('hide_menu', async (ctx) => {
 
 let mode;
 
-bot.hears('log', async (ctx) => {
+bot.hears(/Query|query/, async (ctx) => {
   //mode = 'текущий день';
   //ReplyData(mode, ctx);
   if (isAdmin(ctx.from.id) === false) {
-    ctx.telegram.sendMessage(adminId, 'Получен запрос в бот Cipo ' + mode + ' / ' + ctx.from.id + ' / ' + ctx.from.username);
+    ctx.telegram.sendMessage(adminId, 'Получен запрос в бот Cipo ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);
+    logger.info('index - receive /query/ command by not-admin user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
 };
   
   ctx.reply('читаем файл bot_request.txt и возвращаем последние 15 записей ...');
   let message = 'произошла ошибка - попробуйте позже';
 
   try {
-    message = await readLog('bot_request.txt', 15);
+    logger.info('index - receive /query/ command starting from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
+    message = await readLog('bot_request.txt', 100);
+    logger.info('index - receive /query/ command ending from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
   }
-  catch {
-    writeError(err.stack, 'bot.hears - log');
+  catch (err) {
+    writeError(err.stack, 'bot.hears - query');
   }
   ctx.reply(message);
 });
+
+bot.hears(/Error|error/, async (ctx) => {
+  //mode = 'текущий день';
+  //ReplyData(mode, ctx);
+  if (isAdmin(ctx.from.id) === false) {
+    ctx.telegram.sendMessage(adminId, 'Получен запрос /error/ в бот Cipo ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);
+    logger.info('index - receive /error/ command by not-admin user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
+};
+  
+  ctx.reply('читаем файл error_p.txt и возвращаем последние 2000 символов ...');
+  let message = 'произошла ошибка - попробуйте позже';
+
+  try {
+    logger.info('index - receive /error/ command starting from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
+    message = await readLog('error_p.txt', 100);
+    logger.info('index - receive /error/ command ending from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
+  }
+  catch (err) {
+    writeError(err.stack, 'bot.hears - error');
+  }
+  ctx.reply(message.slice(-2000));
+});
+
+bot.hears(/Log|log/, async (ctx) => {
+  //mode = 'текущий день';
+  //ReplyData(mode, ctx);
+  if (isAdmin(ctx.from.id) === false) {
+    ctx.telegram.sendMessage(adminId, 'Получен запрос /log/ в бот Cipo ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);
+    logger.info('index - receive /log/ command by not-admin user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
+};
+  
+  ctx.reply('читаем файл log_p.txt и возвращаем последние 2000 символов ...');
+  let message = 'произошла ошибка - попробуйте позже';
+
+  try {
+    logger.info('index - receive /log/ command starting from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
+    message = await readLog('log_p.txt', 20);
+    logger.info('index - receive /log/ command ending from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
+  }
+  catch (err) {
+    writeError(err.stack, 'bot.hears - log');
+  }
+  ctx.reply(message.slice(-2000));
+});
+
 
 bot.hears('текущий день', async (ctx) => {
   mode = 'текущий день';
@@ -136,13 +188,15 @@ async function ReplyData(mode, ctx) {
 
   await ctx.reply('формируются данные по запросу ... ');
   let message = 'произошла ошибка - попробуйте позже';
-  console.log('recieve request: ' + mode + " от пользователя " + ctx.from.id);
+  console.log('receive request: ' + mode + " от пользователя " + ctx.from.id);
   let date = new Date().toLocaleString("ru-RU");
-  writeLog(`bot_request.txt`, String(date + ': recieve request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
+  writeLog(`bot_request.txt`, String(date + ': receive request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
   try {
     //ctx.reply("не рано ли?");
     //if (ctx.message.text == 'последний день') {
+    logger.info('index - starting /load/ with mode: ' + mode);  
     await load(mode).then(res => {
+      logger.info('index - ending /load/ with mode: ' + mode);  
       message = `Сумма продаж за "${mode}" = ${res.dateStart.slice(0, 10)} - ${res.dateEnd.slice(0, 10)}
 Чистое поступление: ${res.sumAll.toLocaleString('ru-RU')}`;
 
@@ -185,6 +239,7 @@ async function ReplyData(mode, ctx) {
 
 
 bot.command('quit', async (ctx) => {
+  logger.info('leave chat');
   // Explicit usage
   await ctx.telegram.leaveChat(ctx.message.chat.id);
 
@@ -223,6 +278,7 @@ bot.on('inline_query', async (ctx) => {
 
 
 bot.launch();
+logger.info('starting bot');
 
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));

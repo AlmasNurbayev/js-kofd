@@ -5,7 +5,7 @@ const https = require("https");
 const moment = require('moment');
 const fs = require("fs");
 const { Client } = require('pg');
-const { writeError, writeLog } = require('../logs/logs-utils.js');
+const { writeError, writeLog, logger } = require('../logs/logs-utils.js');
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -31,6 +31,9 @@ const dateMode = {
  * @returns {Promise<string|Error>}
  */
 async function getJWT(iin, pass) {
+
+  logger.info('api - starting getJWT: ' + iin);
+
   const data = {
     credentials: {
       iin: iin,
@@ -47,7 +50,7 @@ async function getJWT(iin, pass) {
     },
     data: JSON.stringify(data),
     httpsAgent: agent,
-    timeout: 6000
+    timeout: 8000
   };
 
   //console.log("1");
@@ -61,6 +64,7 @@ async function getJWT(iin, pass) {
       await writeError(response.data, 'getJWT');
       return;
     }
+    logger.info('api - ending getJWT');
     return response.data.data.jwt;
   } catch (e) {
     await writeError(e, 'getJWT');
@@ -76,6 +80,7 @@ async function getJWT(iin, pass) {
  * @returns {Promise<string|Error>}
  */
 async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_organization, dateMode) {
+    logger.info('api - starting getTransaction: ' + JSON.stringify({knumber, id_kassa, name_kassa, id_organization, dateMode}));
     const token = "Bearer " + jwt;
     //await writeLog(`jwt.txt`, String(token));
   
@@ -95,7 +100,7 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
         Authorization: token,
       },
       httpsAgent: agent,
-      timeout: 6000
+      timeout: 8000
     };
     
     try {
@@ -111,9 +116,10 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
       res.data['dateStart'] = dateStart;
       res.data['dateEnd'] = dateEnd;
       await writeLog(`response-${knumber}.txt`, res.data, false);
+      logger.info('api - ending getTransaction');
       return res.data;
     } catch (e) {
-      await writeError(e, 'getData');
+      await writeError(e, 'getTransaction');
       throw new Error(e);
     }
   }
@@ -124,21 +130,22 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
  * @returns {Promise<string|Error>}
  */
   async function getQuery(query) {
+    logger.info('api - starting getQuery: ' + query.slice(300));
     const client = new Client({
       user: process.env.PGUSER,
       host: process.env.PGHOST,
       database: process.env.PGDATABASE,
       password: process.env.PGPASSWORD,
       port: process.env.PGPORT,
-      connectionTimeoutMillis: 4000,
-      query_timeout: 4000,
+      connectionTimeoutMillis: 6000,
+      query_timeout: 6000,
       idle_in_transaction_session_timeout: 2000,
     });
   
     try {
       await client.connect();
     } catch (err) {
-      await writeError(JSON.stringify(e.stack), 'getKassa-connect');
+      await writeError(JSON.stringify(err.stack), 'getQuery-connect');
       //console.error('query error', err.stack);
       throw err;
     }
@@ -146,8 +153,8 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
     try {
       let res = await client.query(query);
       //console.log(res)
-      await writeLog(`sql.txt`, res);
-      await writeLog(`query.txt`, new Date().toLocaleString("ru-RU") + ' /// ' + String(query), true,false);
+      //await writeLog(`sql.txt`, res);
+      //await writeLog(`query.txt`, new Date().toLocaleString("ru-RU") + ' /// ' + String(query), true,false);
       return res;
     } catch (e) {
       await writeError(JSON.stringify(e.stack), 'query');
@@ -155,6 +162,7 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
       throw new Error(e);
     } finally {
       client.end();
+      logger.info('api - ending getQuery');
     }
   }
   
@@ -168,6 +176,7 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
 
   function getStringFilter(mode, begin, end) {
     //console.log(mode);
+    logger.info('api - starting getStringFilter: ' + mode);
     moment.updateLocale('ru');
     moment.updateLocale('ru', {
       week : {
