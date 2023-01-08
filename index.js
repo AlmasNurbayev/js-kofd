@@ -76,13 +76,14 @@ bot.hears(/Query|query/, async (ctx) => {
 
   try {
     logger.info('index - receive /query/ command starting from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
-    message = await readLog('bot_request.txt', 100);
+    message = await readLog('bot_request.txt', 15);
+    ctx.reply(message);
     logger.info('index - receive /query/ command ending from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
   }
   catch (err) {
     writeError(err.stack, 'bot.hears - query');
   }
-  ctx.reply(message);
+  
 });
 
 bot.hears(/Error|error/, async (ctx) => {
@@ -99,12 +100,13 @@ bot.hears(/Error|error/, async (ctx) => {
   try {
     logger.info('index - receive /error/ command starting from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
     message = await readLog('error_p.txt', 100);
+    ctx.reply(message.slice(-2000));
     logger.info('index - receive /error/ command ending from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
   }
   catch (err) {
     writeError(err.stack, 'bot.hears - error');
   }
-  ctx.reply(message.slice(-2000));
+  
 });
 
 bot.hears(/Log|log/, async (ctx) => {
@@ -121,12 +123,13 @@ bot.hears(/Log|log/, async (ctx) => {
   try {
     logger.info('index - receive /log/ command starting from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
     message = await readLog('log_p.txt', 20);
+    ctx.reply(message.slice(-2000));
     logger.info('index - receive /log/ command ending from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
   }
   catch (err) {
     writeError(err.stack, 'bot.hears - log');
   }
-  ctx.reply(message.slice(-2000));
+  
 });
 
 
