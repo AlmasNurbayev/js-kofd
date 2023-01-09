@@ -47,7 +47,7 @@ async function writeLog(name, data, append = true, jsoned = true) {
 // input point - description - place about function
 // return promise
 async function writeError(error, point) {
-  logger.error(point + " | " +error.slice(0, 300));
+  logger.error(point + " | " +error);
   // await writeLog('errors.txt', {
   //   date: new Date(),
   //   text: error.slice(0, 300),

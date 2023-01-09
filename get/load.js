@@ -85,7 +85,7 @@ async function load(period) {
   }
   catch (err) {
     console.log(err.stack);
-    writeError(err.stack, 'getTransaction - promise get jwt and transactions');
+    writeError(JSON.stringify(err.stack), 'getTransaction - promise get jwt and transactions');
     throw new Error(err);
   }
 
