@@ -201,7 +201,7 @@ async function ReplyData(mode, ctx) {
     await load(mode).then(res => {
       logger.info('index - ending /load/ with mode: ' + mode);  
       message = `Сумма продаж за "${mode}" = ${res.dateStart.slice(0, 10)} - ${res.dateEnd.slice(0, 10)}
-Чистое поступление: ${res.sumAll.toLocaleString('ru-RU')}`;
+Чистое поступление: <b>${res.sumAll.toLocaleString('ru-RU')}</b>`;
 
       if (res.sumAll > 0) {
         message += `
@@ -216,9 +216,13 @@ async function ReplyData(mode, ctx) {
         res.obj.forEach((element) => {
           if (element.sumSale != 0) {
             message += `
- - ${element.name_kassa} поступило: ${element.sumAll.toLocaleString('ru-RU')}               
-    в т.ч. продажи ${element.sumSale.toLocaleString('ru-RU')}, возвраты ${element.sumReturn.toLocaleString('ru-RU')} 
-            `;
+ - ${element.name_kassa} поступило: <b>${element.sumAll.toLocaleString('ru-RU')}</b>               
+    в т.ч. продажи ${element.sumSale.toLocaleString('ru-RU')}, возвраты ${element.sumReturn.toLocaleString('ru-RU')}`;
+            if (element.shiftClosed = true && mode.includes('день')) {
+              message += `. Смена <b>закрыта</b>`;
+            } else if (element.shiftClosed = false && mode.includes('день')) {
+              message += `. Смена пока открыта`;
+            };
           };
         })
       };
@@ -237,7 +241,7 @@ async function ReplyData(mode, ctx) {
     writeError(err.stack, 'bot.hears - load');
     writeLog(`bot_request.txt`, String(date2 + ': ERROR request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
   }
-  ctx.reply(message);
+  ctx.replyWithHTML(message);
 }
 
 

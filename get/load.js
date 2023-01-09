@@ -33,6 +33,7 @@ async function load(period) {
     sumAllCash: 0,
     sumAllMixed: 0,
     countChecks: 0,
+    shiftClosed: false,
     dateStart: '',
     dateEnd: '',
     obj: []
@@ -201,6 +202,7 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
     sumAllCash: 0,
     sumAllMixed: 0,
     countChecks: 0,
+    shiftClosed: false,
     knumber: knumber,
     name_kassa: name_kassa,
     id_organization: id_organization,
@@ -240,6 +242,8 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
             };
           };
         };
+      } else if (element2.type == 2) {
+        tableSum.shiftClosed = true;
       };
     });
     tableSum.sumAll = tableSum.sumSale - tableSum.sumReturn;
