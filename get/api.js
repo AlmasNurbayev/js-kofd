@@ -130,7 +130,7 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
  * @returns {Promise<string|Error>}
  */
   async function getQuery(query) {
-    logger.info('api - starting getQuery: ' + query.slice(300));
+    logger.info('api - starting getQuery: ' + query.slice(0, 50));
     const client = new Client({
       user: process.env.PGUSER,
       host: process.env.PGHOST,
@@ -231,6 +231,12 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
     return [s2, dateStart, dateEnd, mode];
   }
 
+    /**
+ * @description upload file to telegram 
+ * @param {chatID} string id to user
+ * @returns {path} string path to file
+ ** @returns {name} string name file
+ */
   async function uploadToTelegram(chatID, path, name) {
     const fs = require('fs');
     const axios = require('axios');
