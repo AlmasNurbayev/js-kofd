@@ -210,7 +210,7 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
     dateEnd: dateEnd
   };
 
-  logger.info(`load - starting get stat for ${knumber} / ${name_kassa} / ${id_organization} / ${dateStart} / ${dateEnd} `); 
+  logger.info(`load - starting get stat for ${knumber} / ${name_kassa}`); 
 
   try {
     res.data.forEach((element2, index) => {
