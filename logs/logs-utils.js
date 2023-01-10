@@ -4,6 +4,7 @@ const fs = require('fs/promises');
 const pino = require('pino');
 const logger = pino({
   timestamp: () => `,"time":"${new Date().toLocaleString("ru-RU")}"`,
+  base: undefined,
   transport: {
     targets: [
     {
