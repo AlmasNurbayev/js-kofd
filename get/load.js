@@ -38,7 +38,7 @@ async function load(period) {
     dateEnd: '',
     obj: []
   };
-  const queryAllKassa = `select organization.bin, organization.name_org, organization.password_kofd, kassa.*  FROM "public".organization
+  const queryAllKassa = `select organization.bin, organization.name_org, kassa.*  FROM "public".organization
   join "public".kassa on "public".kassa.id_organization  = "public".organization.id`;
   const queryAllOrganization = `select * FROM "public".organization`;
 

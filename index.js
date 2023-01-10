@@ -2,7 +2,7 @@
 
 const { Telegraf, Markup } = require('telegraf');
 const { load } = require('./get/load.js');
-const { uploadToTelegram } = require('./get/api.js');
+const { uploadToTelegram, getQuery } = require('./get/api.js');
 
 const dotenv = require("dotenv");
 const { writeError, writeLog, readLog, logger } = require('./logs/logs-utils.js');
@@ -14,17 +14,28 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
 
-function isAdmin(userId) {
-  if (String(userId) === adminId) {return true}  
-  else {return false}
+async function isAdmin(userId) {
+  logger.info('userId: ' + userId + ' check isAdmin');
+  let isadmin = false;
+  try {
+    const res = await getQuery('select id FROM "public".telegram_users');
+    const listAdmin = res.rows;
+    listAdmin.forEach(element => {
+      if (element.id === String(userId)) { 
+        isadmin = true;
+      }
+    });
+  } catch (err) {
+    writeError(err.stack, 'index - query isAdmin');
+  }
+  return isadmin;
 }
 
-function alarmAdmin(ctx, message) {
-  if (isAdmin(ctx.from.id) === false) {
+async function alarmAdmin(ctx, message) {
+  if (await isAdmin(ctx.from.id) === false) {
     ctx.telegram.sendMessage(adminId, message);
     logger.info(message);  
   };
-
 }
 
 bot.start((ctx) => {
@@ -176,57 +187,61 @@ bot.hears(/Log|log/, async (ctx) => {
 
 bot.hears('текущий день', async (ctx) => {
   mode = 'текущий день';
-  ReplyData(mode, ctx);
+  await ReplyData(mode, ctx);
 });
 
 bot.hears('текущая неделя', async (ctx) => {
   mode = 'текущая неделя';
-  ReplyData(mode, ctx);
+  await ReplyData(mode, ctx);
 });
 
 bot.hears('текущий месяц', async (ctx) => {
   mode = 'текущий месяц';
-  ReplyData(mode, ctx);
+  await ReplyData(mode, ctx);
 });
 
 bot.hears('текущий квартал', async (ctx) => {
   mode = 'текущий квартал';
-  ReplyData(mode, ctx);
+  await ReplyData(mode, ctx);
 });
 
 bot.hears('текущий год', async (ctx) => {
   mode = 'текущий год';
-  ReplyData(mode, ctx);
+  await ReplyData(mode, ctx);
 });
 
 bot.hears('прошлый день', async (ctx) => {
   mode = 'прошлый день';
-  ReplyData(mode, ctx);
+  await ReplyData(mode, ctx);
 });
 
 bot.hears('прошлая неделя', async (ctx) => {
   mode = 'прошлая неделя';
-  ReplyData(mode, ctx);
+  await ReplyData(mode, ctx);
 });
 
 bot.hears('прошлый месяц', async (ctx) => {
   mode = 'прошлый месяц';
-  ReplyData(mode, ctx);
+  await ReplyData(mode, ctx);
 });
 
 bot.hears('прошлый квартал', async (ctx) => {
   mode = 'прошлый квартал';
-  ReplyData(mode, ctx);
+  await ReplyData(mode, ctx);
 });
 
 bot.hears('прошлый год', async (ctx) => {
   mode = 'прошлый год';
-  ReplyData(mode, ctx);
+  await ReplyData(mode, ctx);
 });
 
 async function ReplyData(mode, ctx) {
 
   alarmAdmin(ctx,'index - receive /mode/ ' + mode + ' command by not-admin user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);
+  if (await isAdmin(ctx.from.id) === false) {
+    ctx.reply('Вы не входите в разрешенные пользователи, обратитесь к администратору');
+    return;
+  };
 
   await ctx.reply('формируются данные по запросу ... ');
   let message = 'произошла ошибка - попробуйте позже';
@@ -258,9 +273,11 @@ async function ReplyData(mode, ctx) {
  - ${element.name_kassa} поступило: <b>${element.sumAll.toLocaleString('ru-RU')}</b>               
     в т.ч. продажи ${element.sumSale.toLocaleString('ru-RU')}, возвраты ${element.sumReturn.toLocaleString('ru-RU')}`;
             if (element.shiftClosed && mode.includes('день')) {
-              message += `. Смена закрыта`;
+              message += `. Смена закрыта.
+              `;
             } else if (!element.shiftClosed && mode.includes('день')) {
-              message += `. Смена открыта`;
+              message += `. Смена открыта.
+              `;
             };
           };
         })
@@ -302,25 +319,6 @@ bot.on('text', async (ctx) => {
   //await ctx.reply(`Hello ${ctx.state.role}`);
 });
 
-bot.on('callback_query', async (ctx) => {
-  // Explicit usage
-
-  //}
-
-  await ctx.telegram.answerCbQuery(ctx.callbackQuery.id);
-
-  // Using context shortcut
-  await ctx.answerCbQuery();
-});
-
-bot.on('inline_query', async (ctx) => {
-  const result = [];
-  // Explicit usage
-  await ctx.telegram.answerInlineQuery(ctx.inlineQuery.id, result);
-
-  // Using context shortcut
-  await ctx.answerInlineQuery(result);
-});
 
 
 bot.launch();

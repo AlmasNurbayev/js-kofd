@@ -3,8 +3,7 @@ ALTER SCHEMA "public" OWNER TO ps;
 CREATE TABLE "public".organization (
 	id smallint PRIMARY KEY,
 	BIN varchar UNIQUE,
-	name_org varchar,
-    password_kofd varchar);
+	name_org varchar);
 ALTER TABLE "public".organization OWNER TO ps;
 
 -- create kassa
@@ -39,3 +38,9 @@ CREATE TABLE "public".transaction (
     id_organization smallint REFERENCES "public".organization (id),
     id_kassa smallint REFERENCES "public".kassa (id));
 ALTER TABLE "public".transaction OWNER TO ps;
+
+--create telegram users
+CREATE TABLE "public".telegram_users (
+    id varchar UNIQUE,
+    username varchar);
+ALTER TABLE "public".telegram_users OWNER TO ps;
