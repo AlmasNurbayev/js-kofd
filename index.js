@@ -245,7 +245,7 @@ async function ReplyData(mode, ctx) {
   };
 
   await ctx.reply('формируются данные по запросу ... ');
-  let message = 'произошла ошибка - попробуйте позже';
+  let message = 'произошла ошибка или сервер не ответил в отведенное время - попробуйте позже';
   console.log('receive request: ' + mode + " от пользователя " + ctx.from.id);
   let date = new Date().toLocaleString("ru-RU");
   writeLog(`bot_request.txt`, String(date + ': receive request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
