@@ -258,7 +258,7 @@ async function ReplyData(mode, ctx) {
       message = `Сумма продаж за "${mode}" = ${res.dateStart.slice(0, 10)} - ${res.dateEnd.slice(0, 10)}
 Чистое поступление: <b>${res.sumAll.toLocaleString('ru-RU')}</b>`;
 
-      if (res.sumAll > 0) {
+      if (res.sumAll != 0 || res.cashEject != 0) {
         message += `
         кеш: ${res.sumAllCash.toLocaleString('ru-RU')}
         карта: ${res.sumAllCard.toLocaleString('ru-RU')}
@@ -266,13 +266,14 @@ async function ReplyData(mode, ctx) {
         В т.ч.:
         Продажи: ${res.sumSale.toLocaleString('ru-RU')}
         Возвраты: ${res.sumReturn.toLocaleString('ru-RU')} 
+        Выемка: ${res.cashEject.toLocaleString('ru-RU')} 
         
         Данные по кассам:`;
         res.obj.forEach((element) => {
-          if (element.sumSale != 0) {
+          if (element.sumSale != 0 || element.cashEject != 0) {
             message += `
  - ${element.name_kassa} поступило: <b>${element.sumAll.toLocaleString('ru-RU')}</b>               
-    в т.ч. продажи ${element.sumSale.toLocaleString('ru-RU')}, возвраты ${element.sumReturn.toLocaleString('ru-RU')}`;
+    в т.ч. продажи ${element.sumSale.toLocaleString('ru-RU')}, возвраты ${element.sumReturn.toLocaleString('ru-RU')}, выемка ${element.cashEject.toLocaleString('ru-RU')}`;
             if (element.shiftClosed && mode.includes('день')) {
               message += `. Смена закрыта.
               `;

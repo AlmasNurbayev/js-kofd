@@ -34,6 +34,7 @@ async function load(period) {
     sumAllMixed: 0,
     countChecks: 0,
     shiftClosed: false,
+    cashEject: false,
     dateStart: '',
     dateEnd: '',
     obj: []
@@ -203,6 +204,7 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
     sumAllMixed: 0,
     countChecks: 0,
     shiftClosed: false,
+    cashEject: 0,
     knumber: knumber,
     name_kassa: name_kassa,
     id_organization: id_organization,
@@ -214,6 +216,7 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
 
   try {
     res.data.forEach((element2, index) => {
+      //console.log(element2);
       if (element2.type == 1) {
         if (element2.subType == 2) { // продажа
           tableSum.countChecks++;
@@ -243,9 +246,9 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
           };
         };
       } else if (element2.type == 2) {
-        console.log('load');
-        console.log(element2);
         tableSum.shiftClosed = true;
+      } else if (element2.type == 6 && element2.subType == 1) {
+        tableSum.cashEject += element2.sum;
       };
     });
     tableSum.sumAll = tableSum.sumSale - tableSum.sumReturn;
@@ -281,6 +284,7 @@ function getSummary(tableSumAll, obj) {
     tableSumAll.sumAllCash += obj.sumAllCash;
     tableSumAll.sumAllMixed += obj.sumAllMixed;
     tableSumAll.countChecks += obj.countChecks;
+    tableSumAll.cashEject += obj.cashEject; 
     tableSumAll.dateStart = obj.dateStart;
     tableSumAll.dateEnd = obj.dateEnd;
     tableSumAll.obj.push(obj);
