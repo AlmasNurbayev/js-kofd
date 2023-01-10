@@ -80,7 +80,7 @@ async function getJWT(iin, pass) {
  * @returns {Promise<string|Error>}
  */
 async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_organization, dateMode) {
-    logger.info('api - starting getTransaction: ' + JSON.stringify({knumber, id_kassa, name_kassa, id_organization, dateMode}));
+    logger.info('api - starting getTransaction: ' + JSON.stringify({knumber, id_kassa, name_kassa}));
     const token = "Bearer " + jwt;
     //await writeLog(`jwt.txt`, String(token));
   
