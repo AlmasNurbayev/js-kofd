@@ -2,6 +2,7 @@
 
 const { Telegraf, Markup } = require('telegraf');
 const { load } = require('./get/load.js');
+const { uploadToTelegram } = require('./get/api.js');
 
 const dotenv = require("dotenv");
 const { writeError, writeLog, readLog, logger } = require('./logs/logs-utils.js');
@@ -16,6 +17,14 @@ process.once('SIGTERM', () => bot.stop('SIGTERM'));
 function isAdmin(userId) {
   if (String(userId) === adminId) {return true}  
   else {return false}
+}
+
+function alarmAdmin(ctx, message) {
+  if (isAdmin(ctx.from.id) === false) {
+    ctx.telegram.sendMessage(adminId, message);
+    logger.info(message);  
+  };
+
 }
 
 bot.start((ctx) => {
@@ -66,10 +75,7 @@ let mode;
 bot.hears(/Query|query/, async (ctx) => {
   //mode = 'текущий день';
   //ReplyData(mode, ctx);
-  if (isAdmin(ctx.from.id) === false) {
-    ctx.telegram.sendMessage(adminId, 'Получен запрос в бот Cipo ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);
-    logger.info('index - receive /query/ command by not-admin user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
-};
+  alarmAdmin(ctx, 'index - receive /query/ command by not-admin user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);
   
   ctx.reply('читаем файл bot_request.txt и возвращаем последние 15 записей ...');
   let message = 'произошла ошибка - попробуйте позже';
@@ -83,16 +89,48 @@ bot.hears(/Query|query/, async (ctx) => {
   catch (err) {
     writeError(err.stack, 'bot.hears - query');
   }
+});
+
+bot.hears(/full log|Full log/, async (ctx) => {
+  //mode = 'текущий день';
+  //ReplyData(mode, ctx);
+  alarmAdmin(ctx, 'index - receive /full log/ command by not-admin user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);
   
+  ctx.reply('отправляем файл log_p ...');
+  let message = 'произошла ошибка - попробуйте позже';
+
+  try {
+    logger.info('index - receive /full log/ command starting from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
+    await uploadToTelegram(ctx.from.id, 'logs/log_p.txt', 'log_p.txt');
+    logger.info('index - receive /full log/ command ending from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
+  }
+  catch (err) {
+    writeError(err.stack, 'bot.hears - full log');
+  }
+});
+
+bot.hears(/full error|Full error/, async (ctx) => {
+  //mode = 'текущий день';
+  //ReplyData(mode, ctx);
+  alarmAdmin(ctx, 'index - receive /full error/ command by not-admin user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);
+  
+  ctx.reply('отправляем файл error_p ...');
+  let message = 'произошла ошибка - попробуйте позже';
+  logger.info('index - receive /full error/ command starting from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
+
+  try {
+    await uploadToTelegram(ctx.from.id, 'logs/error_p.txt', 'error_p.txt');
+    logger.info('index - receive /full error/ command ending from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
+  }
+  catch (err) {
+    writeError(err.stack, 'bot.hears - full error');
+  }
 });
 
 bot.hears(/Error|error/, async (ctx) => {
   //mode = 'текущий день';
   //ReplyData(mode, ctx);
-  if (isAdmin(ctx.from.id) === false) {
-    ctx.telegram.sendMessage(adminId, 'Получен запрос /error/ в бот Cipo ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);
-    logger.info('index - receive /error/ command by not-admin user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
-};
+  alarmAdmin(ctx, 'index - receive /error/ command by not-admin user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);
   
   ctx.reply('читаем файл error_p.txt и возвращаем последние 2000 символов ...');
   let message = 'произошла ошибка - попробуйте позже';
@@ -112,10 +150,7 @@ bot.hears(/Error|error/, async (ctx) => {
 bot.hears(/Log|log/, async (ctx) => {
   //mode = 'текущий день';
   //ReplyData(mode, ctx);
-  if (isAdmin(ctx.from.id) === false) {
-    ctx.telegram.sendMessage(adminId, 'Получен запрос /log/ в бот Cipo ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);
-    logger.info('index - receive /log/ command by not-admin user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
-};
+  alarmAdmin(ctx, 'index - receive /log/ command by not-admin user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);
   
   ctx.reply('читаем файл log_p.txt и возвращаем последние 2000 символов ...');
   let message = 'произошла ошибка - попробуйте позже';
@@ -185,9 +220,7 @@ bot.hears('прошлый год', async (ctx) => {
 
 async function ReplyData(mode, ctx) {
 
-  if (isAdmin(ctx.from.id) === false) {
-    ctx.telegram.sendMessage(adminId, 'Получен запрос в бот Cipo ' + mode + ' / ' + ctx.from.id + ' / ' + ctx.from.username);
-};
+  alarmAdmin(ctx,'index - receive /mode/ ' + mode + ' command by not-admin user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);
 
   await ctx.reply('формируются данные по запросу ... ');
   let message = 'произошла ошибка - попробуйте позже';

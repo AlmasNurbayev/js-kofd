@@ -263,7 +263,7 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
 
 function getSummary(tableSumAll, obj) {
 
-  logger.info(`load - starting get summary for ${JSON.stringify(obj)}`); 
+  logger.info(`load - starting get summary for ${JSON.stringify(obj.name_kassa)}`); 
 
   try {
     tableSumAll.sumSale += obj.sumSale;
