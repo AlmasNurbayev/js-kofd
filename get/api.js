@@ -50,7 +50,7 @@ async function getJWT(iin, pass) {
     },
     data: JSON.stringify(data),
     httpsAgent: agent,
-    timeout: 8000
+    timeout: 10000
   };
 
   //console.log("1");
@@ -100,7 +100,7 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
         Authorization: token,
       },
       httpsAgent: agent,
-      timeout: 8000
+      timeout: 10000
     };
     
     try {
