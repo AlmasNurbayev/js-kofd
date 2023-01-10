@@ -243,6 +243,8 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
           };
         };
       } else if (element2.type == 2) {
+        console.log('load');
+        console.log(element2);
         tableSum.shiftClosed = true;
       };
     });

@@ -28,11 +28,8 @@ function alarmAdmin(ctx, message) {
 }
 
 bot.start((ctx) => {
-  //console.log('Id пользователя:', ctx.from.id);
   logger.info('index - bot start new user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
-  return ctx.reply('Добро пожаловать! Это бот для просмотра статистики касс');
-  
-  
+  return ctx.reply('Добро пожаловать! Это бот для просмотра статистики касс. Нажмите кнопку меню для доступа к командам...');
 });
 
 bot.command('menu', async (ctx) => {
@@ -49,9 +46,6 @@ bot.command('menu', async (ctx) => {
     Markup.button.callback("прошлый квартал", "2")],
       //[Markup.button.callback("текущий год", "2"),
       //Markup.button.callback("прошлый год", "2")]
-      // ['button 1', 'button 2'], // Row1 with 2 buttons
-      // ['button 3', 'button 4'], // Row2 with 2 buttons
-      // ['button 5', 'button 6', 'button 7'] // Row3 with 3 buttons
     ])
     .oneTime()
     .resize()
@@ -59,16 +53,28 @@ bot.command('menu', async (ctx) => {
 })
 
 bot.command('hide_menu', async (ctx) => {
-  // await ctx.editMessageReplyMarkup({
-  //   reply_markup: { remove_keyboard: true },
-  //   });
-  await ctx.reply("меню скрыто",
+  await ctx.reply('меню скрыто',
     {
       reply_markup: {
         remove_keyboard: true,
       },
     });
 });
+
+bot.command('about', async (ctx) => {
+  ctx.reply(`Данный бот разработан Алмасом с целью онлайн отображения информации о суммах продажах/возвратах в сети магазинов Cipo.
+  Сервис выступает и как пет-проект и с практической целью.
+  Выводится информация:
+  - о продажах/возвратах за заданный период времени, используются предустановленные периоды. Источник данных - ОФД Jusan Mobile.  
+  - состоянии смен в текущий день
+  - служебные данные - лог-файл, файл ошибок в усеченном или полном виде, лог запросов.
+  
+  Используемый стек:
+  - node js с модулями - axios (get и post запросы к ОФД jusan Mobile), telegraf (интерфейс бота), pg (обращения к Postgres), moment (даты), pino (логи).
+  - репозиторий - https://github.com/AlmasNurbayev/js-kofd
+  `);
+});
+
 
 let mode;
 
@@ -251,10 +257,10 @@ async function ReplyData(mode, ctx) {
             message += `
  - ${element.name_kassa} поступило: <b>${element.sumAll.toLocaleString('ru-RU')}</b>               
     в т.ч. продажи ${element.sumSale.toLocaleString('ru-RU')}, возвраты ${element.sumReturn.toLocaleString('ru-RU')}`;
-            if (element.shiftClosed = true && mode.includes('день')) {
-              message += `. Смена <b>закрыта</b>`;
-            } else if (element.shiftClosed = false && mode.includes('день')) {
-              message += `. Смена пока открыта`;
+            if (element.shiftClosed && mode.includes('день')) {
+              message += `. Смена закрыта`;
+            } else if (!element.shiftClosed && mode.includes('день')) {
+              message += `. Смена открыта`;
             };
           };
         })
