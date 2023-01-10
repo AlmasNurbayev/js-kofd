@@ -28,6 +28,7 @@ async function isAdmin(userId) {
   } catch (err) {
     writeError(err.stack, 'index - query isAdmin');
   }
+  logger.info('userId: ' + userId + ' result checking isAdmin: ' + isadmin);
   return isadmin;
 }
 
