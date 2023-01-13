@@ -206,6 +206,12 @@ bot.hears('текущий квартал', async (ctx) => {
   await ReplyData(mode, ctx);
 });
 
+bot.hears('текущее полугодие', async (ctx) => {
+  mode = 'текущее полугодие';
+  await ReplyData(mode, ctx);
+});
+
+
 bot.hears('текущий год', async (ctx) => {
   mode = 'текущий год';
   await ReplyData(mode, ctx);
@@ -230,6 +236,12 @@ bot.hears('прошлый квартал', async (ctx) => {
   mode = 'прошлый квартал';
   await ReplyData(mode, ctx);
 });
+
+bot.hears('прошлое полугодие', async (ctx) => {
+  mode = 'прошлое полугодие';
+  await ReplyData(mode, ctx);
+});
+
 
 bot.hears('прошлый год', async (ctx) => {
   mode = 'прошлый год';

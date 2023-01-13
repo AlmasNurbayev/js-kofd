@@ -17,11 +17,13 @@ const dateMode = {
     mode1: 'текущий день',
     mode2: 'текущая неделя',
     mode3: 'текущий месяц',
+    mode5: 'текущее полугодие',
     mode4: 'текущий год',
     mode1: 'прошлый день',
     mode2: 'прошлая неделя',
     mode3: 'прошлый месяц',
-    mode4: 'прошлый год'
+    mode4: 'прошлый год',
+    mode5: 'прошлое полугодие'
   };
 
 /**
@@ -198,6 +200,16 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
     } else if (mode === 'текущий квартал') {
       dateStart = moment().startOf('quarter');
       dateEnd = moment().endOf('quarter');
+    } else if (mode === 'текущее полугодие') {
+      if (moment(new Date()).get('quarter') < 3) {
+        dateStart = moment().startOf('year');
+        dateEnd = moment(dateStart).add(5,'M').endOf('month');
+      } else
+      {
+        dateStart = moment().startOf('year');
+        dateStart = moment(dateStart).add(6,'M').startOf('month');
+        dateEnd = moment().endOf('year');
+      }
     } else if (mode === 'текущий год') {
       dateStart = moment().startOf('year');
       dateEnd = moment().endOf('year');
@@ -213,6 +225,18 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
     } else if (mode === 'прошлый квартал') {
       dateStart = moment().add(-1,'Q').startOf('quarter');
       dateEnd = moment().add(-1,'Q').endOf('quarter');
+    } else if (mode === 'прошлое полугодие') {
+      if (moment(new Date()).get('quarter') < 3) {
+        dateStart = moment().startOf('year');
+        dateEnd = moment(dateStart).add(5,'M').endOf('month');
+      } else
+      {
+        dateStart = moment().startOf('year');
+        dateStart = moment(dateStart).add(6,'M').startOf('month');
+        dateEnd = moment().endOf('year');
+      }
+      dateStart = dateStart.add(-2,'Q').startOf('quarter');
+      dateEnd = dateEnd.add(-2,'Q').endOf('quarter');      
     } else if (mode === 'прошлый год') {
       dateStart = moment().add(-1,'y').startOf('year');
       dateEnd = moment().add(-1,'y').endOf('year');
