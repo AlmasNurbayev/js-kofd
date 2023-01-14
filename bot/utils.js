@@ -132,6 +132,11 @@ async function makeChart(res, chat_id, ctx) {
         type: 'horizontalBar',
         data,
         options: {
+          scales: {
+            xAxes: [{
+              display: false
+            }]
+          },
           indexAxis: 'y',
           plugins: {
             datalabels: {
