@@ -1,7 +1,12 @@
 const { writeError, writeLog, readLog, logger } = require('../logs/logs-utils.js');
 const { alarmAdmin, uploadToTelegram, ReplyData, ReplyChart } = require('./utils.js');
-//const {Markup} =  require('telegraf');
 
+
+
+// monitoring all push button or commands from user, and doing nead tasks 
+// mode - string, select hear command or markup button
+// bot - object of bot
+// no return
 function hears(mode, bot) {
     let emptyMessage = 'произошла ошибка - попробуйте позже';
     //console.log(Markup);
@@ -93,7 +98,7 @@ function hears(mode, bot) {
             }
         });
     };
-    if (mode == 'datemode') {
+    if (mode == 'datemode') { // hears markup buttons of summary statistics of periods
         bot.hears('текущий день', async (ctx) => {
             await ReplyData('текущий день', ctx);
         });
@@ -143,7 +148,7 @@ function hears(mode, bot) {
         });
 
     };
-    if (mode == 'chart') {
+    if (mode == 'chart') { // hears markup buttons of chart periods
         bot.hears('chart-10', async (ctx) => {
             await ReplyChart('chart-10', ctx, ctx.from.id);
         });

@@ -6,7 +6,8 @@ const ChartJsImage = require('chartjs-to-image');
 const fs = require("fs");
 const moment = require('moment');
 
-
+// return true if userid contains in db table telegram_users
+// userid - id of telegram user
 async function isAdmin(userId) {
   logger.info('userId: ' + userId + ' check isAdmin');
   let isadmin = false;
@@ -25,6 +26,10 @@ async function isAdmin(userId) {
   return isadmin;
 }
 
+// send message to admin if user is NOT contains in db table telegram_users
+// message - string of message
+// ctx - object of chat
+// no return
 async function alarmAdmin(ctx, message) {
   if (await isAdmin(ctx.from.id) === false) {
     ctx.telegram.sendMessage(adminId, message);
@@ -32,8 +37,11 @@ async function alarmAdmin(ctx, message) {
   };
 }
 
+// upload local file to telegram chat with namde document.txt
+// chat_id - id of sended chat
+// path - string, local path to sended file
+// no return
 async function uploadToTelegram(chatID, path) {
-
   logger.info('bot/utils - starting /upload/: ' + path);
   const fs = require('fs');
   const axios = require('axios');
@@ -59,7 +67,11 @@ async function uploadToTelegram(chatID, path) {
   }
 }
 
-
+// render chart and send image to chat
+// res - array with data of transactions
+// chat_id - id of sended chat
+// ctx - object of chat
+// no return
 async function makeChart(res, chat_id, ctx) {
 
   logger.info('bot/utils - starting /makeChart/ to ' + chat_id);
@@ -95,16 +107,12 @@ async function makeChart(res, chat_id, ctx) {
       moment.locale('ru');
       element.date = element.date + ' (' + moment(element.date).format('ddd') + ')';
     });
-    
-    //data3 = data3.map(item => item.date);
-    //console.table((data2));
-    //console.table((data3));
 
     data3_labels = data3.map(item => item.date);
     data3_data = data3.map(item => item.sum);
     //console.log(data3_data);
 
-    const chart = new ChartJsImage();
+    const chart = new ChartJsImage(); // using QuickChart/Chart.js
     //let chart = new chart(
     const data = {
       labels: data3_labels,
@@ -151,14 +159,12 @@ async function makeChart(res, chat_id, ctx) {
     catch (err) {
       writeError(err.stack, 'bot/utils - MakeChart sending chart');
     };
-    //console.log(image);
-
-
   }
-  //https://www.chartjs.org/docs/latest/
-
 }
 
+// return array with grouping and summary data in objects
+// groupKeys - array of grouping keys
+// sumKeys - array of summary keys
 function groupAndSum(arr, groupKeys, sumKeys) {
   return Object.values(
     arr.reduce((acc, curr) => {
@@ -171,7 +177,11 @@ function groupAndSum(arr, groupKeys, sumKeys) {
   );
 }
 
-
+// load transactions of period and send data to render charts, finally send image of chart to user
+// mode - string of period, for example 'chart-10'
+// chat_id - id of sended chat
+// ctx - object of chat
+// no return
 async function ReplyChart(mode, ctx, chat_id) {
 
   count = +mode.slice(6);
@@ -212,10 +222,12 @@ async function ReplyChart(mode, ctx, chat_id) {
     writeError(err.stack, 'bot/utils - ReplyChart');
     writeLog(`bot_request.txt`, String(date2 + ': ERROR request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
   }
-
-
-
 };
+
+// load transactions of period and send summary statistic to user
+// mode - string of period, for example 'текущий день'
+// ctx - object of chat
+// no return
 
 async function ReplyData(mode, ctx) {
 
