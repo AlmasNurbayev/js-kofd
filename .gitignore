@@ -6,3 +6,4 @@ lib
 .idea
 .env
 **/logs/**.txt
+**/logs/charts

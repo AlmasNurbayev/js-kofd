@@ -240,6 +240,10 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
     } else if (mode === 'прошлый год') {
       dateStart = moment().add(-1,'y').startOf('year');
       dateEnd = moment().add(-1,'y').endOf('year');
+    } else if (mode === 'chart-10') {
+      dateStart = moment().add(-9,'d').startOf('day');
+      dateEnd = moment().endOf('day');
+      //console.log(dateStart, dateEnd);
     } else {
       dateStart = moment(begin).startOf('day');
       dateEnd = moment(end).endOf('day');
@@ -261,33 +265,7 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
  * @returns {path} string path to file
  ** @returns {name} string name file
  */
-  async function uploadToTelegram(chatID, path, name) {
-    const fs = require('fs');
-    const axios = require('axios');
-    const FormData = require('form-data');
-    
-    const url = `https://api.telegram.org/bot${process.env.BOT_TOKEN}/sendDocument`;
-    
-    const formData = new FormData();
-    formData.append('chat_id', chatID);
-    try {
-    formData.append('document', fs.createReadStream(path), name);
-    }
-    catch (err) {
-        await writeError(JSON.stringify(err.stack), 'uploadToTelegram - read');
-    };
-    //console.log(formData);
-    try {
-    await axios.post(url, formData, {
-        headers: formData.getHeaders(),
-    })
-    }
-    catch (err) {
-      await writeError(JSON.stringify(err.stack), 'uploadToTelegram - post');
-    }
-  }
-
-
+  
 
   //console.log(getStringFilter('текущий квартал'));
   //console.log([0,1]);
@@ -296,4 +274,3 @@ exports.getJWT = getJWT;
 exports.getTransaction = getTransaction;
 exports.getQuery = getQuery;
 exports.getStringFilter = getStringFilter;
-exports.uploadToTelegram = uploadToTelegram;

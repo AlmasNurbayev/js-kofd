@@ -1,5 +1,5 @@
 const { writeError, writeLog, readLog, logger } = require('../logs/logs-utils.js');
-const { alarmAdmin, uploadToTelegram, ReplyData } = require('./utils.js');
+const { alarmAdmin, uploadToTelegram, ReplyData, ReplyChart } = require('./utils.js');
 //const {Markup} =  require('telegraf');
 
 function hears(mode, bot) {
@@ -24,7 +24,7 @@ function hears(mode, bot) {
                 writeError(err.stack, infoText);
             }
         });
-    }
+    };
 
     if (mode == 'full log') {
         bot.hears(/full log|Full log/, async (ctx) => {
@@ -34,14 +34,14 @@ function hears(mode, bot) {
             ctx.reply(infoText);
             try {
                 logger.info(infoText + ' starting ' + infoText2);
-                await uploadToTelegram(ctx.from.id, 'logs/log_p.txt', 'log_p.txt');
+                await uploadToTelegram(ctx.from.id, 'logs/log_p.txt');
                 logger.info(infoText + ' ending ' + infoText2);
             }
             catch (err) {
                 writeError(err.stack, infoText);
             }
         });
-    }
+    };
 
     if (mode == 'full error') {
         bot.hears(/full error|Full error/, async (ctx) => {
@@ -51,14 +51,14 @@ function hears(mode, bot) {
             ctx.reply(infoText);
             try {
                 logger.info(infoText + ' starting ' + infoText2);
-                await uploadToTelegram(ctx.from.id, 'logs/error_p.txt', 'error_p.txt');
+                await uploadToTelegram(ctx.from.id, 'logs/error_p.txt');
                 logger.info(infoText + ' ending ' + infoText2);
             }
             catch (err) {
                 writeError(err.stack, infoText);
             }
         });
-    }
+    };
     if (mode == 'error') {
         bot.hears(/Error|error/, async (ctx) => {
             let infoText = 'bot/hears - /error/ command, receive last 2000 symbols of error_p.txt ';
@@ -75,7 +75,7 @@ function hears(mode, bot) {
                 writeError(err.stack, infoText);
             }
         });
-    }
+    };
     if (mode == 'log') {
         bot.hears(/Log|log/, async (ctx) => {
             let infoText = 'bot/hears - /log/ command, receive last 2000 symbols of log_p.txt ';
@@ -92,7 +92,7 @@ function hears(mode, bot) {
                 writeError(err.stack, infoText);
             }
         });
-    }
+    };
     if (mode == 'datemode') {
         bot.hears('текущий день', async (ctx) => {
             await ReplyData('текущий день', ctx);
@@ -142,7 +142,12 @@ function hears(mode, bot) {
             await ReplyData('прошлый год', ctx);
         });
 
-    }
+    };
+    if (mode == 'chart') {
+        bot.hears('chart-10', async (ctx) => {
+            await ReplyChart('chart-10', ctx, ctx.from.id);
+        });
+    };
 
 }
 

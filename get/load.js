@@ -7,7 +7,7 @@ const dotenv = require("dotenv");
 const count = 1000; // count of transaction get from kofd
 
 
-// dee all temporary files
+// clear all temporary files
 fs.unlink("logs/response-post.txt", (err) => { });
 fs.unlink("logs/jwt.txt", (err) => { });
 fs.unlink("logs/response-get.txt", (err) => { });
@@ -15,6 +15,10 @@ fs.unlink("logs/response-get.txt", (err) => { });
 fs.unlink("logs/response.txt", (err) => { });
 
 
+async function getKassaJWT() {
+
+
+} 
 
 
 // get list of org & kassa form db 
@@ -64,7 +68,7 @@ async function load(period) {
   }
 
   try {
-    logger.info('load - starting POST query receive JWT'); 
+    logger.info('load - starting of build array with JWT'); 
     let res = await Promise.all(arrJWT);
     //console.log(JSON.stringify(res));
     listOrg.forEach((element, index) => {
@@ -103,7 +107,9 @@ async function load(period) {
     //fs.appendFile("get/response.txt", JSON.stringify(res) + "\n", (error2) => { });
     writeLog(`summary.txt`, tableSumAll, false);
     //console.log(tableSumAll);
-    return tableSumAll;
+    return {
+      'table': tableSumAll,
+      'rows': res2};
   } catch (err) {
     writeError(err.stack, 'getTransaction - promise get summary');
     console.log(err.stack);
@@ -245,9 +251,9 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
             };
           };
         };
-      } else if (element2.type == 2) {
+      } else if (element2.type == 2) { // смена
         tableSum.shiftClosed = true;
-      } else if (element2.type == 6 && element2.subType == 1) {
+      } else if (element2.type == 6 && element2.subType == 1) { // выемка
         tableSum.cashEject += element2.sum;
       };
     });

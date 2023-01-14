@@ -5,7 +5,7 @@ const { command } = require('./bot/command.js');
 const { hears } = require('./bot/hears.js');
 
 const dotenv = require("dotenv");
-const { logger } = require('./logs/logs-utils.js');
+const { logger, clearDirectory } = require('./logs/logs-utils.js');
 dotenv.config();
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
@@ -29,6 +29,7 @@ hears('full error', bot);
 hears('error', bot);
 hears('log', bot);
 hears('datemode', bot);
+hears('chart', bot);
 
 bot.command('quit', async (ctx) => {
   logger.info('leave chat');
@@ -47,6 +48,15 @@ bot.on('text', async (ctx) => {
   // Using context shortcut
   //await ctx.reply(`Hello ${ctx.state.role}`);
 });
+
+
+(async () => {
+  await clearDirectory('logs/charts');
+})();
+
+
+
+
 
 bot.launch();
 logger.info('starting bot');
