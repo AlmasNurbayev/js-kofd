@@ -235,7 +235,7 @@ async function ReplyChart(mode, ctx, chat_id) {
 // no return
 
 async function ReplyData(mode, ctx) {
-
+  logger.info('bot/utils - starting /ReplyData/ with mode: ' + mode);
   alarmAdmin(ctx, 'bot/utils - receive /mode/ ' + mode + ' command by not-admin user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);
   if (await isAdmin(ctx.from.id) === false) {
     ctx.reply('Вы не входите в разрешенные пользователи, обратитесь к администратору');
@@ -250,7 +250,6 @@ async function ReplyData(mode, ctx) {
   try {
     //ctx.reply("не рано ли?");
     //if (ctx.message.text == 'последний день') {
-    logger.info('bot/utils - starting /ReplyData/ with mode: ' + mode);
     await load(mode).then(res => {
       logger.info('bot/utils - ending /ReplyData/ with mode: ' + mode);
       //const img = makeChart(res['rows']);
