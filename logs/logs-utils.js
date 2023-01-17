@@ -41,7 +41,7 @@ async function writeLog(name, data, append = true, jsoned = true) {
     await fs.appendFile('logs/' + name, data + '\n');
   } else {
     fs.writeFile('logs/' + name, data);
-  };
+  }
 }
 
 // write string error to text file
