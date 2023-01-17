@@ -8,18 +8,10 @@ const count = 1000; // count of transaction get from kofd
 
 
 // clear all temporary files
-fs.unlink("logs/response-post.txt", (err) => { });
-fs.unlink("logs/jwt.txt", (err) => { });
-fs.unlink("logs/response-get.txt", (err) => { });
-//fs.unlink("get/errors.txt", (err) => { });
-fs.unlink("logs/response.txt", (err) => { });
-
-
-async function getKassaJWT() {
-
-
-} 
-
+fs.unlink("logs/response-post.txt", (err) => {writeError(err.stack, 'load - unlink')});
+fs.unlink("logs/jwt.txt", (err) => {writeError(err.stack, 'load - unlink') });
+fs.unlink("logs/response-get.txt", (err) => {writeError(err.stack, 'load - unlink') });
+fs.unlink("logs/response.txt", (err) => {writeError(err.stack, 'load - unlink') });
 
 // get list of org & kassa form db 
 async function load(period) {
@@ -119,7 +111,7 @@ async function load(period) {
 
 // insert to db from recieved transaction 
 async function writeOperation(res, id_kassa, name_kassa, id_organization) {
-  if (res.data.length == 0) { return };
+  if (res.data.length == 0) { return }
   let sql;
   try {
     logger.info('load - starting query in DB for insert transactions'); 
@@ -149,12 +141,12 @@ async function writeOperation(res, id_kassa, name_kassa, id_organization) {
         arr.push(`'` + `'`);
       } else {
         arr.push(`'` + element2.onlineFiscalNumber + `'`);
-      };
+      }
       if (element2.offlineFiscalNumber == null) {
         arr.push(`'` + `'`);
       } else {
         arr.push(`'` + element2.offlineFiscalNumber + `'`);
-      };
+      }
       arr.push(`'` + element2.systemDate + `'`);
       arr.push(`'` + element2.operationDate + `'`);
       arr.push(`'` + element2.type + `'`);
@@ -162,7 +154,7 @@ async function writeOperation(res, id_kassa, name_kassa, id_organization) {
         arr.push('NULL');
       } else {
         arr.push(`'` + element2.subType + `'`);
-      };
+      }
       arr.push(element2.sum);
       arr.push(element2.availableSum);
       arr.push(`'` + element2.paymentTypes + `'`);
@@ -175,7 +167,7 @@ async function writeOperation(res, id_kassa, name_kassa, id_organization) {
         sql += `)`;
       } else {
         sql += `),`;
-      };
+      }
     });
     sql += `
     ON CONFLICT (id) DO NOTHING;`;
@@ -189,7 +181,7 @@ async function writeOperation(res, id_kassa, name_kassa, id_organization) {
     writeError(err.stack, 'writeOperation');
     //console.error('query error', err.stack);
     throw new Error(err);
-  };
+  }
 }
 
 // count statistics from recieved transaction 
@@ -221,7 +213,7 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
   logger.info(`load - starting get stat for ${knumber} / ${name_kassa}`); 
 
   try {
-    res.data.forEach((element2, index) => {
+    res.data.forEach((element2) => {
       //console.log(element2);
       if (element2.type == 1) {
         if (element2.subType == 2) { // продажа
@@ -235,8 +227,8 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
               tableSum.sumSaleCash += element2.sum;
             } else if (element2.paymentTypes[0] == 1) {
               tableSum.sumSaleCard += element2.sum;
-            };
-          };
+            }
+          }
         }
         else if (element2.subType == 3) { // возврат
           tableSum.countChecks++;
@@ -248,14 +240,14 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
               tableSum.sumReturnCash += element2.sum;
             } else if (element2.paymentTypes[0] == 1) {
               tableSum.sumReturnCard += element2.sum;
-            };
-          };
-        };
+            }
+          }
+        }
       } else if (element2.type == 2) { // смена
         tableSum.shiftClosed = true;
       } else if (element2.type == 6 && element2.subType == 1) { // выемка
         tableSum.cashEject += element2.sum;
-      };
+      }
     });
     tableSum.sumAll = tableSum.sumSale - tableSum.sumReturn;
     tableSum.sumAllCard = tableSum.sumSaleCard - tableSum.sumReturnCard;
@@ -269,7 +261,7 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
     writeError(err.stack, 'getStat');
     //console.error('query error', err.stack);
     throw new Error(err);
-  };
+  }
 }
 
 function getSummary(tableSumAll, obj) {
@@ -299,7 +291,7 @@ function getSummary(tableSumAll, obj) {
     writeError(err.stack, 'getSummary');
     //console.error('query error', err.stack);
     throw new Error(err);
-  };
+  }
 }
 
 (async () => {

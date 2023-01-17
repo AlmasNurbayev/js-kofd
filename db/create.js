@@ -2,14 +2,14 @@
 
 const { Client } = require('pg');
 const fs = require('fs');
-const errorAr = [];
+//const errorAr = [];
 const dotenv = require("dotenv");
-const { writeError, writeLog, logger } = require('../logs/logs-utils.js');
+const { writeError, logger } = require('../logs/logs-utils.js');
 dotenv.config();
 
-fs.unlink("db/errors.txt", (err) => { });
-fs.unlink("db/create_result1.txt", (err) => { });
-fs.unlink("db/result.txt", (err) => { });
+fs.unlink("db/errors.txt", (err) => {writeError(err.stack, 'load - unlink') });
+fs.unlink("db/create_result1.txt", (err) => {writeError(err.stack, 'load - unlink') });
+fs.unlink("db/result.txt", (err) => {writeError(err.stack, 'load - unlink') });
 
 (async () => {
     await runAll();
@@ -68,7 +68,7 @@ async function clientQuery(path) {
     try {
         let res = await client.query(query);
         logger.info('db create - clientQuery quering db');
-        fs.writeFile('db/create_result1.txt', JSON.stringify(res), error2 => { });
+        fs.writeFile('db/create_result1.txt', JSON.stringify(res), error2 => {writeError(error2.stack, 'create - writefile create_result1.txt') });
         //console.log(res);
         //client.end();
         return res;

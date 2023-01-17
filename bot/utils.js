@@ -1,4 +1,4 @@
-const { writeError, writeLog, readLog, logger } = require('../logs/logs-utils.js');
+const { writeError, writeLog, logger } = require('../logs/logs-utils.js');
 const { load } = require('../get/load.js');
 const { getQuery } = require('../get/api.js');
 const adminId = '590285714';
@@ -34,7 +34,7 @@ async function alarmAdmin(ctx, message) {
   if (await isAdmin(ctx.from.id) === false) {
     ctx.telegram.sendMessage(adminId, message);
     logger.info(message);
-  };
+  }
 }
 
 // upload local file to telegram chat with namde document.txt
@@ -55,7 +55,7 @@ async function uploadToTelegram(chatID, path) {
   }
   catch (err) {
     await writeError(JSON.stringify(err.stack), 'bot/utils - uploadToTelegram - read');
-  };
+  }
   try {
     await axios.post(url, formData, {
       headers: formData.getHeaders(),
@@ -108,8 +108,8 @@ async function makeChart(res, chat_id, ctx) {
       element.date = element.date + ' (' + moment(element.date).format('ddd') + ')';
     });
 
-    data3_labels = data3.map(item => item.date);
-    data3_data = data3.map(item => item.sum);
+    const data3_labels = data3.map(item => item.date);
+    const data3_data = data3.map(item => item.sum);
     //console.log(data3_data);
 
     const chart = new ChartJsImage(); // using QuickChart/Chart.js
@@ -143,7 +143,7 @@ async function makeChart(res, chat_id, ctx) {
               anchor: 'end',
               align: 'start',
               clamp: true,
-              formatter: function(value, context) {
+              formatter: function(value) {
                 return value.toLocaleString('ru-RU');
               }
             }
@@ -163,7 +163,7 @@ async function makeChart(res, chat_id, ctx) {
     }
     catch (err) {
       writeError(err.stack, 'bot/utils - MakeChart sending chart');
-    };
+    }
   }
 }
 
@@ -189,17 +189,17 @@ function groupAndSum(arr, groupKeys, sumKeys) {
 // no return
 async function ReplyChart(mode, ctx, chat_id) {
 
-  count = +mode.slice(6);
+  let count = +mode.slice(6);
   console.log(count);
 
   alarmAdmin(ctx, 'bot/utils - receive /mode/ ' + mode + ' command by not-admin user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);
   if (await isAdmin(ctx.from.id) === false) {
     ctx.reply('Вы не входите в разрешенные пользователи, обратитесь к администратору');
     return;
-  };
+  }
 
   await ctx.reply('формируются данные по запросу ... ');
-  let message = 'произошла ошибка или сервер не ответил в отведенное время - попробуйте позже';
+
   console.log('receive request: ' + mode + " от пользователя " + ctx.from.id);
   let date = new Date().toLocaleString("ru-RU");
   writeLog(`bot_request.txt`, String(date + ': receive request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
@@ -215,19 +215,13 @@ async function ReplyChart(mode, ctx, chat_id) {
       let date2 = new Date().toLocaleString("ru-RU");
       writeLog(`bot_request.txt`, String(date2 + ': SUCCESS request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
     })
-      .catch(err => {
-        let date2 = new Date().toLocaleString("ru-RU");
-        writeError(err.stack, 'bot/utils - ReplyChart');
-        writeLog(`bot_request.txt`, String(date2 + ': ERROR request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
-      });
   }
-  //}
   catch (err) {
     let date2 = new Date().toLocaleString("ru-RU");
     writeError(err.stack, 'bot/utils - ReplyChart');
     writeLog(`bot_request.txt`, String(date2 + ': ERROR request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
   }
-};
+}
 
 // load transactions of period and send summary statistic to user
 // mode - string of period, for example 'текущий день'
@@ -240,7 +234,7 @@ async function ReplyData(mode, ctx) {
   if (await isAdmin(ctx.from.id) === false) {
     ctx.reply('Вы не входите в разрешенные пользователи, обратитесь к администратору');
     return;
-  };
+  }
 
   await ctx.reply('формируются данные по запросу ... ');
   let message = 'произошла ошибка или сервер не ответил в отведенное время - попробуйте позже';
@@ -279,19 +273,14 @@ async function ReplyData(mode, ctx) {
             } else if (!element.shiftClosed && mode.includes('день')) {
               message += `. Смена открыта.
                 `;
-            };
-          };
-        })
-      };
+            }
+          }
+        });
+      }
       let date2 = new Date().toLocaleString("ru-RU");
       writeLog(`bot_request.txt`, String(date2 + ': SUCCESS request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
-    })
-      .catch(err => {
-        let date2 = new Date().toLocaleString("ru-RU");
-        writeError(err.stack, 'bot/utils - ReplyData');
-        writeLog(`bot_request.txt`, String(date2 + ': ERROR request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
-      });
-  }
+    });
+   }
   //}
   catch (err) {
     let date2 = new Date().toLocaleString("ru-RU");

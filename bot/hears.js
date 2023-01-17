@@ -1,4 +1,4 @@
-const { writeError, writeLog, readLog, logger } = require('../logs/logs-utils.js');
+const { writeError, readLog, logger } = require('../logs/logs-utils.js');
 const { alarmAdmin, uploadToTelegram, ReplyData, ReplyChart } = require('./utils.js');
 
 
@@ -29,7 +29,7 @@ function hears(mode, bot) {
                 writeError(err.stack, infoText);
             }
         });
-    };
+    }
 
     if (mode == 'full log') {
         bot.hears(/full log|Full log/, async (ctx) => {
@@ -46,7 +46,7 @@ function hears(mode, bot) {
                 writeError(err.stack, infoText);
             }
         });
-    };
+    }
 
     if (mode == 'full error') {
         bot.hears(/full error|Full error/, async (ctx) => {
@@ -63,7 +63,7 @@ function hears(mode, bot) {
                 writeError(err.stack, infoText);
             }
         });
-    };
+    }
     if (mode == 'error') {
         bot.hears(/Error|error/, async (ctx) => {
             let infoText = 'bot/hears - /error/ command, receive last 2000 symbols of error_p.txt ';
@@ -72,7 +72,7 @@ function hears(mode, bot) {
             ctx.reply(infoText);
             try {
                 logger.info(infoText + ' starting ' + infoText2);
-                message = await readLog('error_p.txt', 100);
+                let message = await readLog('error_p.txt', 100);
                 ctx.reply(message.slice(-2000));
                 logger.info(infoText + ' ending ' + infoText2);
             }
@@ -80,7 +80,7 @@ function hears(mode, bot) {
                 writeError(err.stack, infoText);
             }
         });
-    };
+    }
     if (mode == 'log') {
         bot.hears(/Log|log/, async (ctx) => {
             let infoText = 'bot/hears - /log/ command, receive last 2000 symbols of log_p.txt ';
@@ -89,7 +89,7 @@ function hears(mode, bot) {
             ctx.reply(infoText);
             try {
                 logger.info(infoText + ' starting ' + infoText2);
-                message = await readLog('log_p.txt', 100);
+                let message = await readLog('log_p.txt', 100);
                 ctx.reply(message.slice(-2000));
                 logger.info(infoText + ' ending ' + infoText2);
             }
@@ -97,7 +97,7 @@ function hears(mode, bot) {
                 writeError(err.stack, infoText);
             }
         });
-    };
+    }
     if (mode == 'datemode') { // hears markup buttons of summary statistics of periods
         bot.hears('текущий день', async (ctx) => {
             await ReplyData('текущий день', ctx);
@@ -147,12 +147,12 @@ function hears(mode, bot) {
             await ReplyData('прошлый год', ctx);
         });
 
-    };
+    }
     if (mode == 'chart') { // hears markup buttons of chart periods
         bot.hears('chart-10', async (ctx) => {
             await ReplyChart('chart-10', ctx, ctx.from.id);
         });
-    };
+    }
 
 }
 

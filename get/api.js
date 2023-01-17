@@ -3,7 +3,7 @@
 const axios = require("axios");
 const https = require("https");
 const moment = require('moment');
-const fs = require("fs");
+//const fs = require("fs"); eslint detect
 const { Client } = require('pg');
 const { writeError, writeLog, logger } = require('../logs/logs-utils.js');
 const dotenv = require("dotenv");
@@ -13,18 +13,6 @@ const agent = new https.Agent({
     rejectUnauthorized: false,
   });
 
-const dateMode = {
-    mode1: 'текущий день',
-    mode2: 'текущая неделя',
-    mode3: 'текущий месяц',
-    mode5: 'текущее полугодие',
-    mode4: 'текущий год',
-    mode1: 'прошлый день',
-    mode2: 'прошлая неделя',
-    mode3: 'прошлый месяц',
-    mode4: 'прошлый год',
-    mode5: 'прошлое полугодие'
-  };
 
 /**
  * @description Get token from KOFD
@@ -92,7 +80,7 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
       dateString = dateArr[0];
       dateStart = dateArr[1];
       dateEnd = dateArr[2];
-    };
+    }
     //skip=0&take=${count} - убрано кол-во операций
     const config = {
       method: "get",
@@ -247,7 +235,7 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
     } else {
       dateStart = moment(begin).startOf('day');
       dateEnd = moment(end).endOf('day');
-    };
+    }
     dateStart = dateStart.format('YYYY-MM-DD[T]HH:mm:ss.SSSZ');
     dateEnd = dateEnd.format('YYYY-MM-DD[T]HH:mm:ss.SSSZ');
 
