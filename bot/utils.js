@@ -96,14 +96,25 @@ async function makeChart(res, chat_id, ctx) {
       resAll = resAll.concat(kassa_array); // соединяем массивы касс в один
       //console.table(resAll);
     });
+    let today = new Date;
+    
     let data2 = groupAndSum(resAll, ['date', 'name_kassa'], ['sum']);
+    
+    today = today.toISOString().split('T')[0]; // нужно добавить ноль на текущую дату, чтобы отразить на диаграмме
+    data2.push({
+      date: today,
+      sum: 0
+    });
+    
     let data3 = groupAndSum(data2, ['date'], ['sum']);
+    
+    //console.log(data3);
 
     data3.sort(function (a, b) {
       var dateA = new Date(a.date), dateB = new Date(b.date)
       return dateB - dateA //сортировка по убывающей дате
     })
-    data3.forEach(element => {
+    data3.forEach(element => { // добавление дня недели
       moment.locale('ru');
       element.date = element.date + ' (' + moment(element.date).format('ddd') + ')';
     });
@@ -113,11 +124,13 @@ async function makeChart(res, chat_id, ctx) {
     //console.log(data3_data);
 
     const chart = new ChartJsImage(); // using QuickChart/Chart.js
+    
     //let chart = new chart(
     const data = {
       labels: data3_labels,
       datasets: [
         {
+          skipNull: false,
           backgroundColor: "rgba(54, 162, 235, 0.5)",
           borderColor: "rgb(54, 162, 235)",
           borderWidth: 1,
@@ -129,12 +142,13 @@ async function makeChart(res, chat_id, ctx) {
     //chart.version = '4';
     chart.setConfig(
       {
+        
         type: 'horizontalBar',
         data,
         options: {
           scales: {
             xAxes: [{
-              display: false
+              display: false,
             }]
           },
           indexAxis: 'y',
