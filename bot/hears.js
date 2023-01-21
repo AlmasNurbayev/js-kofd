@@ -1,6 +1,7 @@
-const e = require('express');
+//const e = require('express');
 const { writeError, readLog, logger } = require('../logs/logs-utils.js');
 const { alarmAdmin, uploadToTelegram, ReplyData, ReplyChart, parseResRaws } = require('./utils.js');
+const { Markup } = require('telegraf');
 
 let resAll;
 
@@ -14,6 +15,7 @@ function hears(mode, bot) {
     //console.log(Markup);
     if (mode == 'query') {
         bot.hears(/Query|query/, async (ctx) => {
+            await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
             let infoText = 'bot/hears - query command, receive last 15 records of bot_request.txt';
             let infoText2 = 'from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username;
 
@@ -35,6 +37,7 @@ function hears(mode, bot) {
 
     if (mode == 'full log') {
         bot.hears(/full log|Full log/, async (ctx) => {
+            await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
             let infoText = 'bot/hears - full log command, receive log_p.txt';
             let infoText2 = 'from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username;
             alarmAdmin(ctx, 'not admin: ' + infoText + ' ' + infoText2);
@@ -52,6 +55,7 @@ function hears(mode, bot) {
 
     if (mode == 'full error') {
         bot.hears(/full error|Full error/, async (ctx) => {
+            await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
             let infoText = 'bot/hears - full error command, receive error_p.txt';
             let infoText2 = 'from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username;
             alarmAdmin(ctx, 'not admin: ' + infoText + ' ' + infoText2);
@@ -68,6 +72,7 @@ function hears(mode, bot) {
     }
     if (mode == 'error') {
         bot.hears(/Error|error/, async (ctx) => {
+            await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
             let infoText = 'bot/hears - /error/ command, receive last 2000 symbols of error_p.txt ';
             let infoText2 = 'from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username;
             alarmAdmin(ctx, 'not admin: ' + infoText + ' ' + infoText2);
@@ -85,6 +90,7 @@ function hears(mode, bot) {
     }
     if (mode == 'log') {
         bot.hears(/Log|log/, async (ctx) => {
+            await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
             let infoText = 'bot/hears - /log/ command, receive last 2000 symbols of log_p.txt ';
             let infoText2 = 'from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username;
             alarmAdmin(ctx, 'not admin: ' + infoText + ' ' + infoText2);
@@ -103,18 +109,22 @@ function hears(mode, bot) {
     if (mode == 'datemode') { // hears markup buttons of summary statistics of periods
         
         bot.hears('текущий день', async (ctx) => {
+            await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
             resAll = await ReplyData('текущий день', ctx);
         });
 
         bot.hears('текущая неделя', async (ctx) => {
+            await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
             resAll = await ReplyData('текущая неделя', ctx);
         });
 
         bot.hears('текущий месяц', async (ctx) => {
+            await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
             resAll = await ReplyData('текущий месяц', ctx);
         });
 
         bot.hears('текущий квартал', async (ctx) => {
+            await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
             resAll = await ReplyData('текущий квартал', ctx);
         });
 
@@ -123,68 +133,82 @@ function hears(mode, bot) {
         });
 
         bot.hears('текущий год', async (ctx) => {
+            await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
             resAll = await ReplyData('текущий год', ctx);
         });
 
         bot.hears('прошлый день', async (ctx) => {
+            await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
             resAll = await ReplyData('прошлый день', ctx);
         });
 
         bot.hears('прошлая неделя', async (ctx) => {
+            await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
             resAll = await ReplyData('прошлая неделя', ctx);
         });
 
         bot.hears('прошлый месяц', async (ctx) => {
+            await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
             resAll = await ReplyData('прошлый месяц', ctx);
         });
 
         bot.hears('прошлый квартал', async (ctx) => {
+            await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
             resAll = await ReplyData('прошлый квартал', ctx);
         });
 
         bot.hears('прошлое полугодие', async (ctx) => {
+            await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
             resAll = await ReplyData('прошлое полугодие', ctx);
         });
 
         bot.hears('прошлый год', async (ctx) => {
+            await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
             resAll = await ReplyData('прошлый год', ctx);
         });
         
     }
     if (mode == 'chart') { // hears markup buttons of chart periods
         bot.hears('chart-10', async (ctx) => {
+            await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
             await ReplyChart('chart-10', ctx, ctx.from.id);
         });
     }
 
     if (mode == 'скрыть меню') { 
-        bot.hears('скрыть меню', async (ctx) => {
-            logger.info('bot/command - markup remove');
-            await ctx.reply('меню скрыто',
-              {
-                reply_markup: {
-                  remove_keyboard: true,
-                },
-              });
-          });
+        hide_menu(bot);
     }    
 
 }
 
 function actions(bot) {
     bot.action(/operations/i, (ctx) => {
+        ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
         const dateInButton = ctx.match.input.slice(11);
         //console.log(dateInButton);
         logger.info('bot/hears - receive /Operations/ with mode: ' + dateInButton);
         //console.log('--- ' + dateInButton);
         let message = '';
+        let buttons = [];
         let list = parseResRaws(resAll.rows, dateInButton);
         list.forEach ((e, index) =>{
-            message += `${index} ${e.elementKassa} ${e.elementTypeOper} ${e.elementSum.toLocaleString('ru-RU')} ${e.elementTypePay} ${e.elementTime}\n`;
+            message += `${index}. ${e.elementKassa} ${e.elementTypeOper} ${e.elementSum.toLocaleString('ru-RU')} ${e.elementTypePay} ${e.elementTime}\n`;
+            buttons.push(Markup.button.callback(String(index), "check-" + index + "-" + dateInButton));
         })
-        ctx.reply(message);
+
+        ctx.replyWithHTML(message, Markup.inlineKeyboard(buttons));
+        //ctx.reply(message);
     });
+}
+
+function hide_menu(bot) {
+    //bot.ctx.ReplyKeyboardHide();
+    bot.hears('скрыть меню', async (ctx) => {
+        logger.info('bot/command - markup remove');
+        await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
+      });
 }
 
 exports.hears = hears;
 exports.actions = actions;
+exports.hide_menu = hide_menu;
