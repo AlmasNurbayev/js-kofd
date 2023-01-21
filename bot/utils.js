@@ -6,7 +6,6 @@ const ChartJsImage = require('chartjs-to-image');
 const fs = require("fs");
 const moment = require('moment');
 const { Markup } = require('telegraf');
-const { transferableAbortSignal } = require('util');
 
 // return true if userid contains in db table telegram_users
 // userid - id of telegram user
