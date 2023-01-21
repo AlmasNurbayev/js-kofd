@@ -1,6 +1,8 @@
+const e = require('express');
 const { writeError, readLog, logger } = require('../logs/logs-utils.js');
-const { alarmAdmin, uploadToTelegram, ReplyData, ReplyChart } = require('./utils.js');
+const { alarmAdmin, uploadToTelegram, ReplyData, ReplyChart, parseResRaws } = require('./utils.js');
 
+let resAll;
 
 
 // monitoring all push button or commands from user, and doing nead tasks 
@@ -99,54 +101,55 @@ function hears(mode, bot) {
         });
     }
     if (mode == 'datemode') { // hears markup buttons of summary statistics of periods
+        
         bot.hears('текущий день', async (ctx) => {
-            await ReplyData('текущий день', ctx);
+            resAll = await ReplyData('текущий день', ctx);
         });
 
         bot.hears('текущая неделя', async (ctx) => {
-            await ReplyData('текущая неделя', ctx);
+            resAll = await ReplyData('текущая неделя', ctx);
         });
 
         bot.hears('текущий месяц', async (ctx) => {
-            await ReplyData('текущий месяц', ctx);
+            resAll = await ReplyData('текущий месяц', ctx);
         });
 
         bot.hears('текущий квартал', async (ctx) => {
-            await ReplyData('текущий квартал', ctx);
+            resAll = await ReplyData('текущий квартал', ctx);
         });
 
         bot.hears('текущее полугодие', async (ctx) => {
-            await ReplyData('текущее полугодие', ctx);
+            resAll = await ReplyData('текущее полугодие', ctx);
         });
 
         bot.hears('текущий год', async (ctx) => {
-            await ReplyData('текущий год', ctx);
+            resAll = await ReplyData('текущий год', ctx);
         });
 
         bot.hears('прошлый день', async (ctx) => {
-            await ReplyData('прошлый день', ctx);
+            resAll = await ReplyData('прошлый день', ctx);
         });
 
         bot.hears('прошлая неделя', async (ctx) => {
-            await ReplyData('прошлая неделя', ctx);
+            resAll = await ReplyData('прошлая неделя', ctx);
         });
 
         bot.hears('прошлый месяц', async (ctx) => {
-            await ReplyData('прошлый месяц', ctx);
+            resAll = await ReplyData('прошлый месяц', ctx);
         });
 
         bot.hears('прошлый квартал', async (ctx) => {
-            await ReplyData('прошлый квартал', ctx);
+            resAll = await ReplyData('прошлый квартал', ctx);
         });
 
         bot.hears('прошлое полугодие', async (ctx) => {
-            await ReplyData('прошлое полугодие', ctx);
+            resAll = await ReplyData('прошлое полугодие', ctx);
         });
 
         bot.hears('прошлый год', async (ctx) => {
-            await ReplyData('прошлый год', ctx);
+            resAll = await ReplyData('прошлый год', ctx);
         });
-
+        
     }
     if (mode == 'chart') { // hears markup buttons of chart periods
         bot.hears('chart-10', async (ctx) => {
@@ -154,6 +157,34 @@ function hears(mode, bot) {
         });
     }
 
+    if (mode == 'скрыть меню') { 
+        bot.hears('скрыть меню', async (ctx) => {
+            logger.info('bot/command - markup remove');
+            await ctx.reply('меню скрыто',
+              {
+                reply_markup: {
+                  remove_keyboard: true,
+                },
+              });
+          });
+    }    
+
+}
+
+function actions(bot) {
+    bot.action(/operations/i, (ctx) => {
+        const dateInButton = ctx.match.input.slice(11);
+        //console.log(dateInButton);
+        logger.info('bot/hears - receive /Operations/ with mode: ' + dateInButton);
+        //console.log('--- ' + dateInButton);
+        let message = '';
+        let list = parseResRaws(resAll.rows, dateInButton);
+        list.forEach ((e, index) =>{
+            message += `${index} ${e.elementKassa} ${e.elementTypeOper} ${e.elementSum.toLocaleString('ru-RU')} ${e.elementTypePay} ${e.elementTime}\n`;
+        })
+        ctx.reply(message);
+    });
 }
 
 exports.hears = hears;
+exports.actions = actions;

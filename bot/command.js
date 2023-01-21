@@ -42,7 +42,7 @@ function command(mode, bot) {
           Markup.button.callback("прошлый месяц", "1")],
           [Markup.button.callback("текущий квартал", "2"),
           Markup.button.callback("прошлый квартал", "2")],
-          [Markup.button.callback("chart-10", "1")]
+          [Markup.button.callback("chart-10", "1"), Markup.button.callback("скрыть меню", "2")]
             //[Markup.button.callback("текущий год", "2"),
             //Markup.button.callback("прошлый год", "2")]
           ])

@@ -5,6 +5,8 @@ const adminId = '590285714';
 const ChartJsImage = require('chartjs-to-image');
 const fs = require("fs");
 const moment = require('moment');
+const { Markup } = require('telegraf');
+const { transferableAbortSignal } = require('util');
 
 // return true if userid contains in db table telegram_users
 // userid - id of telegram user
@@ -97,18 +99,16 @@ async function makeChart(res, chat_id, ctx) {
       //console.table(resAll);
     });
     let today = new Date;
-    
+
     let data2 = groupAndSum(resAll, ['date', 'name_kassa'], ['sum']);
-    
+
     today = today.toISOString().split('T')[0]; // нужно добавить ноль на текущую дату, чтобы отразить на диаграмме
     data2.push({
       date: today,
       sum: 0
     });
-    
+
     let data3 = groupAndSum(data2, ['date'], ['sum']);
-    
-    //console.log(data3);
 
     data3.sort(function (a, b) {
       var dateA = new Date(a.date), dateB = new Date(b.date)
@@ -124,7 +124,7 @@ async function makeChart(res, chat_id, ctx) {
     //console.log(data3_data);
 
     const chart = new ChartJsImage(); // using QuickChart/Chart.js
-    
+
     //let chart = new chart(
     const data = {
       labels: data3_labels,
@@ -142,7 +142,7 @@ async function makeChart(res, chat_id, ctx) {
     //chart.version = '4';
     chart.setConfig(
       {
-        
+
         type: 'horizontalBar',
         data,
         options: {
@@ -154,10 +154,10 @@ async function makeChart(res, chat_id, ctx) {
           indexAxis: 'y',
           plugins: {
             datalabels: {
-              anchor: 'end',
-              align: 'start',
-              clamp: true,
-              formatter: function(value) {
+              anchor: 'start',
+              align: 'end',
+              clamp: false,
+              formatter: function (value) {
                 return value.toLocaleString('ru-RU');
               }
             }
@@ -167,7 +167,7 @@ async function makeChart(res, chat_id, ctx) {
 
 
     chart.setWidth(450).setHeight(350);
-    
+
     let namefile = 'temp_chart' + String(new Date().getTime()).trim() + '.png';
     let namedir = 'logs/charts/';
     await chart.toFile(namedir + namefile);
@@ -258,22 +258,20 @@ async function ReplyData(mode, ctx) {
   try {
     //ctx.reply("не рано ли?");
     //if (ctx.message.text == 'последний день') {
-    await load(mode).then(res => {
+    let resAll = await load(mode).then(res => {
       logger.info('bot/utils - ending /ReplyData/ with mode: ' + mode);
-      //const img = makeChart(res['rows']);
+      //console.log(JSON.stringify(res['rows']));
+      let resAll = res;
       res = res['table'];
+
       message = `Сумма продаж за "${mode}" = ${res.dateStart.slice(0, 10)} - ${res.dateEnd.slice(0, 10)}
   Чистое поступление: <b>${res.sumAll.toLocaleString('ru-RU')}</b>`;
 
       if (res.sumAll != 0 || res.cashEject != 0) {
         message += `
-          кеш: ${res.sumAllCash.toLocaleString('ru-RU')}
-          карта: ${res.sumAllCard.toLocaleString('ru-RU')}
-          смешано: ${res.sumAllMixed.toLocaleString('ru-RU')}
+          кеш: ${res.sumAllCash.toLocaleString('ru-RU')}, карта: ${res.sumAllCard.toLocaleString('ru-RU')}, смешано: ${res.sumAllMixed.toLocaleString('ru-RU')}
           В т.ч.:
-          Продажи: ${res.sumSale.toLocaleString('ru-RU')}
-          Возвраты: ${res.sumReturn.toLocaleString('ru-RU')} 
-          Выемка: ${res.cashEject.toLocaleString('ru-RU')} 
+          Продажи: ${res.sumSale.toLocaleString('ru-RU')}, возвраты: ${res.sumReturn.toLocaleString('ru-RU')}, выемка: ${res.cashEject.toLocaleString('ru-RU')} 
           
           Данные по кассам:`;
         res.obj.forEach((element) => {
@@ -293,15 +291,83 @@ async function ReplyData(mode, ctx) {
       }
       let date2 = new Date().toLocaleString("ru-RU");
       writeLog(`bot_request.txt`, String(date2 + ': SUCCESS request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
+
+      if (mode.includes('день')) {
+      ctx.replyWithHTML(message, Markup.inlineKeyboard([
+        Markup.button.callback("🔍все операции", "operations-" + res.dateStart.slice(0, 10))])//-" + res.dateStart)]),
+      );} else {
+        ctx.replyWithHTML(message);
+      }
+
+      return resAll;
+      //console.log(res.dateStart);
     });
-   }
+    return resAll;
+  }
   //}
   catch (err) {
+    ctx.replyWithHTML('произошла ошибка или сервер не ответил в отведенное время - попробуйте позже');
     let date2 = new Date().toLocaleString("ru-RU");
     writeError(err.stack, 'bot/utils - ReplyData');
     writeLog(`bot_request.txt`, String(date2 + ': ERROR request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
   }
-  ctx.replyWithHTML(message);
+
+}
+
+function parseResRaws(rows, controlDate) {
+  logger.info('bot-utiles - parseResRaws starting' + controlDate);
+  const list = [];
+  if (rows.length == 0) {
+    return list;
+  }
+
+  rows.forEach((kassa) => {
+
+    let kassa_array = kassa.data.filter((e) => { //фильтрация по типу операций
+      return e.type == 1;
+    });
+    kassa_array = kassa.data.filter((e) => {
+      return e.subType == 2 || e.subType == 3;
+    });
+
+    kassa_array.forEach((element) => {
+      //console.log(JSON.stringify(element));
+      let elementTypeOper, elementSum;
+      if (element.type == 1 && element.subType == 3) {
+        elementTypeOper = 'возврат';
+        elementSum = -1 * element.sum;
+      }
+      if (element.type == 1 && element.subType == 2) {
+        elementTypeOper = 'продажа';
+        elementSum = element.sum;
+      }
+      let elementTypePay;
+      if (typeof (element.paymentTypes) == 'object') {
+        if (element.paymentTypes.length == 2) {
+          elementTypePay = 'смешанно';
+        } else if (element.paymentTypes[0] == 0) {
+          elementTypePay = 'кеш';
+        } else if (element.paymentTypes[0] == 1) {
+          elementTypePay = 'карта';
+        }
+      }
+      // console.log(String(element.operationDate).slice(0,10));
+      // console.log(controlDate);
+      if (String(element.operationDate).slice(0,10) == controlDate) { // сверка даты операции и переданной даты
+        list.push({
+          elementKassa: kassa.name_kassa,
+          elementTypeOper: elementTypeOper,
+          elementSum: elementSum,
+          elementTypePay: elementTypePay,
+          elementId: element.id,
+          elementTime: element.operationDate.slice(11, 16),
+          check: {}
+        });
+      }
+    })
+  });
+  logger.info('bot-utiles - parseResRaws ending' + controlDate);
+  return list;
 }
 
 exports.alarmAdmin = alarmAdmin;
@@ -309,3 +375,4 @@ exports.isAdmin = isAdmin;
 exports.uploadToTelegram = uploadToTelegram;
 exports.ReplyData = ReplyData;
 exports.ReplyChart = ReplyChart;
+exports.parseResRaws = parseResRaws;

@@ -1,0 +1,67 @@
+Request URL: https://cabinet.kofd.kz/api/operations/operation?cashboxId=34012&operationId=63c8f844056833389d733298
+Request Method: GET
+
+
+Payload: 
+cashboxId: 34012
+operationId: 63c8f844056833389d733298
+
+
+Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiSUlOODAwNzI3MzAxMjU2IiwiT3JnYW5pemF0aW9uWGluIjoiODAwNzI3MzAxMjU2IiwiUHJvZmlsZUlkIjoiNTMwMiIsIlByb2ZpbGVJaW4iOiI4MDA3MjczMDEyNTYiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOlsiMCIsIjEiLCIyIiwiMyIsIjQiLCI1IiwiNiIsIjgiLCI5IiwiNyIsIjExIiwiMTIiLCIxMyIsIjEwIiwiMjAiLCIyMSIsIjIyIl0sIm5iZiI6MTY3NDI4NTQ0OSwiZXhwIjoxNjc0Mjg5MDQ5LCJpc3MiOiJLYXpUcmFuc2NvbSIsImF1ZCI6Imh0dHBzOi8vY2FiaW5ldC5rb2ZkLmt6In0.-vOivuR1tZ3SFIDWdN4G3WuZigKpNsdpuHKSEUw_NDA
+
+Логичнее проходить по массиву data и вытаскивать все элементы Text и выкладывать в столбик вертикально.
+там внутри есть линии-разделители.
+
+
+{"data":[{"text":"                     Incore                     ","style":0},{"text":"                БИН 800727301256                ","style":0},{"text":"                                                ","style":0},{"text":"                    Продажа                     ","style":0},{"text":"Порядковый номер чека 117                       ","style":0},{"text":"Смена №32                                       ","style":0},{"text":"ФИСКАЛЬНЫЙ ПРИЗНАК: 737532701178                ","style":0},{"text":"                                   КОД КАССИРА 2","style":0},{"text":"ВРЕМЯ: 19.01.2023 13:59:00                      ","style":0},{"text":"ЗНМ SWK00426370                        ИНК 34012","style":0},{"text":"РНМ 010102360873                                ","style":0},{"text":"*********************************************** ","style":0},{"text":"Kiddy Сандалии синий 6163-32 (27) (шт)          ","style":0},{"text":"1 (Штука) x 19\u00A0900,00                = 19\u00A0900,00","style":0},{"text":"------------------------------------------------","style":0},{"text":"Полученная сумма оплаты по чеку             0,00","style":0},{"text":"    Банковская карта:                  19\u00A0900,00","style":0},{"text":"Сумма сдачи после оплаты                    0,00","style":0},{"text":"Общая сумма скидки                          0,00","style":0},{"text":"Общая сумма наценки                         0,00","style":0},{"text":"Общая сумма НДС                             0,00","style":0},{"text":"ИТОГО:         19\u00A0900,00","style":1},{"text":"------------------------------------------------","style":0},{"text":"------------------------------------------------","style":0}],"error":null}
+
+
+
+	8		{2}
+text	:	ВРЕМЯ: 19.01.2023 13:59:00                      
+style	:	0
+
+	12		{2}
+text	:	Kiddy Сандалии синий 6163-32 (27) (шт)          
+style	:	0
+
+13		{2}
+text	:	1 (Штука) x 19 900,00                = 19 900,00
+style	:	0
+
+
+
+21		{2}
+text	:	ИТОГО:         19 900,00
+style	:	1
+
+
+или 
+
+{"data":[{"text":"                     Incore                     ","style":0},{"text":"                БИН 800727301256                ","style":0},{"text":"                                                ","style":0},{"text":"                    Продажа                     ","style":0},{"text":"Порядковый номер чека 114                       ","style":0},{"text":"Смена №31                                       ","style":0},{"text":"ФИСКАЛЬНЫЙ ПРИЗНАК: 737465975646                ","style":0},{"text":"                                   КОД КАССИРА 2","style":0},{"text":"ВРЕМЯ: 18.01.2023 19:26:54                      ","style":0},{"text":"ЗНМ SWK00426370                        ИНК 34012","style":0},{"text":"РНМ 010102360873                                ","style":0},{"text":"*********************************************** ","style":0},{"text":"Cipo Ботинки графит-черный 9910-697-725-664 (3  ","style":0},{"text":"2) (шт)                                         ","style":0},{"text":"1 (Штука) x 37\u00A0900,00                = 37\u00A0900,00","style":0},{"text":"СКИДКА                                          ","style":0},{"text":"Cipo Ботинки графит-черный 9910-697-725-664 (32) ","style":0},{"text":"(шт)                                   11\u00A0370,00","style":0},{"text":"------------------------------------------------","style":0},{"text":"Полученная сумма оплаты по чеку             0,00","style":0},{"text":"    Банковская карта:                  26\u00A0530,00","style":0},{"text":"Сумма сдачи после оплаты                    0,00","style":0},{"text":"Общая сумма скидки                     11\u00A0370,00","style":0},{"text":"Общая сумма наценки                         0,00","style":0},{"text":"Общая сумма НДС                             0,00","style":0},{"text":"ИТОГО:         26\u00A0530,00","style":1},{"text":"------------------------------------------------","style":0},{"text":"------------------------------------------------","style":0}],"error":null}
+
+	14		{2}
+text	:	1 (Штука) x 37 900,00                = 37 900,00
+style	:	0
+
+16		{2}
+text	:	Cipo Ботинки графит-черный 9910-697-725-664 (32) 
+style	:	0
+
+17		{2}
+text	:	(шт)                                   11 370,00
+style	:	0
+
+20		{2}
+text	:	    Банковская карта:                  26 530,00
+style	:	0
+
+22		{2}
+text	:	Общая сумма скидки                     11 370,00
+style	:	0
+
+25		{2}
+text	:	ИТОГО:         26 530,00
+style	:	1
+
+

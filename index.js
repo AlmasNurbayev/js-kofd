@@ -2,7 +2,8 @@
 
 const { Telegraf } = require('telegraf');
 const { command } = require('./bot/command.js');
-const { hears } = require('./bot/hears.js');
+const { hears, actions } = require('./bot/hears.js');
+//const { actions } = require('./bot/actions.js');
 
 const dotenv = require("dotenv");
 const { logger, clearDirectory } = require('./logs/logs-utils.js');
@@ -30,6 +31,9 @@ hears('error', bot);
 hears('log', bot);
 hears('datemode', bot);
 hears('chart', bot);
+hears('скрыть меню', bot);
+
+actions(bot);
 
 bot.command('quit', async (ctx) => {
   logger.info('leave chat');
