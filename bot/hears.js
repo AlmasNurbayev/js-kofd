@@ -2,8 +2,9 @@
 const { writeError, readLog, logger } = require('../logs/logs-utils.js');
 const { alarmAdmin, uploadToTelegram, ReplyData, ReplyChart, parseResRaws } = require('./utils.js');
 const { Markup } = require('telegraf');
+const { getCheck } = require('../get/api.js');
 
-let resAll;
+let resAll = [];
 
 
 // monitoring all push button or commands from user, and doing nead tasks 
@@ -37,6 +38,7 @@ function hears(mode, bot) {
 
     if (mode == 'full log') {
         bot.hears(/full log|Full log/, async (ctx) => {
+            await ctx.sendChatAction("upload_document", ctx.from.id);
             await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
             let infoText = 'bot/hears - full log command, receive log_p.txt';
             let infoText2 = 'from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username;
@@ -55,6 +57,7 @@ function hears(mode, bot) {
 
     if (mode == 'full error') {
         bot.hears(/full error|Full error/, async (ctx) => {
+            await ctx.sendChatAction("upload_document", ctx.from.id);
             await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
             let infoText = 'bot/hears - full error command, receive error_p.txt';
             let infoText2 = 'from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username;
@@ -90,7 +93,10 @@ function hears(mode, bot) {
     }
     if (mode == 'log') {
         bot.hears(/Log|log/, async (ctx) => {
+            //Markup.removeKeyboard(true);
             await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
+            await ctx.sendChatAction("typing", ctx.from.id);
+
             let infoText = 'bot/hears - /log/ command, receive last 2000 symbols of log_p.txt ';
             let infoText2 = 'from user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username;
             alarmAdmin(ctx, 'not admin: ' + infoText + ' ' + infoText2);
@@ -181,24 +187,90 @@ function hears(mode, bot) {
 
 }
 
-function actions(bot) {
+async function actions_oper(bot) {
     bot.action(/operations/i, (ctx) => {
-        ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
+        //ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
         const dateInButton = ctx.match.input.slice(11);
         //console.log(dateInButton);
         logger.info('bot/hears - receive /Operations/ with mode: ' + dateInButton);
         //console.log('--- ' + dateInButton);
         let message = '';
         let buttons = [];
-        let list = parseResRaws(resAll.rows, dateInButton);
+        if (resAll.length == 0) {
+            ctx.reply('для получения детальных операций, необходимо обновить статистику нужного периода');
+            logger.error('bot/hears - ending /Operations/ - not data ');
+            return; 
+        }
+        //console.log(JSON.stringify(resAll));
+        let list = [];
+        list = parseResRaws(resAll.rows, dateInButton);
         list.forEach ((e, index) =>{
+            //console.log(JSON.stringify(e));
             message += `${index}. ${e.elementKassa} ${e.elementTypeOper} ${e.elementSum.toLocaleString('ru-RU')} ${e.elementTypePay} ${e.elementTime}\n`;
-            buttons.push(Markup.button.callback(String(index), "check-" + index + "-" + dateInButton));
+            buttons.push(Markup.button.callback(String(index), "check-" + index + "-" + dateInButton + "-" + e.elementId + "-" + e.elementKnumber));
         })
-
-        ctx.replyWithHTML(message, Markup.inlineKeyboard(buttons));
+        if (buttons.length > 0) {
+            ctx.replyWithHTML(message, Markup.inlineKeyboard(buttons));
+        }
         //ctx.reply(message);
     });
+
+
+}
+
+async function actions_check(bot) {
+    bot.action(/check-/i, async (ctx) => {
+        //ctx.reply('меню скрыто', { reply_markup: { remove_keyboard: true, }, });
+        console.log(ctx.match.input);
+
+
+        if (resAll.length == 0) {
+            ctx.reply('для получения детальных операций, необходимо обновить статистику нужного периода');
+            logger.error('bot/hears - ending /Check/ - not data resAll');
+            return;
+        }
+        let message = '';
+        const resArray = ctx.match.input.split('-');
+        const index = resArray[1];
+        const day = resArray[2] + resArray[3] + resArray[4];
+        let res = await getDataCheck(resArray);
+        if (typeof(res) == 'object') {
+            message += 'чек №' + index + ' - ' + day + '\n';
+            res.data.forEach((element)=>{
+                message += element.text + '\n';
+            })
+        } else {
+            message = 'не удалось получить данные';
+        }
+        ctx.reply(message);
+
+    });
+}
+
+async function getDataCheck(resArray) {
+    
+    const knumber = resArray[resArray.length-1];
+    const id = resArray[resArray.length-2];
+    //console.log(knumber, id);
+    let token = "";
+    resAll.rows.forEach((kassa) => {
+        kassa.data.forEach((element) => {
+           if (element.id === id) {
+                token = kassa.token;
+           }     
+        });
+    });
+    if (token === "") {
+        logger.error('bot/hears - ending /Check/ - not data resAll');
+        return 'для получения детальных операций, необходимо обновить статистику нужного периода';             
+    }
+    try {
+        const res = await getCheck(id, knumber, token);
+        //console.log(JSON.stringify(res))
+        return res;
+    } catch (err) {
+        logger.error('bot/hears - getCheck', err.stack);
+    }
 }
 
 function hide_menu(bot) {
@@ -210,5 +282,6 @@ function hide_menu(bot) {
 }
 
 exports.hears = hears;
-exports.actions = actions;
+exports.actions_oper = actions_oper;
+exports.actions_check = actions_check;
 exports.hide_menu = hide_menu;

@@ -211,7 +211,8 @@ async function ReplyChart(mode, ctx, chat_id) {
     return;
   }
 
-  await ctx.reply('формируются данные по запросу ... ');
+  await ctx.sendChatAction("typing",ctx.from.id);
+  //await ctx.reply('формируются данные по запросу ... ');
 
   console.log('receive request: ' + mode + " от пользователя " + ctx.from.id);
   let date = new Date().toLocaleString("ru-RU");
@@ -248,8 +249,8 @@ async function ReplyData(mode, ctx) {
     ctx.reply('Вы не входите в разрешенные пользователи, обратитесь к администратору');
     return;
   }
-
-  await ctx.reply('формируются данные по запросу ... ');
+  await ctx.sendChatAction("typing",ctx.from.id);
+  //await ctx.reply('формируются данные по запросу ... ');
   let message = 'произошла ошибка или сервер не ответил в отведенное время - попробуйте позже';
   console.log('receive request: ' + mode + " от пользователя " + ctx.from.id);
   let date = new Date().toLocaleString("ru-RU");
@@ -315,11 +316,13 @@ async function ReplyData(mode, ctx) {
 
 function parseResRaws(rows, controlDate) {
   logger.info('bot-utiles - parseResRaws starting' + controlDate);
+  //console.log(JSON.stringify(rows));
+
   const list = [];
   if (rows.length == 0) {
     return list;
   }
-
+  
   rows.forEach((kassa) => {
 
     let kassa_array = kassa.data.filter((e) => { //фильтрация по типу операций
@@ -354,6 +357,8 @@ function parseResRaws(rows, controlDate) {
       // console.log(controlDate);
       if (String(element.operationDate).slice(0,10) == controlDate) { // сверка даты операции и переданной даты
         list.push({
+          elementToken: kassa.token,
+          elementKnumber: kassa.knumber,
           elementKassa: kassa.name_kassa,
           elementTypeOper: elementTypeOper,
           elementSum: elementSum,

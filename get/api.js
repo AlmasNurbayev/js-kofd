@@ -103,8 +103,10 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
       res.data['id_kassa'] = id_kassa;
       res.data['name_kassa'] = name_kassa;
       res.data['id_organization'] = id_organization;
+      res.data['knumber'] = knumber;
       res.data['dateStart'] = dateStart;
       res.data['dateEnd'] = dateEnd;
+      res.data['token'] = token;
       await writeLog(`response-${knumber}.txt`, res.data, false);
       logger.info('api - ending getTransaction');
       return res.data;
@@ -114,6 +116,42 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
     }
   }
   
+  /**
+ * @description Get check data form KOFD
+ * @param {string} id
+ * @param {string} knumber 
+ * @param {string} token 
+ * @returns {Promise<string|Error>} object
+ */
+  async function getCheck(id, knumber , token) {
+    logger.info('api - starting getCheck: ' + id + " - " + knumber);
+      const config = {
+        method: "get",
+        url: `https://cabinet.kofd.kz/api/operations/operation?cashboxId=${knumber}&operationId=${id}`,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+        httpsAgent: agent,
+        timeout: 10000
+      };
+      try {
+        const res = await axios(config);
+        //console.log(res.data);
+        if (res.data.error) {
+          await writeError(res.data.error, 'getCheck');
+          return;
+        }
+        logger.info('api - ending getCheck: ' + id + " - " + knumber);
+        //console.log(JSON.stringify(res.data));
+        return res.data;
+      } catch (e) {
+        await writeError(e.stack, 'getCheck');
+        console.log(e.stack)
+      }     
+  }
+
+
   /**
  * @description Any query to DB
  * @param {*} query
@@ -247,12 +285,7 @@ async function getTransaction(count ,jwt, knumber, id_kassa, name_kassa, id_orga
     return [s2, dateStart, dateEnd, mode];
   }
 
-    /**
- * @description upload file to telegram 
- * @param {chatID} string id to user
- * @returns {path} string path to file
- ** @returns {name} string name file
- */
+    
   
 
   //console.log(getStringFilter('текущий квартал'));
@@ -262,3 +295,4 @@ exports.getJWT = getJWT;
 exports.getTransaction = getTransaction;
 exports.getQuery = getQuery;
 exports.getStringFilter = getStringFilter;
+exports.getCheck = getCheck;

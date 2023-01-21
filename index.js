@@ -2,7 +2,7 @@
 
 const { Telegraf } = require('telegraf');
 const { command } = require('./bot/command.js');
-const { hears, actions } = require('./bot/hears.js');
+const { hears, actions_oper, actions_check } = require('./bot/hears.js');
 //const { actions } = require('./bot/actions.js');
 
 const dotenv = require("dotenv");
@@ -33,7 +33,8 @@ hears('datemode', bot);
 hears('chart', bot);
 hears('скрыть меню', bot);
 
-actions(bot);
+actions_oper(bot);
+actions_check(bot);
 
 bot.command('quit', async (ctx) => {
   logger.info('leave chat');

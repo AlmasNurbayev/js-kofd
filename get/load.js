@@ -8,10 +8,11 @@ const count = 1000; // count of transaction get from kofd
 
 
 // clear all temporary files
-fs.unlink("logs/response-post.txt", (err) => {writeError(err.stack, 'load - unlink')});
-fs.unlink("logs/jwt.txt", (err) => {writeError(err.stack, 'load - unlink') });
-fs.unlink("logs/response-get.txt", (err) => {writeError(err.stack, 'load - unlink') });
-fs.unlink("logs/response.txt", (err) => {writeError(err.stack, 'load - unlink') });
+
+fs.unlink("../logs/response-post.txt", (err) => {writeError(err.stack, 'load - unlink')});
+//fs.unlink("../logs/jwt.txt", (err) => {writeError(err.stack, 'load - unlink') });
+//fs.unlink("../logs/response-get.txt", (err) => {writeError(err.stack, 'load - unlink') });
+fs.unlink("../logs/response.txt", (err) => {writeError(err.stack, 'load - unlink') });
 
 // get list of org & kassa form db 
 async function load(period) {
