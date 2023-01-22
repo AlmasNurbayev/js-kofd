@@ -204,6 +204,9 @@ async function actions_oper(bot) {
         //console.log(JSON.stringify(resAll));
         let list = [];
         list = parseResRaws(resAll.rows, dateInButton);
+        if (list.length > 0) {
+            list.sort((x, y) => x.elementTime.localeCompare(y.elementTime));
+        }    
         list.forEach((e, index) => {
             //console.log(JSON.stringify(e));
             message += `${index}. ${e.elementKassa} ${e.elementTypeOper} ${e.elementSum.toLocaleString('ru-RU')} ${e.elementTypePay} ${e.elementTime}\n`;
@@ -247,9 +250,15 @@ async function actions_check(bot) {
         const day = resArray[2] + resArray[3] + resArray[4];
         let res = await getDataCheck(resArray);
         if (typeof (res) == 'object') {
-            message += 'чек №' + index + ' - ' + day + '\n';
-            res.data.forEach((element) => {
-                message += element.text + '\n';
+            res.data.forEach((element, index2) => {
+                if (index2 == 0) {
+                    message += 'чек №' + index + ' - ' + day + '   ' + element.text + '\n';
+                } else if (index2 == res.data.length-1) {
+                    // последнюю строку не выводим
+                } else {
+                    message += element.text + '\n';
+                }
+                
             })
         } else {
             message = 'не удалось получить данные';
