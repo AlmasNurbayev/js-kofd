@@ -46,7 +46,7 @@ function command(mode, bot) {
             //[Markup.button.callback("текущий год", "2"),
             //Markup.button.callback("прошлый год", "2")]
           ])
-          .oneTime()
+          .oneTime(true)
           .resize()
         );
 
