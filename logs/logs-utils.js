@@ -89,13 +89,13 @@ async function readLog(name, countRow) {
 async function isFileExist(name) {
   //console.log(name);
   
-  const constants = require('fs');
+  //const constants = require('fs');
   try {
-    await fs.access(name, constants.R_OK);
+    await fs.stat();
     return true;
   } catch (error) {
     // write error твой
-    writeError(error.stack, 'logs-utils - is file exist');
+    //writeError(error.stack, 'logs-utils - is file exist');
     return false;
   }
 }
@@ -121,5 +121,6 @@ async function clearDirectory(path) {
 exports.writeError = writeError;
 exports.writeLog = writeLog;
 exports.readLog = readLog;
+exports.isFileExist = isFileExist;
 exports.logger = logger;
 exports.clearDirectory = clearDirectory;

@@ -49,7 +49,7 @@ async function getJWT(iin, pass) {
     const response = await axios(config);
     //      console.log("2");
     //console.log(typeof response);
-    writeLog('response-post.txt', response.data);
+    writeLog('response-post.txt', response.data, false);
     if (response.data.data == null) {
       await writeError(response.data, 'getJWT');
       return;
