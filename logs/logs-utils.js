@@ -91,7 +91,7 @@ async function isFileExist(name) {
   
   //const constants = require('fs');
   try {
-    await fs.stat();
+    await fs.stat(name);
     return true;
   } catch (error) {
     // write error твой

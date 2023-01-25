@@ -3,6 +3,7 @@ const { writeError, readLog, logger } = require('../logs/logs-utils.js');
 const { alarmAdmin, uploadToTelegram, ReplyData, ReplyChart, parseResRaws } = require('./utils.js');
 const { Markup } = require('telegraf');
 const { getCheck } = require('../get/api.js');
+const { fstat } = require('fs');
 
 let resAll = [];
 

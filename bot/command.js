@@ -9,6 +9,7 @@ function command(mode, bot) {
   try {
     if (mode == 'about') {
       bot.command('about', async (ctx) => {
+        await ctx.reply('меню скрыто', { reply_markup: { remove_keyboard: true, }, });
         ctx.reply(`Данный бот разработан с целью онлайн отображения информации о суммах продажах/возвратах в сети магазинов Cipo.
             Сервис выступает и как пет-проект и с практической целью.
             Выводится информация:
