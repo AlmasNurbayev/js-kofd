@@ -232,7 +232,9 @@ async function actions_oper(bot) {
             } else {
                 ctx.replyWithHTML(message, Markup.inlineKeyboard(buttons));
             }
-
+            date = new Date().toLocaleString("ru-RU");
+            writeLog(`bot_request.txt`, String(date + ': SUCCESS receive operations: <' + dateInButton + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
+    
         }
         //ctx.reply(message);
     })
@@ -248,6 +250,9 @@ async function actions_check(bot) {
         if (resAll.length == 0) {
             ctx.reply('для получения детальных операций, необходимо обновить статистику нужного периода');
             logger.error('bot/hears - ending /Check/ - not data resAll');
+            date = new Date().toLocaleString("ru-RU");
+            writeLog(`bot_request.txt`, String(date + ': ERROR request: <' + ctx.match.input + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
+
             return;
         }
         let message = '';
@@ -268,9 +273,12 @@ async function actions_check(bot) {
             })
         } else {
             message = 'не удалось получить данные';
+            date = new Date().toLocaleString("ru-RU");
+            writeLog(`bot_request.txt`, String(date + ': ERROR request: <' + ctx.match.input + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
         }
         ctx.reply(message);
-
+        date = new Date().toLocaleString("ru-RU");
+        writeLog(`bot_request.txt`, String(date + ': SUCCESS request: <' + ctx.match.input + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
     });
 }
 
