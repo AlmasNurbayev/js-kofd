@@ -195,7 +195,7 @@ async function actions_oper(bot) {
         const dateInButton = ctx.match.input.slice(11);
         //console.log(dateInButton);
         let date = new Date().toLocaleString("ru-RU");
-        writeLog(`bot_request.txt`, String(date + ': receive operations: <' + dateInButton + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
+        writeLog(`bot_request.txt`, String(date + ': receive request operations: <' + dateInButton + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
 
         logger.info('bot/hears - receive /Operations/ with mode: ' + dateInButton);
         //console.log('--- ' + dateInButton);
