@@ -1,9 +1,9 @@
 "use strict";
 
-const fs = require("fs");
+//const fs = require("fs");
 const { getJWT, getTransaction, getQuery } = require('./api');
 const { writeError, writeLog, logger, isFileExist } = require('../logs/logs-utils.js');
-const dotenv = require("dotenv");
+//const dotenv = require("dotenv");
 const count = 1000; // count of transaction get from kofd
 
 
@@ -48,18 +48,23 @@ async function load(period) {
   const queryAllOrganization = `select * FROM "public".organization`;
 
   let listKassa, listOrg;
+
+
   let arrJWT = [];
   let arrGet = [];
   try {
     logger.info('load - starting query of kassa and organization');  
     let res = await Promise.all([getQuery(queryAllKassa), getQuery(queryAllOrganization)]);
     listKassa = res[0].rows;
-    //console.table(listKassa);
     listOrg = res[1].rows;
+    console.table(listKassa);
+    console.table(listOrg);
+
     listOrg.forEach(element => {
       arrJWT.push(getJWT(element.bin, process.env.KOFDPASSWORD));
-      console.log('get jwt: ' + element.bin);
+      //console.log('get jwt: ' + element.bin);
     });
+
   }
   catch (err) {
     console.log(err.stack);
@@ -67,9 +72,12 @@ async function load(period) {
     throw new Error(err);
   }
 
+  
+
   try {
     logger.info('load - starting of build array with JWT'); 
     let res = await Promise.all(arrJWT);
+    
     //console.log(JSON.stringify(res));
     listOrg.forEach((element, index) => {
       element['jwt'] = res[index];

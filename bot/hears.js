@@ -1,9 +1,10 @@
 //const e = require('express');
 const { writeError, readLog, logger } = require('../logs/logs-utils.js');
+const { writeLog } = require('../logs/logs-utils.js');
 const { alarmAdmin, uploadToTelegram, ReplyData, ReplyChart, parseResRaws } = require('./utils.js');
 const { Markup } = require('telegraf');
 const { getCheck } = require('../get/api.js');
-const { fstat } = require('fs');
+//const { fstat } = require('fs');
 
 let resAll = [];
 
@@ -193,6 +194,9 @@ async function actions_oper(bot) {
         //ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
         const dateInButton = ctx.match.input.slice(11);
         //console.log(dateInButton);
+        let date = new Date().toLocaleString("ru-RU");
+        writeLog(`bot_request.txt`, String(date + ': receive operations: <' + dateInButton + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
+
         logger.info('bot/hears - receive /Operations/ with mode: ' + dateInButton);
         //console.log('--- ' + dateInButton);
         let message = '';
@@ -238,7 +242,8 @@ async function actions_check(bot) {
     bot.action(/check-/i, async (ctx) => {
         //ctx.reply('меню скрыто', { reply_markup: { remove_keyboard: true, }, });
         console.log(ctx.match.input);
-
+        let date = new Date().toLocaleString("ru-RU");
+        writeLog(`bot_request.txt`, String(date + ': receive request: <' + ctx.match.input + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
 
         if (resAll.length == 0) {
             ctx.reply('для получения детальных операций, необходимо обновить статистику нужного периода');
