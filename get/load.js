@@ -113,7 +113,8 @@ async function load(period) {
       getSummary(tableSumAll, getStat(element3, element3.id_kassa, element3.name_kassa, element3.id_organization, element3.dateStart, element3.dateEnd));
     });
     //fs.appendFile("get/response.txt", JSON.stringify(res) + "\n", (error2) => { });
-    writeLog(`summary.txt`, tableSumAll, false);
+    writeLog(`tableSumAll.txt`, tableSumAll, false);
+    writeLog(`rows.txt`, res2, false);
     //console.log(tableSumAll);
     return {
       'table': tableSumAll,
