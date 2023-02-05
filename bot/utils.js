@@ -152,9 +152,9 @@ async function makeChart(res, chat_id, ctx) {
           },
           indexAxis: 'y',
           plugins: {
-            datalabels: {
-              anchor: 'start',
-              align: 'end',
+            datalabels: { // https://chartjs-plugin-datalabels.netlify.app/guide/#table-of-contents
+              anchor: 'end',
+              align: 'start',
               clamp: false,
               formatter: function (value) {
                 return value.toLocaleString('ru-RU');
