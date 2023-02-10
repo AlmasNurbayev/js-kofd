@@ -23,10 +23,12 @@
         "fastify": "^4.11.0",
         "fastify-cli": "^5.7.1",
         "fs": "^0.0.1-security",
+        "jwt-decode": "^3.1.2",
         "moment": "^2.29.4",
         "pg": "^8.8.0",
         "pino": "^8.8.0",
-        "telegraf": "^4.11.2"
+        "telegraf": "^4.11.2",
+        "uuid": "^9.0.0"
     },
     "devDependencies": {
         "eslint": "^8.32.0",

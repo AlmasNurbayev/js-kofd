@@ -7,9 +7,9 @@ const dotenv = require("dotenv");
 const { writeError, logger } = require('../logs/logs-utils.js');
 dotenv.config();
 
-fs.unlink("db/errors.txt", (err) => {writeError(err.stack, 'load - unlink') });
-fs.unlink("db/create_result1.txt", (err) => {writeError(err.stack, 'load - unlink') });
-fs.unlink("db/result.txt", (err) => {writeError(err.stack, 'load - unlink') });
+fs.unlink("db/errors.txt", (err) => {writeError(err, 'load - unlink') });
+fs.unlink("db/create_result1.txt", (err) => {writeError(err, 'load - unlink') });
+fs.unlink("db/result.txt", (err) => {writeError(err, 'load - unlink') });
 
 (async () => {
     await runAll();
@@ -18,9 +18,10 @@ fs.unlink("db/result.txt", (err) => {writeError(err.stack, 'load - unlink') });
   async function runAll() {
     try {
       logger.info('db create - starting runAll');
-      await clientQuery('db/drop.sql');
-      await clientQuery('db/create.sql');
-      await clientQuery('db/insert.sql');
+    //   await clientQuery('db/drop.sql');
+    //   await clientQuery('db/create.sql');
+    //   await clientQuery('db/insert.sql');
+      await clientQuery('db/createToken.sql');
     } catch (e) {
       await writeError(e.stack, 'db - runAll');  
       throw e;
@@ -50,12 +51,6 @@ async function clientQuery(path) {
         writeError(JSON.stringify(err.stack), "db create - reading script");
         throw new Error(err);
     }
-    // fs.readFile(path, "utf8", (err, data) => {
-    //     query = data;
-    //     if (err) {
-    //         writeError(JSON.stringify(err), "read sql-script", path);
-    //         throw err;
-    //     }
     
     try {
         await client.connect();
@@ -68,7 +63,7 @@ async function clientQuery(path) {
     try {
         let res = await client.query(query);
         logger.info('db create - clientQuery quering db');
-        fs.writeFile('db/create_result1.txt', JSON.stringify(res), error2 => {writeError(error2.stack, 'create - writefile create_result1.txt') });
+        fs.writeFile('db/create_result1.txt', JSON.stringify(res), error2 => {writeError(error2, 'create - writefile create_result1.txt') });
         //console.log(res);
         //client.end();
         return res;
