@@ -86,12 +86,12 @@ async function load(period) {
     // merge listOrg and listKassa
     // arrKnumber = [];
 
-    listKassa.forEach((elementKassa, index) => {
+    listKassa.forEach((elementKassa) => {
       listOrg.forEach(elementOrg => {
         if (elementKassa.bin === elementOrg.bin) {
           elementKassa['jwt'] = elementOrg.jwt;
           //setTimeout(() => {
-          arrGet.push(getTransaction(count, elementKassa.jwt, elementKassa.knumber, elementKassa.id, elementKassa.name_kassa, elementKassa.id_organization, period, index));
+          arrGet.push(getTransaction(count, elementKassa.jwt, elementKassa.knumber, elementKassa.id, elementKassa.name_kassa, elementKassa.id_organization, elementKassa.bin, period));
           //}, index * 200);
           //arrKnumber.push(elementKassa.knumber);
           // get data for all kassa

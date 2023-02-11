@@ -3,7 +3,7 @@ const { writeError, readLog, logger } = require('../logs/logs-utils.js');
 const { writeLog } = require('../logs/logs-utils.js');
 const { alarmAdmin, uploadToTelegram, ReplyData, ReplyChart, parseResRaws } = require('./utils.js');
 const { Markup } = require('telegraf');
-const { getCheck } = require('../get/api.js');
+const { getCheck, getJWT } = require('../get/api.js');
 //const { fstat } = require('fs');
 
 let resAll = [];
@@ -288,6 +288,8 @@ async function getDataCheck(resArray) {
     const id = resArray[resArray.length - 2];
     //console.log(knumber, id);
     let token = "";
+    //console.log(resArray);
+    //console.log(resAll);
     resAll.rows.forEach((kassa) => {
         kassa.data.forEach((element) => {
             if (element.id === id) {
@@ -300,6 +302,7 @@ async function getDataCheck(resArray) {
         return 'для получения детальных операций, необходимо обновить статистику нужного периода';
     }
     try {
+        //const token = await getJWT()
         const res = await getCheck(id, knumber, token);
         //console.log(JSON.stringify(res))
         return res;

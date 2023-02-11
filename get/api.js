@@ -42,7 +42,7 @@ async function getJWT(iin, pass) {
     },
     data: JSON.stringify(data),
     httpsAgent: agent,
-    timeout: 12000
+    timeout: 14000
   };
 
   //console.log("1");
@@ -51,29 +51,27 @@ async function getJWT(iin, pass) {
 
     const nowTimeStamp = Math.round(Date.now() / 1000) + 10; // округляем и прибавляем 10 секунд, чтобы дать время на все остальное
     //console.log('now ts', nowTimeStamp);
-    logger.info('api - getJWT, founding token for ' + iin + ' with timstamp > ' + nowTimeStamp);
+    logger.info('api - getJWT, searching token for ' + iin + ' with timstamp > ' + nowTimeStamp);
     const query_token = `select * FROM "public".token 
     WHERE 
       BIN = '${iin}' and
       EXP > ${nowTimeStamp}   
     `;
-    console.log(nowTimeStamp);
+    //console.log(nowTimeStamp);
     const res_token_select = await getQuery(query_token);
-    //console.log(res_token_select.rows);
-
-    if (res_token_select.rows) {
-      if (res_token_select.rows.length > 0) {
-        logger.info('api - finding JWT in DB ' + res_token_select.rows[0].token);
+//    console.log(res_token_select.rows);
+    
+    if (res_token_select.rows.length > 0) {
+        logger.info('api - found JWT in DB ' + res_token_select.rows[0].token);
         logger.info('api - ending getJWT');
         return res_token_select.rows[0].token;
-      }
     } else {
       const response = await axios(config);
       //      console.log("2");
       //console.log(typeof response);
       writeLog('response-post.txt', response.data, false);
       if (response.data.data == null) {
-        await writeError(response.data, 'getJWT');
+        await writeError(response.data, 'getJWT - JWT is null received');
         return;
       }
 
@@ -108,7 +106,8 @@ async function getJWT(iin, pass) {
  * @param {*} kassa_id
  * @returns {Promise<string|Error>}
  */
-async function getTransaction(count, jwt, knumber, id_kassa, name_kassa, id_organization, dateMode, index) {
+async function getTransaction(count, jwt, knumber, id_kassa, name_kassa, id_organization, bin, dateMode) {
+
   logger.info('api - starting getTransaction: ' + JSON.stringify({ knumber, id_kassa, name_kassa }));
   const token = "Bearer " + jwt;
   //await writeLog(`jwt.txt`, String(token));
@@ -130,18 +129,19 @@ async function getTransaction(count, jwt, knumber, id_kassa, name_kassa, id_orga
     headers: {
       "Content-Type": "application/json",
       'Host': String(uuidv4()),
-      "Connection": "keep-alive",
+      //"Connection": "keep-alive",
       //"Postman-Token": Date.now(),
       //"User-Agent": "PostmanRuntime/7.30.1",// need 2-nd token
       Authorization: token,
     },
     httpsAgent: agent,
-    timeout: 14000
+    timeout: 16000
   };
-  //console.log("---------------------------");
-  //console.log(config.url);
-  //console.log(jwt);
-  //console.log("---------------------------");
+  // console.log("---------------------------");
+  // console.log('url', config.url);
+  // console.log('host', config.headers.Host);
+  // //console.log(jwt);
+  // console.log("---------------------------");
 
   try {
     const res = await axios(config);
@@ -154,6 +154,7 @@ async function getTransaction(count, jwt, knumber, id_kassa, name_kassa, id_orga
     res.data['name_kassa'] = name_kassa;
     res.data['id_organization'] = id_organization;
     res.data['knumber'] = knumber;
+    res.data['bin'] = bin;
     res.data['dateStart'] = dateStart;
     res.data['dateEnd'] = dateEnd;
     res.data['token'] = token;
