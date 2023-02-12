@@ -278,7 +278,10 @@ async function ReplyData(mode, ctx) {
           if (element.sumAll != 0 || element.cashEject != 0) {
             message += `
    - ${element.name_kassa} поступило: <b>${element.sumAll.toLocaleString('ru-RU')}</b>               
-      в т.ч. продажи ${element.sumSale.toLocaleString('ru-RU')}, возвраты ${element.sumReturn.toLocaleString('ru-RU')}, выемка ${element.cashEject.toLocaleString('ru-RU')}`;
+      в т.ч. продажи ${element.sumSale.toLocaleString('ru-RU')}, возвраты ${element.sumReturn.toLocaleString('ru-RU')}, выемка ${element.cashEject.toLocaleString('ru-RU')}. `;
+            message += `
+            В кассе ${element.availableSum.toLocaleString('ru-RU')}`;
+
             if (element.shiftClosed && mode.includes('день')) {
               message += `. Смена закрыта.
                 `;

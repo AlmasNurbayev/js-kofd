@@ -37,6 +37,7 @@ async function load(period) {
     sumAllCash: 0,
     sumAllMixed: 0,
     countChecks: 0,
+    availableSum: 0,
     shiftClosed: false,
     cashEject: false,
     dateStart: '',
@@ -220,6 +221,7 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
     sumAllCash: 0,
     sumAllMixed: 0,
     countChecks: 0,
+    availableSum: 0,
     shiftClosed: false,
     cashEject: 0,
     knumber: knumber,
@@ -232,8 +234,9 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
   logger.info(`load - starting get stat for ${knumber} / ${name_kassa}`); 
 
   try {
-    res.data.forEach((element2) => {
+    res.data.forEach((element2, index) => {
       //console.log(element2);
+      if (index === 0) {tableSum.availableSum = element2.availableSum;}
       if (element2.type == 1) {
         if (element2.subType == 2) { // продажа
           tableSum.countChecks++;
@@ -264,8 +267,10 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
         }
       } else if (element2.type == 2) { // смена
         tableSum.shiftClosed = true;
+        //tableSum.availableSum = element2.availableSum;
       } else if (element2.type == 6 && element2.subType == 1) { // выемка
         tableSum.cashEject += element2.sum;
+        //tableSum.availableSum = element2.availableSum;
       }
     });
     tableSum.sumAll = tableSum.sumSale - tableSum.sumReturn;
