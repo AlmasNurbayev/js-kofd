@@ -76,7 +76,7 @@ async function getJWT(iin, pass) {
       }
 
       const decoded = jwt_decode(response.data.data.jwt);
-      console.log(decoded);
+      //console.log(decoded);
 
       let query_insert = `INSERT INTO "public".token
       (BIN, token, working, exp, nbf)

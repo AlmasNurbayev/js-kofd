@@ -275,7 +275,7 @@ async function ReplyData(mode, ctx) {
           
           Данные по кассам:`;
         res.obj.forEach((element) => {
-          if (element.sumAll != 0 || element.cashEject != 0) {
+          if (element.sumAll != 0 || element.cashEject != 0 || element.availableSum != 0) {
             message += `
    - ${element.name_kassa} поступило: <b>${element.sumAll.toLocaleString('ru-RU')}</b>               
       в т.ч. продажи ${element.sumSale.toLocaleString('ru-RU')}, возвраты ${element.sumReturn.toLocaleString('ru-RU')}, выемка ${element.cashEject.toLocaleString('ru-RU')}. `;
