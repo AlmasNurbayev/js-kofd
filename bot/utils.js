@@ -6,6 +6,7 @@ const ChartJsImage = require('chartjs-to-image');
 const fs = require("fs");
 const moment = require('moment');
 const { Markup } = require('telegraf');
+const { getStringFilter } = require('../get/api.js');
 
 // return true if userid contains in db table telegram_users
 // userid - id of telegram user
@@ -73,7 +74,7 @@ async function uploadToTelegram(chatID, path) {
 // chat_id - id of sended chat
 // ctx - object of chat
 // no return
-async function makeChart(res, chat_id, ctx) {
+async function makeChart(res, chat_id, ctx, mode) {
 
   logger.info('bot/utils - starting /makeChart/ to ' + chat_id);
   // подготовка массивов к группировке
@@ -89,7 +90,11 @@ async function makeChart(res, chat_id, ctx) {
       });
       kassa_array.forEach((element2 => { // цикл операций
         element2.name_kassa = element.name_kassa;
-        element2.date = element2.operationDate.split('T')[0];
+        if (mode.includes('d')) {
+          element2.date = element2.operationDate.split('T')[0];
+        } else if (mode.includes('m')) {
+          element2.date = element2.operationDate.slice(0,7);
+        }
         if (element2.type == 1 && element2.subType == 3) {
           element2.sum = element2.sum * -1;
         }
@@ -97,15 +102,33 @@ async function makeChart(res, chat_id, ctx) {
       resAll = resAll.concat(kassa_array); // соединяем массивы касс в один
       //console.table(resAll);
     });
-    let today = new Date;
+    
 
     let data2 = groupAndSum(resAll, ['date', 'name_kassa'], ['sum']);
 
-    today = today.toISOString().split('T')[0]; // нужно добавить ноль на текущую дату, чтобы отразить на диаграмме
-    data2.push({
-      date: today,
-      sum: 0
-    });
+    let dateStart = moment(getStringFilter(mode)[1]);
+    let dateEnd = moment(getStringFilter(mode)[2]);
+    // console.log(mode);
+    // console.log(dateStart, dateEnd);
+    if (mode.includes('d')) {
+      let dif_days = dateEnd.diff(dateStart, 'days');
+      for (let x = 0; x <= dif_days; x++) {
+         let some_day = dateStart.add(1, 'd').toISOString().split('T')[0];
+         data2.push({
+          date: some_day,
+          sum: 0
+        });         
+      };
+    } else if (mode.includes('m')) {
+      let dif_month = dateEnd.diff(dateStart, 'month');
+      for (let x = 0; x <= dif_month; x++) {
+         let some_month = dateStart.add(1, 'M').toISOString().slice(0,7);
+         data2.push({
+          date: some_month,
+          sum: 0
+        });         
+      };      
+    }
 
     let data3 = groupAndSum(data2, ['date'], ['sum']);
 
@@ -114,8 +137,10 @@ async function makeChart(res, chat_id, ctx) {
       return dateB - dateA //сортировка по убывающей дате
     })
     data3.forEach(element => { // добавление дня недели
+      if (mode.includes('d')) {
       moment.locale('ru');
       element.date = element.date + ' (' + moment(element.date).format('ddd') + ')';
+      }
     });
 
     const data3_labels = data3.map(item => item.date);
@@ -145,6 +170,14 @@ async function makeChart(res, chat_id, ctx) {
         type: 'horizontalBar',
         data,
         options: {
+          layout: { //https://www.chartjs.org/docs/2.9.4/configuration/layout.html
+            padding: {
+                left: 0,
+                right: 50,
+                top: 0,
+                bottom: 0
+            }
+          },
           scales: {
             xAxes: [{
               display: false,
@@ -154,8 +187,9 @@ async function makeChart(res, chat_id, ctx) {
           plugins: {
             datalabels: { // https://chartjs-plugin-datalabels.netlify.app/guide/#table-of-contents
               anchor: 'end',
-              align: 'start',
+              align: 'end',
               clamp: false,
+              offset: 5,
               formatter: function (value) {
                 return value.toLocaleString('ru-RU');
               }
@@ -224,7 +258,7 @@ async function ReplyChart(mode, ctx, chat_id) {
       logger.info('bot/utils - ending /ReplyChart/ with mode: ' + mode);
       //const img = makeChart(res['rows']);
       res = res['rows'];
-      makeChart(res, chat_id, ctx);
+      makeChart(res, chat_id, ctx, mode);
       //console.log(JSON.stringify(res));
       let date2 = new Date().toLocaleString("ru-RU");
       writeLog(`bot_request.txt`, String(date2 + ': SUCCESS request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));

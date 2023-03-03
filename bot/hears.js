@@ -177,13 +177,19 @@ function hears(mode, bot) {
 
     }
     if (mode == 'chart') { // hears markup buttons of chart periods
-        bot.hears('chart-10', async (ctx) => {
+        bot.hears('chart-10d', async (ctx) => {
             await ctx.reply('меню скрыто', { reply_markup: { remove_keyboard: true, }, });
-            await ReplyChart('chart-10', ctx, ctx.from.id);
+            await ReplyChart('chart-10d', ctx, ctx.from.id);
         });
     }
+    if (mode == 'chart') { // hears markup buttons of chart periods
+        bot.hears('chart-14m', async (ctx) => {
+            await ctx.reply('меню скрыто', { reply_markup: { remove_keyboard: true, }, });
+            await ReplyChart('chart-14m', ctx, ctx.from.id);
+        });
+    }    
 
-    if (mode == 'скрыть меню') {
+    if (mode == 'скрыть кнопки') {
         hide_menu(bot);
     }
 
@@ -313,9 +319,9 @@ async function getDataCheck(resArray) {
 
 function hide_menu(bot) {
     //bot.ctx.ReplyKeyboardHide();
-    bot.hears('скрыть меню', async (ctx) => {
+    bot.hears('скрыть кнопки', async (ctx) => {
         logger.info('bot/command - markup remove');
-        await ctx.reply('меню скрыто', { reply_markup: { remove_keyboard: true, }, });
+        await ctx.reply('кнопки скрыты', { reply_markup: { remove_keyboard: true, }, });
     });
 }
 

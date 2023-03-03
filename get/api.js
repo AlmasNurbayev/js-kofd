@@ -315,10 +315,13 @@ function getStringFilter(mode, begin, end) {
   } else if (mode === 'прошлый год') {
     dateStart = moment().add(-1, 'y').startOf('year');
     dateEnd = moment().add(-1, 'y').endOf('year');
-  } else if (mode === 'chart-10') {
+  } else if (mode === 'chart-10d') {
     dateStart = moment().add(-9, 'd').startOf('day');
     dateEnd = moment().endOf('day');
     //console.log(dateStart, dateEnd);
+  } else if (mode === 'chart-14m') {
+    dateStart = moment().add(-13, 'M').startOf('month');
+    dateEnd = moment().endOf('month');    
   } else {
     dateStart = moment(begin).startOf('day');
     dateEnd = moment(end).endOf('day');
