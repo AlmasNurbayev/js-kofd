@@ -337,7 +337,38 @@ function getStringFilter(mode, begin, end) {
   return [s2, dateStart, dateEnd, mode];
 }
 
-
+/**
+* @description Получить информацию о продукте из бэкенда сайта
+* @param {string} name наименование товара
+* @returns {Promise<string|Error>} object
+*/
+async function getProduct(name) {
+  logger.info('api - starting getCheck: ' + name);
+  const config = {
+    method: "get",
+    url: process.env.SITE_GET_PRODUCT_URL + name,
+    headers: {
+      "Content-Type": "application/json",
+      //Authorization: token,
+    },
+    httpsAgent: agent,
+    timeout: 10000
+  };
+  try {
+    const res = await axios(config);
+    //console.log(res.data);
+    if (res.data.error) {
+      await writeError(res.data.error, 'getProduct');
+      return;
+    }
+    logger.info('api - ending getProduct: ' + name);
+    //console.log(JSON.stringify(res.data));
+    return res.data;
+  } catch (e) {
+    await writeError(e.stack, 'getProduct');
+    console.log(e.stack)
+  }
+}
 
 
 //console.log(getStringFilter('текущий квартал'));
@@ -348,3 +379,4 @@ exports.getTransaction = getTransaction;
 exports.getQuery = getQuery;
 exports.getStringFilter = getStringFilter;
 exports.getCheck = getCheck;
+exports.getProduct = getProduct;

@@ -3,7 +3,8 @@ const { writeError, readLog, logger } = require('../logs/logs-utils.js');
 const { writeLog } = require('../logs/logs-utils.js');
 const { alarmAdmin, uploadToTelegram, ReplyData, ReplyChart, parseResRaws } = require('./utils.js');
 const { Markup } = require('telegraf');
-const { getCheck, getJWT } = require('../get/api.js');
+const { getCheck, getJWT, getProduct } = require('../get/api.js');
+const dotenv = require("dotenv");
 //const { fstat } = require('fs');
 
 let resAll = [];
@@ -247,6 +248,7 @@ async function actions_oper(bot) {
 }
 
 async function actions_check(bot) {
+    dotenv.config();
     bot.action(/check-/i, async (ctx) => {
         //ctx.reply('меню скрыто', { reply_markup: { remove_keyboard: true, }, });
         console.log(ctx.match.input);
@@ -262,27 +264,56 @@ async function actions_check(bot) {
             return;
         }
         let message = '';
+        let row_name = '';
+        let image_url = '';
         const resArray = ctx.match.input.split('-');
         const index = resArray[1];
         const day = resArray[2] + resArray[3] + resArray[4];
         let res = await getDataCheck(resArray);
         if (typeof (res) == 'object') {
+            let index_top = false
             res.data.forEach((element, index2) => {
+
                 if (index2 == 0) {
-                    message += 'чек №' + index + ' - ' + day + '   ' + element.text + '\n';
+                    message += 'чек №' + index + ' - ' + day + ' ' + element.text + '\n';
                 } else if (index2 == res.data.length-1) {
                     // последнюю строку не выводим
                 } else {
-                    message += element.text + '\n';
+                    if (index_top) {
+                        message += element.text + '\n'; // обычная строка
+                    }
+                    if (element.text.includes('*******')) {
+                        index_top = true;
+                        row_name =  res.data[index2+1].text;
+                        row_name = row_name.slice(0, row_name.indexOf(' ('));
+                        // console.log(row_name);
+                        // console.log(await getProduct(row_name));
+                        
+                    }
                 }
                 
             })
+            let product = await getProduct(row_name);
+            if (product) {
+                let image = product.image_registry.find(e => e.main === true);
+                image_url = process.env.SITE_GET_IMAGES_URL + '/' + image.full_name;
+            }
+
+
+
         } else {
             message = 'не удалось получить данные';
             date = new Date().toLocaleString("ru-RU");
             writeLog(`bot_request.txt`, String(date + ': ERROR request: <' + ctx.match.input + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
         }
-        ctx.reply(message);
+        message = message.replaceAll('   ','');
+        if (image_url !== '') {
+            ctx.replyWithPhoto({ url: image_url}, {caption: message.slice(0,1000) });
+            //message += '<a href="' + image_url + '">Фото</a>';
+            //ctx.sendMessage(message, {parse_mode: 'HTML'});
+        } else {
+            ctx.reply(message);
+        };
         date = new Date().toLocaleString("ru-RU");
         writeLog(`bot_request.txt`, String(date + ': SUCCESS request: <' + ctx.match.input + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
     });
