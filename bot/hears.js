@@ -233,8 +233,13 @@ async function actions_oper(bot) {
                 subarray.forEach ((element, index) =>{
                    if (index != 0) {
                     message = 'продолжение выбора чеков';
+                    setTimeout(()=>{
+                        ctx.replyWithHTML(message, Markup.inlineKeyboard(element));    
+                       }, 500);
+                   } else {
+                    ctx.replyWithHTML(message, Markup.inlineKeyboard(element));    
                    }     
-                   ctx.replyWithHTML(message, Markup.inlineKeyboard(element));    
+
                 });
             } else {
                 ctx.replyWithHTML(message, Markup.inlineKeyboard(buttons));
