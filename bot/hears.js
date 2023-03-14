@@ -269,14 +269,13 @@ async function actions_check(bot) {
             return;
         }
         let message = '';
-        let row_name = '';
-        let image_url = '';
+        let image_url = [];
         const resArray = ctx.match.input.split('-');
         const index = resArray[1];
         const day = resArray[2] + resArray[3] + resArray[4];
         let res = await getDataCheck(resArray);
         if (typeof (res) == 'object') {
-            let index_top = false
+            
             res.data.forEach((element, index2) => {
 
                 if (index2 == 0) {
@@ -284,44 +283,116 @@ async function actions_check(bot) {
                 } else if (index2 == res.data.length-1) {
                     // последнюю строку не выводим
                 } else {
-                    if (index_top) {
+                    // if (index_top) {
                         message += element.text + '\n'; // обычная строка
-                    }
-                    if (element.text.includes('*******')) {
-                        index_top = true;
-                        row_name =  res.data[index2+1].text;
-                        row_name = row_name.slice(0, row_name.indexOf(' ('));
-                        // console.log(row_name);
-                        // console.log(await getProduct(row_name));
+                    // }
+                    // if (element.text.includes('*******')) {
+                    //     index_top = true;
+                    //     row_name =  res.data[index2+1].text;
+                    //     row_name = row_name.slice(0, row_name.indexOf(' ('));
+                    //     // console.log(row_name);
+                    //     // console.log(await getProduct(row_name));
                         
-                    }
+                    // }
                 }
                 
             })
-            let product = await getProduct(row_name);
-            if (product) {
-                let image = product.image_registry.find(e => e.main === true);
-                image_url = process.env.SITE_GET_IMAGES_URL + '/' + image.full_name;
-            }
-
-
-
-        } else {
+            let names = extractNames(res.data);
+            let names_promise = [];
+            names.forEach((e) => {
+                names_promise.push(getProduct(e));
+            });
+            let res_promise = await Promise.all(names_promise);
+            //console.log(res_promise);
+            res_promise.forEach((e) => {
+                if (e) {
+                    if (e.image_registry) {
+                        let image = e.image_registry.find(e => e.main === true);
+                        image_url.push({
+                            type: 'photo',
+                            media: {url: process.env.SITE_GET_IMAGES_URL + '/' + image.full_name},
+                            caption: e.name_1c,
+                        });
+                    }                
+    
+                }
+            })
+         } else {
             message = 'не удалось получить данные';
             date = new Date().toLocaleString("ru-RU");
             writeLog(`bot_request.txt`, String(date + ': ERROR request: <' + ctx.match.input + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
         }
         message = message.replaceAll('   ','');
-        if (image_url !== '') {
-            ctx.replyWithPhoto({ url: image_url}, {caption: message.slice(0,1000) });
-            //message += '<a href="' + image_url + '">Фото</a>';
-            //ctx.sendMessage(message, {parse_mode: 'HTML'});
-        } else {
-            ctx.reply(message);
-        };
+
+        if (image_url.length > 1) { // отправляем одним сообщением чек, и вторым сообщением группу фото
+            let m = await ctx.reply(message);  
+            await ctx.replyWithMediaGroup(image_url, {reply_to_message_id: m.message_id});
+        } else if (image_url.length === 1) { // отправляем одним сообщением чек, и одну картинку
+            await ctx.replyWithPhoto({url: image_url[0].media.url}, {caption: message.slice(0,1000)}); // не работает параметр reply_to_message_id    
+        } else { // отправляем только чек, если не найдены фото
+            await ctx.reply(message);  
+        }
+        // else {
+        //     ctx.reply(message);
+        // };
         date = new Date().toLocaleString("ru-RU");
         writeLog(`bot_request.txt`, String(date + ': SUCCESS request: <' + ctx.match.input + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
     });
+}
+
+function extractNames(data) {
+    //console.log(data);
+    let indexStart = 0;
+    let indexEnd = 0;
+    data.forEach((element, index) => {
+        if (element.text === '*********************************************** ' && indexStart === 0) {
+            indexStart = index;
+        }
+        if (element.text === '------------------------------------------------' && indexEnd === 0) {
+            indexEnd = index;
+        }
+        if (element.text === 'СКИДКА                                          ' && indexEnd === 0) {
+            indexEnd = index;
+        }        
+
+    })
+    let data2 = data.slice(indexStart+1,indexEnd);
+    //console.log(data2);
+    let dataEnd = [];
+    let dataNames = [];
+
+    let names = '';
+    data2.forEach((element, index) => {
+        let findEnd = element.text.indexOf('₸');
+        names = names + element.text;
+        if (findEnd !== -1) {
+            dataEnd.push(index);
+            dataNames.push(names)
+            names = '';
+            // if (index === 0) {
+            //     let row_name = element.text.slice(0, findEnd-1);
+            //     let name = row_name.slice(0, row_name.indexOf(' ('));
+            //     dataNames.push(name)
+            // }
+        } 
+
+    })
+    dataNames = dataNames.map((e, index) => {
+        let findEnd = e.indexOf(' (');
+        let name1 = '';
+        if (findEnd !== -1) {
+          name1 = e.slice(0, findEnd);  
+          let findDouble = e.indexOf('  ');
+          if (findDouble !== -1) {
+            name1 = name1.replaceAll('  ','');
+          }
+          
+        } else (delete dataNames[index])
+        return name1;
+
+    })
+    return dataNames;
+
 }
 
 async function getDataCheck(resArray) {
