@@ -275,7 +275,7 @@ async function actions_check(bot) {
         const day = resArray[2] + resArray[3] + resArray[4];
         let res = await getDataCheck(resArray);
         if (typeof (res) == 'object') {
-            
+            let index_top = false;
             res.data.forEach((element, index2) => {
 
                 if (index2 == 0) {
@@ -283,17 +283,18 @@ async function actions_check(bot) {
                 } else if (index2 == res.data.length-1) {
                     // последнюю строку не выводим
                 } else {
-                    // if (index_top) {
+                    if (index_top) {
                         message += element.text + '\n'; // обычная строка
+                    }    
                     // }
-                    // if (element.text.includes('*******')) {
-                    //     index_top = true;
+                     if (element.text.includes('*******')) {
+                         index_top = true;
                     //     row_name =  res.data[index2+1].text;
                     //     row_name = row_name.slice(0, row_name.indexOf(' ('));
                     //     // console.log(row_name);
                     //     // console.log(await getProduct(row_name));
                         
-                    // }
+                    }
                 }
                 
             })
