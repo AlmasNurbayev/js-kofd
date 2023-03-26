@@ -343,6 +343,8 @@ function getStringFilter(mode, begin, end) {
 * @returns {Promise<string|Error>} object
 */
 async function getProduct(name) {
+  //process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
   logger.info('api - starting getCheck: ' + name);
   const config = {
     method: "get",
@@ -351,8 +353,12 @@ async function getProduct(name) {
       "Content-Type": "application/json",
       //Authorization: token,
     },
-    httpsAgent: agent,
-    timeout: 10000
+    httpsAgent: new https.Agent({
+      checkServerIdentity: function (host, cert) {
+        return undefined;
+      }
+    }),
+    timeout: 14000
   };
   try {
     const res = await axios(config);

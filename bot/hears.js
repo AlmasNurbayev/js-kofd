@@ -314,7 +314,10 @@ async function actions_check(bot) {
                             media: {url: process.env.SITE_GET_IMAGES_URL + '/' + image.full_name},
                             caption: e.name_1c,
                         });
-                    }                
+                    }  
+                    if (e.price_registry) {
+                        
+                    }               
     
                 }
             })
