@@ -10,3 +10,5 @@
 Используемый стек:
  - node js с модулями - axios (get и post запросы к ОФД jusan Mobile), telegraf (интерфейс бота), pg (обращения к Postgres), moment (даты), pino (логи), chart-js (диаграммы).
  - репозиторий - https://github.com/AlmasNurbayev/js-kofd
+
+<image src="/public_images/bot_stat.png" alt="главная статистика">
