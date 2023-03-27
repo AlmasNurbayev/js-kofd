@@ -84,7 +84,7 @@ async function getJWT(iin, pass) {
       ('${iin}', '${response.data.data.jwt}', ${true}, ${decoded.exp}, ${decoded.nbf})
       `;
       const res_token_insert = await getQuery(query_insert);
-      await writeLog("token_insert.txt", res_token_insert);
+      //await writeLog("token_insert.txt", res_token_insert);
       logger.info('api - insert token to db');
 
       logger.info('api - ending getJWT');
