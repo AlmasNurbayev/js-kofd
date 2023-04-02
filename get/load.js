@@ -116,8 +116,8 @@ async function load(period) {
       getSummary(tableSumAll, getStat(element3, element3.id_kassa, element3.name_kassa, element3.id_organization, element3.dateStart, element3.dateEnd));
     });
     //fs.appendFile("get/response.txt", JSON.stringify(res) + "\n", (error2) => { });
-    writeLog(`tableSumAll.txt`, tableSumAll, false);
-    writeLog(`rows.txt`, res2, false);
+    //writeLog(`tableSumAll.txt`, tableSumAll, false);
+    //writeLog(`rows.txt`, res2, false);
     //console.log(tableSumAll);
     return {
       'table': tableSumAll,
@@ -194,7 +194,7 @@ async function writeOperation(res, id_kassa, name_kassa, id_organization) {
     //fs.writeFileSync('logs/insert.txt', String(new Date()) + " " + sql);
     //console.log(sql);
     let res2 = await getQuery(sql);
-    writeLog(`writeOperation.txt`, JSON.stringify(res2), false);
+    //writeLog(`writeOperation.txt`, JSON.stringify(res2), false);
     return res2;
   }
   catch (err) {

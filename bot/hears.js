@@ -200,7 +200,7 @@ async function actions_oper(bot) {
     bot.action(/operations/i, (ctx) => {
         //ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
         const dateInButton = ctx.match.input.slice(11);
-        //console.log(dateInButton);
+        //console.log(ctx);
         let date = new Date().toLocaleString("ru-RU");
         writeLog(`bot_request.txt`, String(date + ': receive request operations: <' + dateInButton + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
 
@@ -222,7 +222,7 @@ async function actions_oper(bot) {
         list.forEach((e, index) => {
             //console.log(JSON.stringify(e));
             message += `${index}. ${e.elementKassa} ${e.elementTypeOper} ${e.elementSum.toLocaleString('ru-RU')} ${e.elementTypePay} ${e.elementTime}\n`;
-            buttons.push(Markup.button.callback(String(index), "check-" + index + "-" + dateInButton + "-" + e.elementId + "-" + e.elementKnumber));
+            buttons.push(Markup.button.callback(String(index), "check-" + index + "-" + dateInButton + "-" + e.elementId + "-" + e.elementKnumber + "-" + resAll.bot_message_id));
         })
         if (buttons.length > 0) {
             if (buttons.length > 8) {
@@ -234,7 +234,7 @@ async function actions_oper(bot) {
                    if (index != 0) {
                     message = 'продолжение выбора чеков';
                     setTimeout(()=>{
-                        ctx.replyWithHTML(message, Markup.inlineKeyboard(element));    
+                        sendedMessage = ctx.replyWithHTML(message, Markup.inlineKeyboard(element));    
                        }, 500);
                    } else {
                     ctx.replyWithHTML(message, Markup.inlineKeyboard(element));    
@@ -244,6 +244,7 @@ async function actions_oper(bot) {
             } else {
                 ctx.replyWithHTML(message, Markup.inlineKeyboard(buttons));
             }
+            
             date = new Date().toLocaleString("ru-RU");
             writeLog(`bot_request.txt`, String(date + ': SUCCESS receive operations: <' + dateInButton + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
     
@@ -273,6 +274,8 @@ async function actions_check(bot) {
         const resArray = ctx.match.input.split('-');
         const index = resArray[1];
         const day = resArray[2] + resArray[3] + resArray[4];
+        const bot_message_id = Number(resArray[7]);
+ 
         let res = await getDataCheck(resArray);
         if (typeof (res) == 'object') {
             let index_top = false;
@@ -327,14 +330,17 @@ async function actions_check(bot) {
             writeLog(`bot_request.txt`, String(date + ': ERROR request: <' + ctx.match.input + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
         }
         message = message.replaceAll('   ','');
-
+        
         if (image_url.length > 1) { // отправляем одним сообщением чек, и вторым сообщением группу фото
-            let m = await ctx.reply(message);  
+            let m = await ctx.reply(message, {reply_to_message_id: bot_message_id} );  
+            // console.log(JSON.stringify(m));
+            // console.log(m.message_id);
+
             await ctx.replyWithMediaGroup(image_url, {reply_to_message_id: m.message_id});
         } else if (image_url.length === 1) { // отправляем одним сообщением чек, и одну картинку
-            await ctx.replyWithPhoto({url: image_url[0].media.url}, {caption: message.slice(0,1000)}); // не работает параметр reply_to_message_id    
+            await ctx.replyWithPhoto({url: image_url[0].media.url}, {caption: message.slice(0,1000), reply_to_message_id: bot_message_id}  );     
         } else { // отправляем только чек, если не найдены фото
-            await ctx.reply(message);  
+            await ctx.reply(message, {reply_to_message_id: bot_message_id});  
         }
         // else {
         //     ctx.reply(message);
@@ -401,8 +407,8 @@ function extractNames(data) {
 
 async function getDataCheck(resArray) {
 
-    const knumber = resArray[resArray.length - 1];
-    const id = resArray[resArray.length - 2];
+    const knumber = resArray[resArray.length - 2];
+    const id = resArray[resArray.length - 3];
     //console.log(knumber, id);
     let token = "";
     //console.log(resArray);

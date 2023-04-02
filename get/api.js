@@ -62,7 +62,7 @@ async function getJWT(iin, pass) {
 //    console.log(res_token_select.rows);
     
     if (res_token_select.rows.length > 0) {
-        logger.info('api - found JWT in DB ' + res_token_select.rows[0].token);
+        logger.info('api - found JWT in DB ' + res_token_select.rows[0].token.slice(0,20));
         logger.info('api - ending getJWT');
         return res_token_select.rows[0].token;
     } else {
@@ -84,7 +84,7 @@ async function getJWT(iin, pass) {
       ('${iin}', '${response.data.data.jwt}', ${true}, ${decoded.exp}, ${decoded.nbf})
       `;
       const res_token_insert = await getQuery(query_insert);
-      await writeLog("token_insert.txt", res_token_insert);
+      //await writeLog("token_insert.txt", res_token_insert);
       logger.info('api - insert token to db');
 
       logger.info('api - ending getJWT');

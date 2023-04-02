@@ -292,11 +292,11 @@ async function ReplyData(mode, ctx) {
   try {
     //ctx.reply("не рано ли?");
     //if (ctx.message.text == 'последний день') {
-    let resAll = await load(mode).then(res => {
+    let bot_message;
+    let resAll = await load(mode)
       logger.info('bot/utils - ending /ReplyData/ with mode: ' + mode);
       //console.log(JSON.stringify(res['rows']));
-      let resAll = res;
-      res = res['table'];
+     let res = resAll['table'];
 
       message = `Сумма продаж за "${mode}" = ${res.dateStart.slice(0, 10)} - ${res.dateEnd.slice(0, 10)}
   Чистое поступление: <b>${res.sumAll.toLocaleString('ru-RU')}</b>`;
@@ -330,16 +330,16 @@ async function ReplyData(mode, ctx) {
       writeLog(`bot_request.txt`, String(date2 + ': SUCCESS request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
 
       if (mode.includes('день')) {
-      ctx.replyWithHTML(message, Markup.inlineKeyboard([
+      bot_message = await ctx.replyWithHTML(message, Markup.inlineKeyboard([
         Markup.button.callback("🔍все операции", "operations-" + res.dateStart.slice(0, 10))])//-" + res.dateStart)]),
       );} else {
-        ctx.replyWithHTML(message);
+        bot_message = await ctx.replyWithHTML(message);
       }
 
+      resAll.bot_message_id = bot_message.message_id;
       return resAll;
-      //console.log(res.dateStart);
-    });
-    return resAll;
+
+    
   }
   //}
   catch (err) {
