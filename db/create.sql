@@ -44,3 +44,11 @@ CREATE TABLE "public".telegram_users (
     id varchar UNIQUE,
     username varchar);
 ALTER TABLE "public".telegram_users OWNER TO ps;
+
+CREATE TABLE "public".token (
+    id SERIAL PRIMARY KEY,
+    bin varchar,
+    token varchar,
+    exp int,
+    nbf int,
+    working boolean);

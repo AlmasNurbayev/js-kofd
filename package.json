@@ -17,7 +17,6 @@
         "chart.js": "^4.1.2",
         "chartjs-to-image": "^1.1.0",
         "dotenv": "^16.0.3",
-        "express": "^4.18.2",
         "fs": "^0.0.1-security",
         "jwt-decode": "^3.1.2",
         "moment": "^2.29.4",
@@ -27,7 +26,6 @@
         "uuid": "^9.0.0"
     },
     "devDependencies": {
-        "eslint": "^8.32.0",
-        "prisma": "^4.8.1"
+        "eslint": "^8.32.0"
     }
 }
