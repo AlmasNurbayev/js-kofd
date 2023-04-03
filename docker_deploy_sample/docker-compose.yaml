@@ -1,0 +1,42 @@
+version: '3.8'
+services:
+  db:
+    hostname: postgres
+    image: postgres:15.2-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: "kofd"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    #ports:
+    #  - 5432:5432
+    volumes: 
+      - pgdata:/var/lib/postgresql/data
+      - ./create.sql:/docker-entrypoint-initdb.d/create_tables.sql 
+  bot:
+    env_file: .env
+    container_name: js-kofd
+    build:
+        context: .
+        #dockerfile: Dockerfile
+    #image: node:18-alpine --!!!! вот это не надо было!
+    # рабочая директория
+    working_dir: /app
+    # анонимный том
+    # `rw` означает `read/write` - чтение/запись
+    volumes:
+      - app:/app
+      #- app:/app/node_modules
+      #- app:/app/logs
+    # сервис, от которого зависит работоспособность данного сервиса
+    depends_on:
+      - db
+    restart: always
+    # команда для запуска сервера для разработки
+    command: npm run index
+
+
+volumes:
+    pgdata:
+    app:
