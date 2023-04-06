@@ -16,7 +16,7 @@ jobs:
         node-version: [18.x]    
     steps:
       - uses: actions/checkout@v3
-      - run: |
+      - script: |
           git pull
           npx prisma migrate deploy
           npm install
