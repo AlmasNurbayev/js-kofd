@@ -20,7 +20,7 @@ jobs:
         - name: init repo
           #working-directory: /home/almas/js-kofd ? 
           run: |
-            cd /home/almas/js-kofd
+            cd /home/js-kofd
             git pull
             npx prisma migrate deploy
             npm install
