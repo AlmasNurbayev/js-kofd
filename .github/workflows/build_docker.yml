@@ -19,7 +19,7 @@ jobs:
           uses: actions/checkout@v3
         - name: init repo
           #working-directory: /home/almas/js-kofd ? 
-          #npx prisma migrate deploy
+          #npx prisma migrate deploy // нужен .env
           run: |
             cd /home/js-kofd
             git pull
