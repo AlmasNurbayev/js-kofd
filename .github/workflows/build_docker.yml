@@ -17,8 +17,6 @@ jobs:
     steps:
         - name: get repo
           uses: actions/checkout@v3
-          with:
-              path: /home/almas/js-kofd
         - name: init repo
           working-directory: /home/almas/js-kofd  
           run:
