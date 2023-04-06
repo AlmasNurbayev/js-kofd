@@ -1,0 +1,23 @@
+name: build and run docker container
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        node-version: [18.x]    
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          cd /home/almas/js-kofd
+          git pull
+          npm install
+        working-directory: /home/almas/js-kofd

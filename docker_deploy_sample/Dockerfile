@@ -11,6 +11,7 @@ COPY package*.json ./
 #COPY ["package.json", "package-lock.json*", "./"]
 
 RUN npm install --production
+RUN npx prisma migrate deploy
 
 COPY . .
 
