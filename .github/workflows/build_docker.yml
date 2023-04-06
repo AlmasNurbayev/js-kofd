@@ -15,11 +15,11 @@ jobs:
       matrix:
         node-version: [18.x]    
     steps:
-      - uses: actions/checkout@v3
-      - with:
-        script: |
-          cd /home/almas/js-kofd
-          git pull
-          npx prisma migrate deploy
-          npm install
+        uses: actions/checkout@v3
+        with:
+          script: |
+            cd /home/almas/js-kofd
+            git pull
+            npx prisma migrate deploy
+            npm install
         working-directory: /home/almas/js-kofd
