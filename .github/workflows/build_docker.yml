@@ -15,11 +15,16 @@ jobs:
       matrix:
         node-version: [18.x]    
     steps:
-        - uses: actions/checkout@v3
-        - run:
+        - name: get repo
+          uses: actions/checkout@v3
+          with:
+              path: /home/almas/js-kofd
+        - name: init repo
+          working-directory: /home/almas/js-kofd  
+          run:
             cd /home/almas/js-kofd
             git pull
             npx prisma migrate deploy
             npm install
-          working-directory: /home/almas/js-kofd  
+          
   
