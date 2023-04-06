@@ -16,8 +16,7 @@ jobs:
         node-version: [18.x]    
     steps:
         uses: actions/checkout@v3
-        with:
-          script: |
+        run:
             cd /home/almas/js-kofd
             git pull
             npx prisma migrate deploy
