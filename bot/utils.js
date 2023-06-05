@@ -382,7 +382,7 @@ function parseResRaws(rows, controlDate) {
       }
       let elementTypePay;
       //if (typeof (element.paymenttypes) == 'object') {
-        if (element.paymenttypes.length === '0,1') {
+        if (element.paymenttypes === '0,1') {
           elementTypePay = 'смешанно';
         } else if (element.paymenttypes === '0') {
           elementTypePay = 'кеш';
