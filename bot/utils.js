@@ -353,63 +353,66 @@ async function ReplyData(mode, ctx) {
 
 function parseResRaws(rows, controlDate) {
   logger.info('bot-utiles - parseResRaws starting' + controlDate);
-  //console.log(JSON.stringify(rows));
+  
+  
+
+  rows = rows.filter((e) => { //фильтрация по типу операций
+    return e.type_operation === 1;
+  });
+  rows = rows.filter((e) => { //фильтрация по типу операций
+    return e.subtype === 2 || e.subtype === 3;
+  });
+
 
   const list = [];
   if (rows.length == 0) {
     return list;
   }
   
-  rows.forEach((kassa) => {
-
-    let kassa_array = kassa.data.filter((e) => { //фильтрация по типу операций
-      return e.type == 1;
-    });
-    kassa_array = kassa.data.filter((e) => {
-      return e.subType == 2 || e.subType == 3;
-    });
-
-    kassa_array.forEach((element) => {
-      //console.log(JSON.stringify(element));
+  rows.forEach((element) => {
+    
       let elementTypeOper, elementSum;
-      if (element.type == 1 && element.subType == 3) {
+      if (element.type_operation == 1 && element.subtype == 3) {
         elementTypeOper = 'возврат';
-        elementSum = -1 * element.sum;
+        elementSum = -1 * element.sum_operation;
       }
-      if (element.type == 1 && element.subType == 2) {
+      if (element.type_operation == 1 && element.subtype == 2) {
         elementTypeOper = 'продажа';
-        elementSum = element.sum;
+        elementSum = element.sum_operation;
       }
       let elementTypePay;
-      if (typeof (element.paymentTypes) == 'object') {
-        if (element.paymentTypes.length == 2) {
+      //if (typeof (element.paymenttypes) == 'object') {
+        if (element.paymenttypes.length === '0,1') {
           elementTypePay = 'смешанно';
-        } else if (element.paymentTypes[0] == 0) {
+        } else if (element.paymenttypes === '0') {
           elementTypePay = 'кеш';
-        } else if (element.paymentTypes[0] == 1) {
+        } else if (element.paymenttypes[0] === '1') {
           elementTypePay = 'карта';
         }
-      }
+      //}
       // console.log(String(element.operationDate).slice(0,10));
       // console.log(controlDate);
-      if (String(element.operationDate).slice(0,10) == controlDate) { // сверка даты операции и переданной даты
+      //if (String(element.operationDate).slice(0,10) == controlDate) { // сверка даты операции и переданной даты
         list.push({
-          elementToken: kassa.token,
-          elementKnumber: kassa.knumber,
-          elementKassa: kassa.name_kassa,
+          //elementToken: kassa.token,
+          elementKnumber: element.knumber,
+          elementKassa: element.name_kassa,
           elementTypeOper: elementTypeOper,
           elementSum: elementSum,
           elementTypePay: elementTypePay,
           elementId: element.id,
-          elementTime: element.operationDate.slice(11, 16),
-          check: {}
+          elementTime: element.operationdate.toLocaleString("ru-RU").slice(12, 17),
+          check: element.cheque,
+          names: element.names,
         });
-      }
+      //}
     })
-  });
   logger.info('bot-utiles - parseResRaws ending' + controlDate);
   return list;
 }
+
+
+
 
 exports.alarmAdmin = alarmAdmin;
 exports.isAdmin = isAdmin;

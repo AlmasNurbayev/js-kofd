@@ -190,7 +190,8 @@ async function getCheck(id, knumber, token) {
     const res = await axios(config);
     //console.log(res.data);
     if (res.data.error) {
-      await writeError(res.data.error, 'getCheck');
+      await writeError(JSON.stringify(res.data.error), 'getCheck');
+      console.log(res.data.error);
       return;
     }
     logger.info('api - ending getCheck: ' + id + " - " + knumber);

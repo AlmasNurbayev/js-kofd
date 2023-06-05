@@ -1,9 +1,10 @@
 //const e = require('express');
 const { writeError, readLog, logger } = require('../logs/logs-utils.js');
 const { writeLog } = require('../logs/logs-utils.js');
-const { alarmAdmin, uploadToTelegram, ReplyData, ReplyChart, parseResRaws } = require('./utils.js');
+const {extractNames } = require('../get/load.js');
+const { alarmAdmin, uploadToTelegram, ReplyData, ReplyChart, parseResRaws,  } = require('./utils.js');
 const { Markup } = require('telegraf');
-const { getCheck, getJWT, getProduct } = require('../get/api.js');
+const { getCheck, getProduct, getQuery } = require('../get/api.js');
 const dotenv = require("dotenv");
 //const { fstat } = require('fs');
 
@@ -208,48 +209,66 @@ async function actions_oper(bot) {
         //console.log('--- ' + dateInButton);
         let message = '';
         let buttons = [];
-        if (resAll.length == 0) {
-            ctx.reply('для получения детальных операций, необходимо обновить статистику нужного периода');
-            logger.error('bot/hears - ending /Operations/ - not data ');
-            return;
-        }
-        //console.log(JSON.stringify(resAll));
+        // if (resAll.length == 0) {
+        //     ctx.reply('для получения детальных операций, необходимо обновить статистику нужного периода');
+        //     logger.error('bot/hears - ending /Operations/ - not data ');
+        //     return;
+        // }
+        console.log(dateInButton);
+        let sql = `select * from "transaction"
+        join (select id as id_kassa, name_kassa, znumber, snumber from kassa) as kassa 
+        on kassa.id_kassa  = transaction.id_kassa
+        where 
+        operationdate > '${dateInButton}T00:00:00.000' and
+        operationdate < '${dateInButton}T23:59:59.999'`;
         let list = [];
-        list = parseResRaws(resAll.rows, dateInButton);
-        if (list.length > 0) {
-            list.sort((x, y) => x.elementTime.localeCompare(y.elementTime));
-        }    
-        list.forEach((e, index) => {
-            //console.log(JSON.stringify(e));
-            message += `${index}. ${e.elementKassa} ${e.elementTypeOper} ${e.elementSum.toLocaleString('ru-RU')} ${e.elementTypePay} ${e.elementTime}\n`;
-            buttons.push(Markup.button.callback(String(index), "check-" + index + "-" + dateInButton + "-" + e.elementId + "-" + e.elementKnumber + "-" + resAll.bot_message_id));
-        })
-        if (buttons.length > 0) {
-            if (buttons.length > 8) {
-                let subarray = []; //разбиваем массив в подмассивы по 8 кнопок
-                for (let i = 0; i <Math.ceil(buttons.length/8); i++){
-                    subarray[i] = buttons.slice((i*8), (i*8) + 8);
-                }
-                subarray.forEach ((element, index) =>{
-                   if (index != 0) {
-                    message = 'продолжение выбора чеков';
-                    setTimeout(()=>{
-                        sendedMessage = ctx.replyWithHTML(message, Markup.inlineKeyboard(element));    
-                       }, 500);
-                   } else {
-                    ctx.replyWithHTML(message, Markup.inlineKeyboard(element));    
-                   }     
-
-                });
-            } else {
-                ctx.replyWithHTML(message, Markup.inlineKeyboard(buttons));
-            }
+        let trans_db = getQuery(sql).then(res => {
+            //console.log('res.rows', res.rows);     
+            list = parseResRaws(res.rows, dateInButton);    
+            //console.log('list', list);  
             
-            date = new Date().toLocaleString("ru-RU");
-            writeLog(`bot_request.txt`, String(date + ': SUCCESS receive operations: <' + dateInButton + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
+            if (list.length > 0) {
+                list.sort((x, y) => x.elementTime.localeCompare(y.elementTime));
+            }    
+            list.forEach((e, index) => {
+                //console.log(JSON.stringify(e));
+                message += `${index}. ${e.elementKassa} ${e.elementTypeOper} ${e.elementSum.toLocaleString('ru-RU')} ${e.elementTypePay} ${e.elementTime}\n`;
+                buttons.push(Markup.button.callback(String(index), "check-" + index + "-" + dateInButton + "-" + e.elementId + "-" + e.elementKnumber + "-" + resAll.bot_message_id));
+            })
+            if (buttons.length > 0) {
+                if (buttons.length > 8) {
+                    let subarray = []; //разбиваем массив в подмассивы по 8 кнопок
+                    for (let i = 0; i <Math.ceil(buttons.length/8); i++){
+                        subarray[i] = buttons.slice((i*8), (i*8) + 8);
+                    }
+                    subarray.forEach ((element, index) =>{
+                       if (index != 0) {
+                        message = 'продолжение выбора чеков';
+                        setTimeout(()=>{
+                            let sendedMessage = ctx.replyWithHTML(message, Markup.inlineKeyboard(element));    
+                           }, 500);
+                       } else {
+                        ctx.replyWithHTML(message, Markup.inlineKeyboard(element));    
+                       }     
     
-        }
-        //ctx.reply(message);
+                    });
+                } else {
+                    ctx.replyWithHTML(message, Markup.inlineKeyboard(buttons));
+                }
+                
+                date = new Date().toLocaleString("ru-RU");
+                writeLog(`bot_request.txt`, String(date + ': SUCCESS receive operations: <' + dateInButton + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
+        
+            }
+            //ctx.reply(message);
+                
+
+        });
+          
+        return
+
+        //let list = [];
+        //list = parseResRaws(resAll.rows, dateInButton);
     })
 }
 
@@ -261,29 +280,36 @@ async function actions_check(bot) {
         let date = new Date().toLocaleString("ru-RU");
         writeLog(`bot_request.txt`, String(date + ': receive request: <' + ctx.match.input + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
 
-        if (resAll.length == 0) {
-            ctx.reply('для получения детальных операций, необходимо обновить статистику нужного периода');
-            logger.error('bot/hears - ending /Check/ - not data resAll');
-            date = new Date().toLocaleString("ru-RU");
-            writeLog(`bot_request.txt`, String(date + ': ERROR request: <' + ctx.match.input + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
+        // if (resAll.length == 0) {
+        //     ctx.reply('для получения детальных операций, необходимо обновить статистику нужного периода');
+        //     logger.error('bot/hears - ending /Check/ - not data resAll');
+        //     date = new Date().toLocaleString("ru-RU");
+        //     writeLog(`bot_request.txt`, String(date + ': ERROR request: <' + ctx.match.input + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
 
-            return;
-        }
+        //     return;
+        // }
         let message = '';
         let image_url = [];
         const resArray = ctx.match.input.split('-');
         const index = resArray[1];
         const day = resArray[2] + resArray[3] + resArray[4];
+        const id_trans = resArray[5];
         const bot_message_id = Number(resArray[7]);
- 
-        let res = await getDataCheck(resArray);
+        //console.log(id_trans);
+
+        let sql = `select * from transaction where id = '${id_trans}'`
+        let res = await getQuery(sql);
+        res = res.rows[0];
+        
         if (typeof (res) == 'object') {
             let index_top = false;
-            res.data.forEach((element, index2) => {
+            //console.log('res', res);
+            let check = JSON.parse(res.cheque);
+            check.data.forEach((element, index2) => {
 
                 if (index2 == 0) {
                     message += 'чек №' + index + ' - ' + day + ' ' + element.text + '\n';
-                } else if (index2 == res.data.length-1) {
+                } else if (index2 == check.data.length-1) {
                     // последнюю строку не выводим
                 } else {
                     if (index_top) {
@@ -301,7 +327,7 @@ async function actions_check(bot) {
                 }
                 
             })
-            let names = extractNames(res.data);
+            let names = JSON.parse(res.names);
             let names_promise = [];
             names.forEach((e) => {
                 names_promise.push(getProduct(e));
@@ -350,89 +376,35 @@ async function actions_check(bot) {
     });
 }
 
-function extractNames(data) {
-    //console.log(data);
-    let indexStart = 0;
-    let indexEnd = 0;
-    data.forEach((element, index) => {
-        if (element.text === '*********************************************** ' && indexStart === 0) {
-            indexStart = index;
-        }
-        if (element.text === '------------------------------------------------' && indexEnd === 0) {
-            indexEnd = index;
-        }
-        if (element.text === 'СКИДКА                                          ' && indexEnd === 0) {
-            indexEnd = index;
-        }        
 
-    })
-    let data2 = data.slice(indexStart+1,indexEnd);
-    //console.log(data2);
-    let dataEnd = [];
-    let dataNames = [];
+// async function getDataCheck(resArray) {
 
-    let names = '';
-    data2.forEach((element, index) => {
-        let findEnd = element.text.indexOf('₸');
-        names = names + element.text;
-        if (findEnd !== -1) {
-            dataEnd.push(index);
-            dataNames.push(names)
-            names = '';
-            // if (index === 0) {
-            //     let row_name = element.text.slice(0, findEnd-1);
-            //     let name = row_name.slice(0, row_name.indexOf(' ('));
-            //     dataNames.push(name)
-            // }
-        } 
-
-    })
-    dataNames = dataNames.map((e, index) => {
-        let findEnd = e.indexOf(' (');
-        let name1 = '';
-        if (findEnd !== -1) {
-          name1 = e.slice(0, findEnd);  
-          let findDouble = e.indexOf('  ');
-          if (findDouble !== -1) {
-            name1 = name1.replaceAll('  ','');
-          }
-          
-        } else (delete dataNames[index])
-        return name1;
-
-    })
-    return dataNames;
-
-}
-
-async function getDataCheck(resArray) {
-
-    const knumber = resArray[resArray.length - 2];
-    const id = resArray[resArray.length - 3];
-    //console.log(knumber, id);
-    let token = "";
-    //console.log(resArray);
-    //console.log(resAll);
-    resAll.rows.forEach((kassa) => {
-        kassa.data.forEach((element) => {
-            if (element.id === id) {
-                token = kassa.token;
-            }
-        });
-    });
-    if (token === "") {
-        logger.error('bot/hears - ending /Check/ - not data resAll');
-        return 'для получения детальных операций, необходимо обновить статистику нужного периода';
-    }
-    try {
-        //const token = await getJWT()
-        const res = await getCheck(id, knumber, token);
-        //console.log(JSON.stringify(res))
-        return res;
-    } catch (err) {
-        logger.error('bot/hears - getCheck', err.stack);
-    }
-}
+//     const knumber = resArray[resArray.length - 2];
+//     const id = resArray[resArray.length - 3];
+//     //console.log(knumber, id);
+//     let token = "";
+//     //console.log(resArray);
+//     //console.log(resAll);
+//     resAll.rows.forEach((kassa) => {
+//         kassa.data.forEach((element) => {
+//             if (element.id === id) {
+//                 token = kassa.token;
+//             }
+//         });
+//     });
+//     if (token === "") {
+//         logger.error('bot/hears - ending /Check/ - not data resAll');
+//         return 'для получения детальных операций, необходимо обновить статистику нужного периода';
+//     }
+//     try {
+//         //const token = await getJWT()
+//         const res = await getCheck(id, knumber, token);
+//         //console.log(JSON.stringify(res))
+//         return res;
+//     } catch (err) {
+//         logger.error('bot/hears - getCheck', err.stack);
+//     }
+// }
 
 function hide_menu(bot) {
     //bot.ctx.ReplyKeyboardHide();
@@ -441,6 +413,7 @@ function hide_menu(bot) {
         await ctx.reply('кнопки скрыты', { reply_markup: { remove_keyboard: true, }, });
     });
 }
+
 
 exports.hears = hears;
 exports.actions_oper = actions_oper;
