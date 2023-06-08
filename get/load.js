@@ -59,8 +59,8 @@ async function load(period) {
     let res = await Promise.all([getQuery(queryAllKassa), getQuery(queryAllOrganization)]);
     listKassa = res[0].rows;
     listOrg = res[1].rows;
-    console.table(listKassa);
-    console.table(listOrg);
+    //console.table(listKassa);
+    //console.table(listOrg);
 
     listOrg.forEach(element => {
       arrJWT.push(getJWT(element.bin, process.env.KOFDPASSWORD));
