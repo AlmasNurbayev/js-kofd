@@ -39,13 +39,12 @@ async function checkNew() {
     //сравниваем список транзакций с позицией курсора
     for (let user of arrUsers.rows) {
       if (user.transaction_cursor.length > 5) {
-          console.log(user.id + '. Валидный курсор: ' + user.transaction_cursor);
+          console.log('id: ' + user.id + '. Валидный курсор: ' + user.transaction_cursor);
           for (let [index, transaction] of arrTodayTrans.rows.entries()) {
             if (user.transaction_cursor === transaction.id) {
               console.log('курсор найден на позиции: ' + index);
               if (index !== 0) {
                 console.log('new sales are available for ' + user.username);
-
                 // отправляем на кролика
                 const queue = 'transactions';
                 const conn = await amqplib.connect(`amqp://${process.env.RMUSER}:${process.env.RMPASSWORD}@localhost`);
