@@ -78,7 +78,7 @@ async function checkNew() {
 }
 
 async function agent() {
-  console.log(new Date().toLocaleString("ru-RU"));
+  console.log('======== ' + new Date().toLocaleString("ru-RU"));
   await startLoad();
   await checkNew();
 }
