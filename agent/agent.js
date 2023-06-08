@@ -39,10 +39,10 @@ async function checkNew() {
     //сравниваем список транзакций с позицией курсора
     for (let user of arrUsers.rows) {
       if (user.transaction_cursor.length > 5) {
-          console.log('валидный курсор ' + user.transaction_cursor);
+          console.log(user.id + '. Валидный курсор: ' + user.transaction_cursor);
           for (let [index, transaction] of arrTodayTrans.rows.entries()) {
             if (user.transaction_cursor === transaction.id) {
-              console.log(index);
+              console.log('курсор найден на позиции: ' + index);
               if (index !== 0) {
                 console.log('new sales are available for ' + user.username);
 
