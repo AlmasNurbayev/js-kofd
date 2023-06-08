@@ -3,11 +3,37 @@
 const { Telegraf } = require('telegraf');
 const { command } = require('./bot/command.js');
 const { hears, actions_oper, actions_check } = require('./bot/hears.js');
+const amqplib = require('amqplib');
 //const { actions } = require('./bot/actions.js');
 
 const dotenv = require("dotenv");
-const { logger, clearDirectory } = require('./logs/logs-utils.js');
+const { logger, clearDirectory, writeError } = require('./logs/logs-utils.js');
 dotenv.config();
+
+async function listenRM(queue, bot) {
+  try {
+    const connection = await amqplib.connect(`amqp://${process.env.RMUSER}:${process.env.RMPASSWORD}@localhost`);
+    const channel = await connection.createChannel()
+
+    await channel.assertQueue(queue)
+
+    channel.consume(queue, data => {
+      console.log(`Получено сообщение от кролика: ${Buffer.from(data.content)}`);
+      logger.info('index - get message from rabbitMQ ' + Buffer.from(data.content));
+      let data2 = JSON.parse(data.content);
+      if (data2.message === 'new_transactions') {
+          bot.telegram.sendMessage(Number(data2.user), "появились новые транзакции");
+          channel.ack(data);
+      }
+    })
+  } catch (error) {
+    await writeError(error.stack);
+    console.log(error);
+  }
+}
+
+
+
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -54,18 +80,20 @@ bot.on('text', async (ctx) => {
   //await ctx.reply(`Hello ${ctx.state.role}`);
 });
 
-
 (async () => {
   await clearDirectory('logs/charts');
 })();
 
-
-
-
-
 bot.launch();
 logger.info('starting bot');
+
+(async () => {
+  await listenRM('transactions', bot);
+})();
+
 
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
+
+exports.bot = bot;

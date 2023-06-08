@@ -111,10 +111,6 @@ async function load(period) {
     logger.info('load - starting GET query receive transaction');
     let res2 = await Promise.all(arrGet);
 
-    // если запрос за день, то запрашиваем чеки по каждой операции 
-    if (period.includes('день')) {
-      
-    }
 
     res2.forEach((element3) => {
       //console.log(element3.name_kassa + ", " + element3.data.length + ", " + element3.id_kassa + ",  " + element3.id_organization);
@@ -432,10 +428,6 @@ function extractNames(data) {
   return dataNames;
 
 }
-
-
-
-
 
 (async () => {
   //console.log(await load('текущий день'));
