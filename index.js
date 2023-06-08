@@ -22,7 +22,7 @@ async function listenRM(queue, bot) {
       logger.info('index - get message from rabbitMQ ' + Buffer.from(data.content));
       let data2 = JSON.parse(data.content);
       if (data2.message === 'new_transactions') {
-          bot.telegram.sendMessage(Number(data2.user), "появились новые транзакции");
+          bot.telegram.sendMessage(Number(data2.user), "Агент мониторинга: новые транзакции: " + data2.count + " шт.");
           channel.ack(data);
       }
     })

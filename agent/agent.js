@@ -53,7 +53,8 @@ async function checkNew() {
                 await ch2.sendToQueue(queue, Buffer.from(JSON.stringify(
                   {
                     user: String(user.id), 
-                    message: "new_transactions"
+                    message: "new_transactions",
+                    count: index
                   }
                 )));
                 await ch2.close();
