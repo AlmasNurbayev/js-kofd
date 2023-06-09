@@ -1,8 +1,8 @@
 //const e = require('express');
 const { writeError, readLog, logger } = require('../logs/logs-utils.js');
 const { writeLog } = require('../logs/logs-utils.js');
-const {extractNames } = require('../get/load.js');
-const { alarmAdmin, uploadToTelegram, ReplyData, ReplyChart, parseResRaws,  } = require('./utils.js');
+const { extractNames } = require('../get/load.js');
+const { alarmAdmin, uploadToTelegram, ReplyData, ReplyChart, parseResRaws, } = require('./utils.js');
 const { Markup } = require('telegraf');
 const { getCheck, getProduct, getQuery } = require('../get/api.js');
 const dotenv = require("dotenv");
@@ -119,7 +119,7 @@ function hears(mode, bot) {
     if (mode == 'datemode') { // hears markup buttons of summary statistics of periods
 
         bot.hears('текущий день', async (ctx) => {
-            await ctx.reply('меню скрыто', {reply_markup: {remove_keyboard: true,},});
+            await ctx.reply('меню скрыто', { reply_markup: { remove_keyboard: true, }, });
             resAll = await ReplyData('текущий день', ctx);
         });
 
@@ -189,7 +189,7 @@ function hears(mode, bot) {
             await ctx.reply('меню скрыто', { reply_markup: { remove_keyboard: true, }, });
             await ReplyChart('chart-14m', ctx, ctx.from.id);
         });
-    }    
+    }
 
     if (mode == 'скрыть кнопки') {
         hide_menu(bot);
@@ -224,12 +224,12 @@ async function actions_oper(bot) {
         let list = [];
         let trans_db = getQuery(sql).then(res => {
             //console.log('res.rows', res.rows);     
-            list = parseResRaws(res.rows, dateInButton);    
+            list = parseResRaws(res.rows, dateInButton);
             //console.log('list', list);  
-            
+
             if (list.length > 0) {
                 list.sort((x, y) => x.elementTime.localeCompare(y.elementTime));
-            }    
+            }
             list.forEach((e, index) => {
                 //console.log(JSON.stringify(e));
                 message += `${index}. ${e.elementKassa} ${e.elementTypeOper} ${e.elementSum.toLocaleString('ru-RU')} ${e.elementTypePay} ${e.elementTime}\n`;
@@ -238,33 +238,33 @@ async function actions_oper(bot) {
             if (buttons.length > 0) {
                 if (buttons.length > 8) {
                     let subarray = []; //разбиваем массив в подмассивы по 8 кнопок
-                    for (let i = 0; i <Math.ceil(buttons.length/8); i++){
-                        subarray[i] = buttons.slice((i*8), (i*8) + 8);
+                    for (let i = 0; i < Math.ceil(buttons.length / 8); i++) {
+                        subarray[i] = buttons.slice((i * 8), (i * 8) + 8);
                     }
-                    subarray.forEach ((element, index) =>{
-                       if (index != 0) {
-                        message = 'продолжение выбора чеков';
-                        setTimeout(()=>{
-                            let sendedMessage = ctx.replyWithHTML(message, Markup.inlineKeyboard(element));    
-                           }, 500);
-                       } else {
-                        ctx.replyWithHTML(message, Markup.inlineKeyboard(element));    
-                       }     
-    
+                    subarray.forEach((element, index) => {
+                        if (index != 0) {
+                            message = 'продолжение выбора чеков';
+                            setTimeout(() => {
+                                let sendedMessage = ctx.replyWithHTML(message, Markup.inlineKeyboard(element));
+                            }, 500);
+                        } else {
+                            ctx.replyWithHTML(message, Markup.inlineKeyboard(element));
+                        }
+
                     });
                 } else {
                     ctx.replyWithHTML(message, Markup.inlineKeyboard(buttons));
                 }
-                
+
                 date = new Date().toLocaleString("ru-RU");
                 writeLog(`bot_request.txt`, String(date + ': SUCCESS receive operations: <' + dateInButton + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
-        
+
             }
             //ctx.reply(message);
-                
+
 
         });
-          
+
         return
 
         //let list = [];
@@ -300,7 +300,7 @@ async function actions_check(bot) {
         let sql = `select * from transaction where id = '${id_trans}'`
         let res = await getQuery(sql);
         res = res.rows[0];
-        
+
         if (typeof (res) == 'object') {
             let index_top = false;
             //console.log('res', res);
@@ -309,23 +309,23 @@ async function actions_check(bot) {
 
                 if (index2 == 0) {
                     message += 'чек №' + index + ' - ' + day + ' ' + element.text + '\n';
-                } else if (index2 == check.data.length-1) {
+                } else if (index2 == check.data.length - 1) {
                     // последнюю строку не выводим
                 } else {
                     if (index_top) {
                         message += element.text + '\n'; // обычная строка
-                    }    
+                    }
                     // }
-                     if (element.text.includes('*******')) {
-                         index_top = true;
-                    //     row_name =  res.data[index2+1].text;
-                    //     row_name = row_name.slice(0, row_name.indexOf(' ('));
-                    //     // console.log(row_name);
-                    //     // console.log(await getProduct(row_name));
-                        
+                    if (element.text.includes('*******')) {
+                        index_top = true;
+                        //     row_name =  res.data[index2+1].text;
+                        //     row_name = row_name.slice(0, row_name.indexOf(' ('));
+                        //     // console.log(row_name);
+                        //     // console.log(await getProduct(row_name));
+
                     }
                 }
-                
+
             })
             let names = JSON.parse(res.names);
             let names_promise = [];
@@ -340,34 +340,41 @@ async function actions_check(bot) {
                         let image = e.image_registry.find(e => e.main === true);
                         image_url.push({
                             type: 'photo',
-                            media: {url: process.env.SITE_GET_IMAGES_URL + '/' + image.full_name},
+                            media: { url: process.env.SITE_GET_IMAGES_URL + '/' + image.full_name },
                             caption: e.name_1c,
                         });
-                    }  
+                    }
                     if (e.price_registry) {
-                        
-                    }               
-    
+
+                    }
+
                 }
             })
-         } else {
+        } else {
             message = 'не удалось получить данные';
             date = new Date().toLocaleString("ru-RU");
             writeLog(`bot_request.txt`, String(date + ': ERROR request: <' + ctx.match.input + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
         }
-        message = message.replaceAll('   ','');
-        
-        if (image_url.length > 1) { // отправляем одним сообщением чек, и вторым сообщением группу фото
-            let m = await ctx.reply(message, {reply_to_message_id: bot_message_id} );  
-            // console.log(JSON.stringify(m));
-            // console.log(m.message_id);
+        message = message.replaceAll('   ', '');
 
-            await ctx.replyWithMediaGroup(image_url, {reply_to_message_id: m.message_id});
-        } else if (image_url.length === 1) { // отправляем одним сообщением чек, и одну картинку
-            await ctx.replyWithPhoto({url: image_url[0].media.url}, {caption: message.slice(0,1000), reply_to_message_id: bot_message_id}  );     
-        } else { // отправляем только чек, если не найдены фото
-            await ctx.reply(message, {reply_to_message_id: bot_message_id});  
+        console.log(bot_message_id);
+        try {
+            if (image_url.length > 1) { // отправляем одним сообщением чек, и вторым сообщением группу фото
+
+                let m = await ctx.reply(message, { reply_to_message_id: bot_message_id });
+                await ctx.replyWithMediaGroup(image_url, { reply_to_message_id: m.message_id });
+                // console.log(JSON.stringify(m));
+                // console.log(m.message_id);
+            } else if (image_url.length === 1) { // отправляем одним сообщением чек, и одну картинку
+                await ctx.replyWithPhoto({ url: image_url[0].media.url }, { caption: message.slice(0, 1000), reply_to_message_id: bot_message_id });
+            } else { // отправляем только чек, если не найдены фото
+                await ctx.reply(message, { reply_to_message_id: bot_message_id });
+            }
+        } catch (error) {
+            console.log('hears - action_check ' + error.stack);
+            writeError(error.stack, 'hears - action_check');
         }
+
         // else {
         //     ctx.reply(message);
         // };
