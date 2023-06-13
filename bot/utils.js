@@ -433,7 +433,7 @@ async function  buildMessage(payload) {
       e.elementTime = e.elementFullTime.toLocaleString("ru-RU").slice(11,16); // в функции ParseResRaws время возвращается со смещением, непонятно почему. Поэтому парсим время заново.
       const dateInButton = e.elementFullTime.toLocaleString("ru-RU").slice(0,10);
       console.log(dateInButton);
-      message += `${index}. ${e.elementKassa} ${e.elementTypeOper} ${e.elementSum.toLocaleString('ru-RU')} ${e.elementTypePay} ${e.elementTime}\n`;
+      message += `${index}. ${e.elementKassa} ${e.elementTypeOper} ${e.elementSum.toLocaleString('ru-RU')} ${e.elementTypePay} ${e.elementTime}\n ${e.names}\n`;
       buttons.push(Markup.button.callback(String(index), "check-" + index + "-" + dateInButton  + "-"  + e.elementId + "-" + e.elementKnumber));
   })
 
