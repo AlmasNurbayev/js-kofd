@@ -369,7 +369,8 @@ async function actions_check(bot) {
                     let m = await ctx.reply(message, { reply_to_message_id: bot_message_id });
                     await ctx.replyWithMediaGroup(image_url, { reply_to_message_id: m.message_id });
                 } else {
-                    await ctx.replyWithMediaGroup(image_url);
+                    let m = await ctx.reply(message);
+                    await ctx.replyWithMediaGroup(image_url, { reply_to_message_id: m.message_id });
                 }
                 // console.log(JSON.stringify(m));
                 // console.log(m.message_id);

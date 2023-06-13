@@ -28,13 +28,19 @@ async function checkNew() {
     //console.log(arrUsers);
 
     //получаем из БД транзакции именно продаж за 10 дней (если долго не было продаж или запусков агента)
-    const currentDay = moment().add(-10, 'd').startOf('day').format('YYYY-MM-DD[T]HH:mm:ss');
-    let sql_today = `select * from transaction
+    //process.env.TZ = 'Asia/Almaty';
+    const currentDay = moment().add(-2, 'd').startOf('day').format('YYYY-MM-DD[T]HH:mm:ss');
+    let sql_today = `
+    select * from transaction
     where 
     operationdate >= '${currentDay}'
-    and type_operation = 1`;
+    and type_operation = 1;`;
     //console.log(sql_today);
     let arrTodayTrans = await getQuery(sql_today);
+    //arrTodayTrans = arrTodayTrans[1];
+    //set timezone = 'Asia/Almaty';
+    // console.log(arrTodayTrans);
+    // console.log(process.env.TZ);
     arrTodayTrans.rows.reverse();
     //console.log(arrTodayTrans);
 
@@ -44,7 +50,9 @@ async function checkNew() {
       if (user.transaction_cursor.length > 5) {
           console.log('id: ' + user.id + '. Валидный курсор: ' + user.transaction_cursor);
           for (let [index, transaction] of arrTodayTrans.rows.entries()) {
+            transaction.operationdate = transaction.operationdate.toLocaleString('ru-RU');
             arrNewTrans.push(transaction);
+            //console.log(transaction.operationdate.getTimezoneOffset());
             if (user.transaction_cursor === transaction.id) {
               arrNewTrans.pop();
               console.log('курсор найден на позиции: ' + index);

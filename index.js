@@ -20,9 +20,9 @@ async function listenRM(queue, bot) {
     await channel.assertQueue(queue)
 
     channel.consume(queue, data => {
-      console.log(`Получено сообщение от кролика: ${Buffer.from(data.content)}`);
-      logger.info('index - get message from rabbitMQ ' + Buffer.from(data.content));
       let data2 = JSON.parse(data.content);
+      console.log(`Получено сообщение от кролика для: ${data2.user}`);
+      logger.info('index - get message from rabbitMQ ' + data2);
       if (data2.message === 'new_transactions') {
           let message = buildMessage(data2.payload).then(res => {
             //console.log(message);
@@ -38,7 +38,7 @@ async function listenRM(queue, bot) {
 }
 
 
-
+process.env.TZ = 'Asia/Almaty';
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 

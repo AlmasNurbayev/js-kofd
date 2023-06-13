@@ -426,13 +426,13 @@ async function  buildMessage(payload) {
     const list = parseResRaws(payload);
     //console.log('list', list);
     if (list.length > 0) {
-      list.sort((x, y) => x.elementTime.localeCompare(y.elementFullTime));
+      list.sort((x, y) => x.elementTime.localeCompare(y.elementTime));
   }
       list.forEach((e, index) => {
-      //console.log(JSON.stringify(e));
-      e.elementTime = e.elementFullTime.toLocaleString("ru-RU").slice(11,16); // в функции ParseResRaws время возвращается со смещением, непонятно почему. Поэтому парсим время заново.
-      const dateInButton = e.elementFullTime.toLocaleString("ru-RU").slice(0,10);
-      console.log(dateInButton);
+      //e.elementTime = e.elementFullTime.slice(11,16); // в функции ParseResRaws время возвращается со смещением, непонятно почему. Поэтому парсим время заново.
+      //console.log(e.elementFullTime);
+      const dateInButton = e.elementFullTime.slice(6,10) + '-' + e.elementFullTime.slice(3,5) + '-' + e.elementFullTime.slice(0,2);
+      //console.log(dateInButton);
       message += `${index}. ${e.elementKassa} ${e.elementTypeOper} ${e.elementSum.toLocaleString('ru-RU')} ${e.elementTypePay} ${e.elementTime}\n ${e.names}\n`;
       buttons.push(Markup.button.callback(String(index), "check-" + index + "-" + dateInButton  + "-"  + e.elementId + "-" + e.elementKnumber));
   })
