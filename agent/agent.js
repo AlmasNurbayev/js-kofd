@@ -21,6 +21,8 @@ async function startLoad() {
 
 async function checkNew() {
   try {
+
+    logger.info('agent - starting check');
     // получаем список пользователей
     let arrUsers = await getQuery('select * from telegram_users');
     //console.log(arrUsers);
@@ -75,7 +77,7 @@ async function checkNew() {
       }
       //console.log(arrNewTrans);
     }
-
+    logger.info('agent - ending check');
 
   } catch (error) {
     await writeError(error.stack, 'agent checkNew');
