@@ -294,7 +294,11 @@ async function actions_check(bot) {
         const index = resArray[1];
         const day = resArray[2] + resArray[3] + resArray[4];
         const id_trans = resArray[5];
-        const bot_message_id = Number(resArray[7]);
+        let bot_message_id = 0;
+        if (resArray.length >= 8) {
+            bot_message_id = Number(resArray[7]);
+        }
+        
         //console.log(id_trans);
 
         let sql = `select * from transaction where id = '${id_trans}'`
@@ -361,14 +365,27 @@ async function actions_check(bot) {
         try {
             if (image_url.length > 1) { // отправляем одним сообщением чек, и вторым сообщением группу фото
 
-                let m = await ctx.reply(message, { reply_to_message_id: bot_message_id });
-                await ctx.replyWithMediaGroup(image_url, { reply_to_message_id: m.message_id });
+                if (bot_message_id > 0) { // если есть сообщения для ответа
+                    let m = await ctx.reply(message, { reply_to_message_id: bot_message_id });
+                    await ctx.replyWithMediaGroup(image_url, { reply_to_message_id: m.message_id });
+                } else {
+                    await ctx.replyWithMediaGroup(image_url);
+                }
                 // console.log(JSON.stringify(m));
                 // console.log(m.message_id);
             } else if (image_url.length === 1) { // отправляем одним сообщением чек, и одну картинку
-                await ctx.replyWithPhoto({ url: image_url[0].media.url }, { caption: message.slice(0, 1000), reply_to_message_id: bot_message_id });
+                if (bot_message_id > 0) { // если есть сообщения для ответа
+                    await ctx.replyWithPhoto({ url: image_url[0].media.url }, { caption: message.slice(0, 1000), reply_to_message_id: bot_message_id });
+                } else {
+                    await ctx.replyWithPhoto({ url: image_url[0].media.url }, { caption: message.slice(0, 1000)});
+                }
+                
             } else { // отправляем только чек, если не найдены фото
-                await ctx.reply(message, { reply_to_message_id: bot_message_id });
+                if (bot_message_id > 0) { // если есть сообщения для ответа
+                    await ctx.reply(message, { reply_to_message_id: bot_message_id });
+                } else {
+                    await ctx.reply(message);
+                }
             }
         } catch (error) {
             console.log('hears - action_check ' + error.stack);

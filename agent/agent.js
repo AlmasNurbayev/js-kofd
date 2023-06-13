@@ -38,10 +38,13 @@ async function checkNew() {
 
     //сравниваем список транзакций с позицией курсора
     for (let user of arrUsers.rows) {
+      let arrNewTrans = [];
       if (user.transaction_cursor.length > 5) {
           console.log('id: ' + user.id + '. Валидный курсор: ' + user.transaction_cursor);
           for (let [index, transaction] of arrTodayTrans.rows.entries()) {
+            arrNewTrans.push(transaction);
             if (user.transaction_cursor === transaction.id) {
+              arrNewTrans.pop();
               console.log('курсор найден на позиции: ' + index);
               if (index !== 0) {
                 console.log('new sales are available for ' + user.username);
@@ -54,6 +57,7 @@ async function checkNew() {
                   {
                     user: String(user.id), 
                     message: "new_transactions",
+                    payload: arrNewTrans, 
                     count: index
                   }
                 )));
@@ -65,9 +69,11 @@ async function checkNew() {
                 await getQuery(sql_upd);
 
               }
+              break;
             }
           }
       }
+      //console.log(arrNewTrans);
     }
 
 

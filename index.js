@@ -1,7 +1,9 @@
 "use strict";
 
 const { Telegraf } = require('telegraf');
+const { Markup } = require('telegraf');
 const { command } = require('./bot/command.js');
+const { buildMessage } = require('./bot/utils.js');
 const { hears, actions_oper, actions_check } = require('./bot/hears.js');
 const amqplib = require('amqplib');
 //const { actions } = require('./bot/actions.js');
@@ -22,8 +24,11 @@ async function listenRM(queue, bot) {
       logger.info('index - get message from rabbitMQ ' + Buffer.from(data.content));
       let data2 = JSON.parse(data.content);
       if (data2.message === 'new_transactions') {
-          bot.telegram.sendMessage(Number(data2.user), "Агент мониторинга: новые транзакции: " + data2.count + " шт.");
-          channel.ack(data);
+          let message = buildMessage(data2.payload).then(res => {
+            //console.log(message);
+            bot.telegram.sendMessage(Number(data2.user), res[0],Markup.inlineKeyboard(res[1]));
+            channel.ack(data);
+          });
       }
     })
   } catch (error) {

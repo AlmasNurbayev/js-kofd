@@ -402,6 +402,7 @@ function parseResRaws(rows, controlDate) {
           elementTypePay: elementTypePay,
           elementId: element.id,
           elementTime: element.operationdate.toLocaleString("ru-RU").slice(12, 17),
+          elementFullTime: element.operationdate,
           check: element.cheque,
           names: element.names,
         });
@@ -411,9 +412,42 @@ function parseResRaws(rows, controlDate) {
   return list;
 }
 
+async function  buildMessage(payload) {
+  let message = `Агент мониторинга: новые транзакции: + ${payload.length} шт.:\n`;
+  let buttons = [];
+  const arrKassa = await getQuery('select * from kassa');
+
+  if (payload) {
+    //console.log(arrKassa);
+    payload.forEach((element) => {
+      const name_kassa = arrKassa.rows.find(e => e.knumber === element.knumber);
+      element.name_kassa = name_kassa.name_kassa;
+    });
+    const list = parseResRaws(payload);
+    //console.log('list', list);
+    if (list.length > 0) {
+      list.sort((x, y) => x.elementTime.localeCompare(y.elementFullTime));
+  }
+      list.forEach((e, index) => {
+      //console.log(JSON.stringify(e));
+      e.elementTime = e.elementFullTime.toLocaleString("ru-RU").slice(11,16); // в функции ParseResRaws время возвращается со смещением, непонятно почему. Поэтому парсим время заново.
+      const dateInButton = e.elementFullTime.toLocaleString("ru-RU").slice(0,10);
+      console.log(dateInButton);
+      message += `${index}. ${e.elementKassa} ${e.elementTypeOper} ${e.elementSum.toLocaleString('ru-RU')} ${e.elementTypePay} ${e.elementTime}\n`;
+      buttons.push(Markup.button.callback(String(index), "check-" + index + "-" + dateInButton  + "-"  + e.elementId + "-" + e.elementKnumber));
+  })
+
+    // const name_operation = ? 
+    // newTrans += `${index} ${name_kassa.name_kassa} ${element.type_operation} ${element.sum_operation} ${element.names}\n`;
 
 
+  }
 
+  return [message, buttons];
+
+}
+
+exports.buildMessage = buildMessage;
 exports.alarmAdmin = alarmAdmin;
 exports.isAdmin = isAdmin;
 exports.uploadToTelegram = uploadToTelegram;
