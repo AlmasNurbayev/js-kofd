@@ -21,7 +21,19 @@ const logger = pino({
   }
 });
 //const logger_l = pino(transport_l);
-
+const loggerAgent = pino({
+  timestamp: () => `,"time":"${new Date().toLocaleString("ru-RU")}"`,
+  base: undefined,
+  transport: {
+    targets: [
+      {
+        //level: 'info',
+        target: 'pino/file',
+        options: { destination: 'logs/log_agent.txt', append: true }
+      },
+    ]
+  }
+});
 
 
 // write string  to text file
@@ -123,4 +135,5 @@ exports.writeLog = writeLog;
 exports.readLog = readLog;
 exports.isFileExist = isFileExist;
 exports.logger = logger;
+exports.loggerAgent = loggerAgent;
 exports.clearDirectory = clearDirectory;

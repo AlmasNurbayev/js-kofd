@@ -380,6 +380,18 @@ function parseResRaws(rows, controlDate) {
         elementTypeOper = 'продажа';
         elementSum = element.sum_operation;
       }
+      if (element.type_operation == 2) {
+        elementTypeOper = 'Z-отчет';
+        elementSum = 0;
+      }
+      if (element.type_operation == 6 && element.subtype == 1) {
+        elementTypeOper = 'выемка';
+        elementSum = element.sum_operation;
+      }
+      if (element.type_operation == 3 && element.subtype == 2) {
+        elementTypeOper = 'X-отчет';
+        elementSum = 0;
+      }
       let elementTypePay;
       //if (typeof (element.paymenttypes) == 'object') {
         if (element.paymenttypes === '0,1') {
@@ -388,6 +400,8 @@ function parseResRaws(rows, controlDate) {
           elementTypePay = 'кеш';
         } else if (element.paymenttypes[0] === '1') {
           elementTypePay = 'карта';
+        } else {
+          elementTypePay = '';
         }
       //}
       // console.log(String(element.operationDate).slice(0,10));

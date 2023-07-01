@@ -1,7 +1,7 @@
 const { getQuery } = require('../get/api');
 const { load } = require('../get/load.js');
-const { logger } = require('../logs/logs-utils');
-const { writeError } = require('../logs/logs-utils.js');
+const { loggerAgent } = require('../logs/logs-utils');
+//const { writeError } = require('../logs/logs-utils.js');
 const moment = require('moment');
 const amqplib = require('amqplib');
 
@@ -11,9 +11,9 @@ const amqplib = require('amqplib');
 async function startLoad() {
   try {
     await load('текущий день');
-    logger.info('agent - ending startLoad');
+    loggerAgent.info('agent - ending startLoad');
   } catch (error) {
-    await writeError(error.stack, 'agent load');
+    await loggerAgent.error('agent load' + error.stack);
     console.log(error.stack);
     throw new Error(error);
   }
@@ -22,19 +22,19 @@ async function startLoad() {
 async function checkNew() {
   try {
 
-    logger.info('agent - starting check');
+    loggerAgent.info('agent - starting check');
     // получаем список пользователей
     let arrUsers = await getQuery('select * from telegram_users');
     //console.log(arrUsers);
 
     //получаем из БД транзакции именно продаж за 10 дней (если долго не было продаж или запусков агента)
     //process.env.TZ = 'Asia/Almaty';
-    const currentDay = moment().add(-2, 'd').startOf('day').format('YYYY-MM-DD[T]HH:mm:ss');
+    const currentDay = moment().add(-4, 'd').startOf('day').format('YYYY-MM-DD[T]HH:mm:ss');
     let sql_today = `
     select * from transaction
     where 
     operationdate >= '${currentDay}'
-    and type_operation = 1;`;
+    and (type_operation = 1 OR type_operation = 2 OR type_operation = 3 OR type_operation = 6);`;
     //console.log(sql_today);
     let arrTodayTrans = await getQuery(sql_today);
     //arrTodayTrans = arrTodayTrans[1];
@@ -85,10 +85,10 @@ async function checkNew() {
       }
       //console.log(arrNewTrans);
     }
-    logger.info('agent - ending check');
+    loggerAgent.info('agent - ending check');
 
   } catch (error) {
-    await writeError(error.stack, 'agent checkNew');
+    await loggerAgent.error('agent checkNew ' + error.stack);
     console.log(error.stack);
     throw new Error(error);    
   }
