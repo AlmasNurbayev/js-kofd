@@ -354,16 +354,6 @@ async function ReplyData(mode, ctx) {
 function parseResRaws(rows, controlDate) {
   logger.info('bot-utiles - parseResRaws starting' + controlDate);
   
-  
-
-  // rows = rows.filter((e) => { //фильтрация по типу операций
-  //   return e.type_operation === 1;
-  // });
-  // rows = rows.filter((e) => { //фильтрация по типу операций
-  //   return e.subtype === 2 || e.subtype === 3;
-  // });
-
-
   const list = [];
   if (rows.length == 0) {
     return list;
@@ -381,7 +371,7 @@ function parseResRaws(rows, controlDate) {
         elementSum = element.sum_operation;
       }
       if (element.type_operation == 2) {
-        elementTypeOper = 'Закрытие смены /Z-отчет';
+        elementTypeOper = 'Закрытие смены (Z)';
         elementSum = 0;
       }
       if (element.type_operation == 6 && element.subtype == 1) {
