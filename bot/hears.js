@@ -316,6 +316,9 @@ async function actions_check(bot) {
                 } else if (index2 == check.data.length - 1) {
                     // последнюю строку не выводим
                 } else {
+                    if (res.type_operation !== 1) { // если не продажа или возврат - выводит все строки
+                        message += element.text + '\n'; // обычная строка
+                    }
                     if (index_top) {
                         message += element.text + '\n'; // обычная строка
                     }
