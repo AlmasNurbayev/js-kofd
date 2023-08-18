@@ -22,7 +22,7 @@ async function listenRM(queue, bot) {
     channel.consume(queue, data => {
       let data2 = JSON.parse(data.content);
       console.log(`Получено сообщение от кролика для: ${data2.user}`);
-      logger.info('index - get message from rabbitMQ ' + data2);
+      logger.info('index - get message from rabbitMQ ' + data.content);
       if (data2.message === 'new_transactions') {
           let message = buildMessage(data2.payload).then(res => {
             //console.log(message);
