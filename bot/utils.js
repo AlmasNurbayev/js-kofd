@@ -378,7 +378,7 @@ function parseResRaws(rows, controlDate) {
         elementTypeOper = 'выемка';
         elementSum = element.sum_operation;
       }
-      if (element.type_operation == 3 && element.subtype == 2) {
+      if (element.type_operation == 3 && element.subtype >= 1) {
         elementTypeOper = 'X-отчет';
         elementSum = 0;
       }
