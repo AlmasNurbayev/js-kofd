@@ -224,7 +224,7 @@ async function actions_oper(bot) {
         let list = [];
         let trans_db = getQuery(sql).then(res => {
             //console.log('res.rows', res.rows);     
-            list = parseResRaws(res.rows, dateInButton);
+            list = parseResRaws(res.rows);
             //console.log('list', list);  
 
             if (list.length > 0) {

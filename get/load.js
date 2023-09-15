@@ -45,8 +45,12 @@ async function load(period) {
     dateEnd: '',
     obj: []
   };
-  const queryAllKassa = `select organization.bin, organization.name_org, kassa.*  FROM "public".organization
+
+  let queryAllKassa = `select organization.bin, organization.name_org, kassa.*  FROM "public".organization
   join "public".kassa on "public".kassa.id_organization  = "public".organization.id`;
+  if (String(period).includes('день')) {
+    queryAllKassa += ' where kassa.active = true';
+  }
   const queryAllOrganization = `select * FROM "public".organization`;
 
   let listKassa, listOrg;

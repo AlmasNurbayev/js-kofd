@@ -9,6 +9,7 @@ const amqplib = require('amqplib');
 //const { actions } = require('./bot/actions.js');
 
 const dotenv = require("dotenv");
+const { getQuery } = require('./get/api');
 const { logger, clearDirectory, writeError } = require('./logs/logs-utils.js');
 dotenv.config();
 
@@ -87,6 +88,9 @@ bot.on('text', async (ctx) => {
 
 (async () => {
   await clearDirectory('logs/charts');
+  // чистим токены при рестарте
+  const clean_token = `TRUNCATE token`;
+  await getQuery(clean_token);
 })();
 
 bot.launch();

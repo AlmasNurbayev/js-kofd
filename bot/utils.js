@@ -351,8 +351,8 @@ async function ReplyData(mode, ctx) {
 
 }
 
-function parseResRaws(rows, controlDate) {
-  logger.info('bot-utiles - parseResRaws starting' + controlDate);
+function parseResRaws(rows) {
+  logger.info('bot-utiles - parseResRaws starting');
   
   const list = [];
   if (rows.length == 0) {
@@ -412,7 +412,7 @@ function parseResRaws(rows, controlDate) {
         });
       //}
     })
-  logger.info('bot-utiles - parseResRaws ending' + controlDate);
+  logger.info('bot-utiles - parseResRaws ending');
   return list;
 }
 
