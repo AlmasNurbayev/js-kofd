@@ -33,16 +33,16 @@ async function checkNew() {
     let sql_today = `
     select * from transaction
     where 
-    operationdate >= '${currentDay}'
-    and (type_operation = 1 OR type_operation = 2 OR type_operation = 3 OR type_operation = 6);`;
+    operationdate > '${currentDay}'
+    and (type_operation = 1 OR type_operation = 2 OR type_operation = 3 OR type_operation = 6)
+    order by id desc;`;
     //console.log(sql_today);
     let arrTodayTrans = await getQuery(sql_today);
     //arrTodayTrans = arrTodayTrans[1];
     //set timezone = 'Asia/Almaty';
     // console.log(arrTodayTrans);
     // console.log(process.env.TZ);
-    arrTodayTrans.rows.reverse();
-    //console.log(arrTodayTrans);
+    //arrTodayTrans.rows.reverse();
 
     //сравниваем список транзакций с позицией курсора
     for (let user of arrUsers.rows) {
