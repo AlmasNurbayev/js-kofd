@@ -81,7 +81,7 @@ async function load(period) {
 
 
   try {
-    logger.info('load - starting of build array with JWT');
+    //logger.info('load - starting of build array with JWT');
     let res = await Promise.all(arrJWT);
 
     //console.log(JSON.stringify(res));

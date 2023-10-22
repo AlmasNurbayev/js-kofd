@@ -256,7 +256,7 @@ async function getQuery(query) {
 
 function getStringFilter(mode, begin, end) {
   //console.log(mode);
-  logger.info('api - starting getStringFilter: ' + mode);
+  //logger.info('api - starting getStringFilter: ' + mode);
   moment.updateLocale('ru');
   moment.updateLocale('ru', {
     week: {
