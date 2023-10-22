@@ -24,7 +24,7 @@ const agent = new https.Agent({
  */
 async function getJWT(iin, pass) {
 
-  logger.info('api - starting getJWT: ' + iin);
+  //logger.info('api - starting getJWT: ' + iin);
 
   const data = {
     credentials: {
@@ -51,7 +51,7 @@ async function getJWT(iin, pass) {
 
     const nowTimeStamp = Math.round(Date.now() / 1000) + 10; // округляем и прибавляем 10 секунд, чтобы дать время на все остальное
     //console.log('now ts', nowTimeStamp);
-    logger.info('api - getJWT, searching token for ' + iin + ' with timstamp > ' + nowTimeStamp);
+    //logger.info('api - getJWT, searching token for ' + iin + ' with timstamp > ' + nowTimeStamp);
     const query_token = `select * FROM "public".token 
     WHERE 
       BIN = '${iin}' and
@@ -69,7 +69,7 @@ async function getJWT(iin, pass) {
       const response = await axios(config);
       //      console.log("2");
       //console.log(typeof response);
-      writeLog('response-post.txt', response.data, false);
+      //writeLog('response-post.txt', response.data, false);
       if (response.data.data == null) {
         await writeError(response.data, 'getJWT - JWT is null received');
         return;
@@ -85,9 +85,9 @@ async function getJWT(iin, pass) {
       `;
       const res_token_insert = await getQuery(query_insert);
       //await writeLog("token_insert.txt", res_token_insert);
-      logger.info('api - insert token to db');
+      //logger.info('api - insert token to db');
 
-      logger.info('api - ending getJWT');
+      //logger.info('api - ending getJWT');
       return response.data.data.jwt;
     }
 
@@ -108,7 +108,7 @@ async function getJWT(iin, pass) {
  */
 async function getTransaction(count, jwt, knumber, id_kassa, name_kassa, id_organization, bin, dateMode) {
 
-  logger.info('api - starting getTransaction: ' + JSON.stringify({ knumber, id_kassa, name_kassa }));
+  //logger.info('api - starting getTransaction: ' + JSON.stringify({ knumber, id_kassa, name_kassa }));
   const token = "Bearer " + jwt;
   //await writeLog(`jwt.txt`, String(token));
 
@@ -158,8 +158,8 @@ async function getTransaction(count, jwt, knumber, id_kassa, name_kassa, id_orga
     res.data['dateStart'] = dateStart;
     res.data['dateEnd'] = dateEnd;
     res.data['token'] = token;
-    await writeLog(`response-${knumber}.txt`, res.data, false);
-    logger.info('api - ending getTransaction');
+    //await writeLog(`response-${knumber}.txt`, res.data, false);
+    //logger.info('api - ending getTransaction');
     return res.data;
   } catch (e) {
     await writeError(e, 'getTransaction');
@@ -210,7 +210,7 @@ async function getCheck(id, knumber, token) {
 * @returns {Promise<string|Error>}
 */
 async function getQuery(query) {
-  logger.info('api - starting getQuery: ' + query.slice(0, 50));
+  //logger.info('api - starting getQuery: ' + query.slice(0, 50));
   const client = new Client({
     user: process.env.PGUSER,
     host: process.env.PGHOST,
@@ -242,7 +242,7 @@ async function getQuery(query) {
     throw new Error(e);
   } finally {
     client.end();
-    logger.info('api - ending getQuery');
+    //logger.info('api - ending getQuery');
   }
 }
 

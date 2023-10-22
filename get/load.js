@@ -119,7 +119,7 @@ async function load(period) {
     res2.forEach((element3) => {
       //console.log(element3.name_kassa + ", " + element3.data.length + ", " + element3.id_kassa + ",  " + element3.id_organization);
       writeOperation(element3, element3.id_kassa, element3.name_kassa, element3.id_organization);
-      writeLog(`response.txt`, element3, false);
+      //writeLog(`response.txt`, element3, false);
       getSummary(tableSumAll, getStat(element3, element3.id_kassa, element3.name_kassa, element3.id_organization, element3.dateStart, element3.dateEnd));
     });
     //fs.appendFile("get/response.txt", JSON.stringify(res) + "\n", (error2) => { });

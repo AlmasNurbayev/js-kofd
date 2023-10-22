@@ -11,7 +11,7 @@ const { getStringFilter } = require('../get/api.js');
 // return true if userid contains in db table telegram_users
 // userid - id of telegram user
 async function isAdmin(userId) {
-  logger.info('userId: ' + userId + ' check isAdmin');
+  //logger.info('userId: ' + userId + ' check isAdmin');
   let isadmin = false;
   try {
     const res = await getQuery('select id FROM "public".telegram_users');
