@@ -29,7 +29,7 @@ async function checkNew() {
 
     //получаем из БД транзакции именно продаж за 10 дней (если долго не было продаж или запусков агента)
     //process.env.TZ = 'Asia/Almaty';
-    const currentDay = moment().add(-4, 'd').startOf('day').format('YYYY-MM-DD[T]HH:mm:ss');
+    const currentDay = moment().add(-2, 'd').startOf('day').format('YYYY-MM-DD[T]HH:mm:ss');
     let sql_today = `
     select * from transaction
     where 
@@ -95,7 +95,7 @@ async function checkNew() {
 }
 
 async function agent() {
-  console.log('======== ' + new Date().toLocaleString("ru-RU"));
+  //console.log('======== ' + new Date().toLocaleString("ru-RU"));
   await startLoad();
   await checkNew();
 }
