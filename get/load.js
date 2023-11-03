@@ -112,7 +112,7 @@ async function load(period) {
   }
 
   try {
-    logger.info('load - starting GET query receive transaction');
+    //logger.info('load - starting GET query receive transaction');
     let res2 = await Promise.all(arrGet);
 
 
@@ -178,7 +178,7 @@ async function writeOperation(res, id_kassa, name_kassa, id_organization) {
   if (res.data.length > 0) {
     let sql;
     try {
-      logger.info('load - starting query in DB for insert transactions');
+      //logger.info('load - starting query in DB for insert transactions');
       sql = `INSERT INTO "public".transaction (
     id,
     onlineFiscalNumber,
@@ -291,7 +291,7 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
     dateEnd: dateEnd
   };
 
-  logger.info(`load - starting get stat for ${knumber} / ${name_kassa}`);
+  //logger.info(`load - starting get stat for ${knumber} / ${name_kassa}`);
 
   try {
     res.data.forEach((element2, index) => {
@@ -350,7 +350,7 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
 
 function getSummary(tableSumAll, obj) {
 
-  logger.info(`load - starting get summary for ${JSON.stringify(obj.name_kassa)}`);
+  //logger.info(`load - starting get summary for ${JSON.stringify(obj.name_kassa)}`);
 
   try {
     tableSumAll.sumSale += obj.sumSale;

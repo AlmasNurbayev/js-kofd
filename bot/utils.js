@@ -352,7 +352,7 @@ async function ReplyData(mode, ctx) {
 }
 
 function parseResRaws(rows) {
-  logger.info('bot-utiles - parseResRaws starting');
+  //logger.info('bot-utiles - parseResRaws starting');
   
   const list = [];
   if (rows.length == 0) {
@@ -412,7 +412,7 @@ function parseResRaws(rows) {
         });
       //}
     })
-  logger.info('bot-utiles - parseResRaws ending');
+  //logger.info('bot-utiles - parseResRaws ending');
   return list;
 }
 
