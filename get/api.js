@@ -108,7 +108,7 @@ async function getJWT(iin, pass) {
  */
 async function getTransaction(count, jwt, knumber, id_kassa, name_kassa, id_organization, bin, dateMode) {
 
-  //logger.info('api - starting getTransaction: ' + JSON.stringify({ knumber, id_kassa, name_kassa }));
+  logger.info('api - starting getTransaction: ' + String(knumber) + ' ' + String(name_kassa) + ' ' + String(dateMode));
   const token = "Bearer " + jwt;
   //await writeLog(`jwt.txt`, String(token));
 
