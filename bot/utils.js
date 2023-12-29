@@ -237,7 +237,7 @@ function groupAndSum(arr, groupKeys, sumKeys) {
 async function ReplyChart(mode, ctx, chat_id) {
 
   let count = +mode.slice(6);
-  console.log(count);
+  //console.log(count);
 
   alarmAdmin(ctx, 'bot/utils - receive /mode/ ' + mode + ' command by not-admin user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);
   if (await isAdmin(ctx.from.id) === false) {
@@ -345,7 +345,6 @@ async function ReplyData(mode, ctx) {
           limit 1;`;
           const listTransaction = await getQuery(queryElement);
           const lastTransaction = listTransaction.rows[0];
-          console.log(lastTransaction);
           message += `
     - ${element.name_kassa} - ${Number(lastTransaction.availablesum).toLocaleString('ru-RU')}`;
         }
