@@ -301,20 +301,22 @@ async function ReplyData(mode, ctx) {
       message = `Сумма продаж за "${mode}" = ${res.dateStart.slice(0, 10)} - ${res.dateEnd.slice(0, 10)}
   Чистое поступление: <b>${res.sumAll.toLocaleString('ru-RU')}</b>`;
 
-      if (res.sumAll != 0 || res.cashEject != 0) {
+      //if (res.sumAll != 0 || res.cashEject != 0) {
         message += `
           кеш: ${res.sumAllCash.toLocaleString('ru-RU')}, карта: ${res.sumAllCard.toLocaleString('ru-RU')}, смешано: ${res.sumAllMixed.toLocaleString('ru-RU')}
           В т.ч.:
-          Продажи: ${res.sumSale.toLocaleString('ru-RU')}, возвраты: ${res.sumReturn.toLocaleString('ru-RU')}, выемка: ${res.cashEject.toLocaleString('ru-RU')} 
+          Продажи: ${res.sumSale.toLocaleString('ru-RU')}, возвраты: ${res.sumReturn.toLocaleString('ru-RU')}, выемка: ${res.cashEject.toLocaleString('ru-RU')}`; 
           
-          Данные по кассам:`;
+          message += `
+
+  Итоги по кассам:`;
         res.obj.forEach((element) => {
           if (element.sumAll != 0 || element.cashEject != 0 || element.availableSum != 0) {
             message += `
    - ${element.name_kassa} поступило: <b>${element.sumAll.toLocaleString('ru-RU')}</b>               
       в т.ч. продажи ${element.sumSale.toLocaleString('ru-RU')}, возвраты ${element.sumReturn.toLocaleString('ru-RU')}, выемка ${element.cashEject.toLocaleString('ru-RU')}. `;
-            message += `
-            В кассе ${element.availableSum.toLocaleString('ru-RU')}`;
+            // message += `
+            // В кассе ${element.availableSum.toLocaleString('ru-RU')}`;
 
             if (element.shiftClosed && mode.includes('день')) {
               message += `. Смена закрыта.
@@ -325,7 +327,29 @@ async function ReplyData(mode, ctx) {
             }
           }
         });
-      }
+      //} else {
+        message += `
+
+  Остатки по активным кассам:`;
+        let queryAllKassa = `select organization.bin, organization.name_org, kassa.*  FROM "public".organization
+  join "public".kassa on "public".kassa.id_organization  = "public".organization.id`;
+        if (String(mode).includes('день')) { 
+          queryAllKassa += ' where kassa.active = true';
+        }
+        const dataKassa = await getQuery(queryAllKassa);
+        const listKassa = dataKassa.rows;
+        for await (const element of listKassa) {
+          const queryElement = `select * from transaction
+          where id_kassa = ${element.id}
+          order by id desc 
+          limit 1;`;
+          const listTransaction = await getQuery(queryElement);
+          const lastTransaction = listTransaction.rows[0];
+          console.log(lastTransaction);
+          message += `
+    - ${element.name_kassa} - ${Number(lastTransaction.availablesum).toLocaleString('ru-RU')}`;
+        }
+      //}
       let date2 = new Date().toLocaleString("ru-RU");
       writeLog(`bot_request.txt`, String(date2 + ': SUCCESS request: <' + mode + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
 
