@@ -1,42 +1,45 @@
 "use strict";
 
 const { Telegraf } = require('telegraf');
-const { Markup } = require('telegraf');
+const { agent } = require('./agent/agent.js');
+// const { Markup } = require('telegraf');
 const { command } = require('./bot/command.js');
-const { buildMessage } = require('./bot/utils.js');
+// const { buildMessage } = require('./bot/utils.js');
 const { hears, actions_oper, actions_check } = require('./bot/hears.js');
-const amqplib = require('amqplib');
+// const amqplib = require('amqplib');
 //const { actions } = require('./bot/actions.js');
 
 const dotenv = require("dotenv");
 const { getQuery } = require('./get/api');
-const { logger, clearDirectory, writeError } = require('./logs/logs-utils.js');
+const { logger, clearDirectory } = require('./logs/logs-utils.js');
 dotenv.config();
 
-async function listenRM(queue, bot) {
-  try {
-    const connection = await amqplib.connect(`amqp://${process.env.RMUSER}:${process.env.RMPASSWORD}@localhost`);
-    const channel = await connection.createChannel()
+// async function listenRM(queue, bot) {
+//   try {
+//     const connection = await amqplib.connect(`amqp://${process.env.RMUSER}:${process.env.RMPASSWORD}@rabbitmq`);
+//     const channel = await connection.createChannel()
+//     console.log('create connection to RMQ');
 
-    await channel.assertQueue(queue)
+//     await channel.assertQueue(queue)
 
-    channel.consume(queue, data => {
-      let data2 = JSON.parse(data.content);
-      console.log(`Получено сообщение от кролика для: ${data2.user}`);
-      logger.info('index - get message from rabbitMQ ' + JSON.stringify(data.content).slice(0,100));
-      if (data2.message === 'new_transactions') {
-          let message = buildMessage(data2.payload).then(res => {
-            //console.log(message);
-            bot.telegram.sendMessage(Number(data2.user), res[0],Markup.inlineKeyboard(res[1]));
-            channel.ack(data);
-          });
-      }
-    })
-  } catch (error) {
-    await writeError(error.stack);
-    console.log(error);
-  }
-}
+//     channel.consume(queue, data => {
+//       let data2 = JSON.parse(data.content);
+//       console.log(`Получено сообщение от кролика для: ${data2.user}`);
+//       logger.info('index - get message from rabbitMQ ' + JSON.stringify(data.content).slice(0,100));
+//       if (data2.message === 'new_transactions') {
+//           let message = buildMessage(data2.payload).then(res => {
+//             //console.log(message);
+//             bot.telegram.sendMessage(Number(data2.user), res[0],Markup.inlineKeyboard(res[1]));
+//             channel.ack(data);
+//           });
+//       }
+//     })
+//   } catch (error) {
+//     await writeError(error.stack);
+//     console.log(error);
+//     setTimeout(listenRM, 5000);
+//   }
+// }
 
 
 process.env.TZ = 'Asia/Almaty';
@@ -94,10 +97,12 @@ bot.on('text', async (ctx) => {
 })();
 
 bot.launch();
+console.log('starting bot');
 logger.info('starting bot');
 
 (async () => {
-  await listenRM('transactions', bot);
+  const agentTimer = setInterval(() => agent(bot), 180000);
+  // await listenRM('transactions', bot);
 })();
 
 

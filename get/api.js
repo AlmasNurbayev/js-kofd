@@ -216,7 +216,7 @@ async function getQuery(query) {
     host: process.env.PGHOST,
     database: process.env.PGDATABASE,
     password: process.env.PGPASSWORD,
-    port: process.env.PGPORT,
+    port: 5432,
     connectionTimeoutMillis: 6000,
     query_timeout: 6000,
     idle_in_transaction_session_timeout: 2000,

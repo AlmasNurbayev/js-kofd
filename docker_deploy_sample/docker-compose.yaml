@@ -1,42 +1,59 @@
 version: '3.8'
 services:
   db:
-    hostname: postgres
-    image: postgres:15.2-alpine
-    restart: always
+    image: postgres:16.1-alpine
+    ports:
+      - ${PGPORT_EXTERNAL}:5432
     environment:
-      POSTGRES_DB: "kofd"
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "postgres"
-      PGDATA: "/var/lib/postgresql/data/pgdata"
-    #ports:
-    #  - 5432:5432
-    volumes: 
-      - pgdata:/var/lib/postgresql/data
-      - ./create.sql:/docker-entrypoint-initdb.d/create_tables.sql 
-  bot:
-    env_file: .env
-    container_name: js-kofd
-    build:
-        context: .
-        #dockerfile: Dockerfile
-    #image: node:18-alpine --!!!! вот это не надо было!
-    # рабочая директория
-    working_dir: /app
-    # анонимный том
-    # `rw` означает `read/write` - чтение/запись
+      POSTGRES_DB: ${PGDATABASE}
+      POSTGRES_USER: ${PGUSER}
+      POSTGRES_PASSWORD: ${PGPASSWORD}
     volumes:
-      - app:/app
-      #- app:/app/node_modules
-      #- app:/app/logs
-    # сервис, от которого зависит работоспособность данного сервиса
-    depends_on:
-      - db
-    restart: always
-    # команда для запуска сервера для разработки
-    command: npm run index
+      - ./volume_db/:/var/lib/postgresql/data
+      #- ./create.sql:/docker-entrypoint-initdb.d/create_tables.sql
 
+  js-kofd:
+    image: node:20
+    depends_on:
+    - db
+    # - rabbitmq
+    command: bash -c "npm install && npm run index"
+    working_dir: /app
+    volumes:
+      - ./js-kofd/:/app
+    ports:
+      - 8443:8443
+    environment:
+      KOFDPASSWORD: ${KOFDPASSWORD}
+      BOT_TOKEN: ${BOT_TOKEN}
+      SITE_GET_PRODUCT_URL: ${SITE_GET_PRODUCT_URL}
+      SITE_GET_IMAGES_URL: ${SITE_GET_IMAGES_URL}
+      # RMUSER: ${RM_USERNAME}
+      # RMPASSWORD: ${RM_PASSWORD}
+      TZ: ${TZ}
+
+      PGDATABASE: ${PGDATABASE}
+      PGUSER: ${PGUSER}
+      PGPASSWORD: ${PGPASSWORD}
+      PGHOST: 'db'
+
+      #DATABASE_URL: postgresql://${DB_USERNAME}:${DB_PASSWORD}@db:5432/${DB_NAME}?schema=public
+
+  # rabbitmq:
+  #   image: rabbitmq:3-management
+  #   hostname: rabbitmq
+  #   restart: always
+  #   environment:
+  #     - RABBITMQ_DEFAULT_USER=${RM_USERNAME}
+  #     - RABBITMQ_DEFAULT_PASS=${RM_PASSWORD}
+  #     - RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS=-rabbit log_levels [{connection,error},{default,error}] disk_free_limit 2147483648
+  #   volumes:
+  #     - ./volume_rabbitmq:/var/lib/rabbitmq
+  #   ports:
+  #     - ${RM_PORT_MANAGEMENT}:15672
+  #     - ${RM_PORT_EXTERNAL}:5672
 
 volumes:
-    pgdata:
-    app:
+  volume_db:
+  js-kofd:
+  # volume_rabbitmq:
