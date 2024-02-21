@@ -7,4 +7,4 @@ lib
 .env
 .vscode
 **/logs/**.txt
-**/logs/charts
+**/logs/charts/**
