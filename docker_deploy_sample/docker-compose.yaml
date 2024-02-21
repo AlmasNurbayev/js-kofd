@@ -1,6 +1,23 @@
+# использовать так:
+# - создать корневую папку, 
+# - выложить туда: docker-compose.yaml, env, папку js-kofd (клонировать с Git)
+# - заполнить env
+# - из корневой папки запустить docker-compose up -d
+#
+# Первый запуск - нужно подключиться к БД по порту PGPORT_EXTERNAL и накатить дамп
+# после рестартовать контейнер js-kofd
+#
+# при этом в корневой папке появится вторая папка - volume_db, это volume для postgres
+# нельзя при этом CHOWN, так как база не сможет работать с volume 
+#
+# бэкап можно делать из хост-системы так:
+# docker exec -t js-kofd-container_db-kofd_1 pg_dumpall -c -U ps > dump_`date +%Y-%m-%d"_"%H_%M_%S`.sql
+# где js-kofd-container_db-kofd_1 - имя контейнера
+# ps - пользователь
+
 version: '3.8'
 services:
-  db:
+  db-kofd:
     image: postgres:16.1-alpine
     ports:
       - ${PGPORT_EXTERNAL}:5432
@@ -10,12 +27,13 @@ services:
       POSTGRES_PASSWORD: ${PGPASSWORD}
     volumes:
       - ./volume_db/:/var/lib/postgresql/data
+    restart: unless-stopped
       #- ./create.sql:/docker-entrypoint-initdb.d/create_tables.sql
 
   js-kofd:
     image: node:20
     depends_on:
-    - db
+    - db-kofd
     # - rabbitmq
     command: bash -c "npm install && npm run index"
     working_dir: /app
@@ -35,8 +53,8 @@ services:
       PGDATABASE: ${PGDATABASE}
       PGUSER: ${PGUSER}
       PGPASSWORD: ${PGPASSWORD}
-      PGHOST: 'db'
-
+      PGHOST: 'db-kofd'
+    restart: unless-stopped
       #DATABASE_URL: postgresql://${DB_USERNAME}:${DB_PASSWORD}@db:5432/${DB_NAME}?schema=public
 
   # rabbitmq:
