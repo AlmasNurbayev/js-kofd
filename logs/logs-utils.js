@@ -118,6 +118,10 @@ async function isFileExist(name) {
 
 async function clearDirectory(path) {
   logger.info('logs-utils-readlog - starting clearDirectory: ' + path);
+  if (!await isFileExist(path)) {
+    await fs.mkdir(path);
+  }
+
   for (const file of await fs.readdir(path)) {
     try {
       await fs.unlink(path + '/'+ file);
