@@ -276,7 +276,6 @@ async function actions_check(bot) {
     dotenv.config();
     bot.action(/check-/i, async (ctx) => {
         //ctx.reply('меню скрыто', { reply_markup: { remove_keyboard: true, }, });
-        console.log(ctx.match.input);
         let date = new Date().toLocaleString("ru-RU");
         writeLog(`bot_request.txt`, String(date + ': receive request: <' + ctx.match.input + "> от пользователя " + ctx.from.id + " / " + ctx.from.username));
 
@@ -364,7 +363,6 @@ async function actions_check(bot) {
         }
         message = message.replaceAll('   ', '');
 
-        console.log(bot_message_id);
         try {
             if (image_url.length > 1) { // отправляем одним сообщением чек, и вторым сообщением группу фото
 

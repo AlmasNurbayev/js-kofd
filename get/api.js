@@ -13,7 +13,7 @@ const { v4: uuidv4 } = require('uuid');
 dotenv.config();
 
 const agent = new https.Agent({
-  rejectUnauthorized: false,
+  rejectUnauthorized: false
 });
 
 /**
@@ -347,6 +347,7 @@ async function getProduct(name) {
   //process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
   logger.info('api - starting getCheck: ' + name);
+  logger.info('api - starting getCheck: ' + process.env.SITE_GET_PRODUCT_URL + name);
   const config = {
     method: "get",
     url: process.env.SITE_GET_PRODUCT_URL + name,
@@ -354,11 +355,7 @@ async function getProduct(name) {
       "Content-Type": "application/json",
       //Authorization: token,
     },
-    httpsAgent: new https.Agent({
-      checkServerIdentity: function (host, cert) {
-        return undefined;
-      }
-    }),
+    //httpsAgent: agent, 
     timeout: 14000
   };
   try {
@@ -373,7 +370,9 @@ async function getProduct(name) {
     return res.data;
   } catch (e) {
     await writeError(e.stack, 'getProduct');
+    console.log('error on getProduct', process.env.SITE_GET_PRODUCT_URL, name)
     console.log(e.stack)
+    
   }
 }
 
