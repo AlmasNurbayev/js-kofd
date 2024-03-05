@@ -22,12 +22,16 @@ services:
     ports:
       - ${PGPORT_EXTERNAL}:5432
     environment:
+      PGTZ: ${TZ}
+      TZ: ${TZ}
       POSTGRES_DB: ${PGDATABASE}
       POSTGRES_USER: ${PGUSER}
       POSTGRES_PASSWORD: ${PGPASSWORD}
     volumes:
       - ./volume_db/:/var/lib/postgresql/data
     restart: unless-stopped
+    networks:
+      default:
       #- ./create.sql:/docker-entrypoint-initdb.d/create_tables.sql
 
   js-kofd:
@@ -37,10 +41,10 @@ services:
     # - rabbitmq
     command: bash -c "npm install && npm run index"
     working_dir: /app
-    volumes:
-      - ./js-kofd/:/app
     ports:
       - 8443:8443
+    volumes:
+      - ./js-kofd/:/app
     environment:
       KOFDPASSWORD: ${KOFDPASSWORD}
       BOT_TOKEN: ${BOT_TOKEN}
@@ -55,6 +59,12 @@ services:
       PGPASSWORD: ${PGPASSWORD}
       PGHOST: 'db-kofd'
     restart: unless-stopped
+    networks:
+      kofd:
+         aliases:
+           - js-kofd.local
+      default:
+
       #DATABASE_URL: postgresql://${DB_USERNAME}:${DB_PASSWORD}@db:5432/${DB_NAME}?schema=public
 
   # rabbitmq:
@@ -75,3 +85,7 @@ volumes:
   volume_db:
   js-kofd:
   # volume_rabbitmq:
+networks:
+  kofd:
+    name: 'kofd'
+  default:    
