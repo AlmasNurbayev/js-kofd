@@ -42,7 +42,7 @@ dotenv.config();
 // }
 
 
-process.env.TZ = 'Asia/Almaty';
+//process.env.TZ = 'Asia/Almaty';
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
