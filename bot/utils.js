@@ -303,7 +303,7 @@ async function ReplyData(mode, ctx) {
 
       //if (res.sumAll != 0 || res.cashEject != 0) {
         message += `
-          кеш: ${res.sumAllCash.toLocaleString('ru-RU')}, карта: ${res.sumAllCard.toLocaleString('ru-RU')}, смешано: ${res.sumAllMixed.toLocaleString('ru-RU')}
+          кеш: ${res.sumAllCash.toLocaleString('ru-RU')}, карта: ${res.sumAllCard.toLocaleString('ru-RU')}, мобильный: ${res.sumAllMobile.toLocaleString('ru-RU')}, смешано: ${res.sumAllMixed.toLocaleString('ru-RU')}
           В т.ч.:
           Продажи: ${res.sumSale.toLocaleString('ru-RU')}, возвраты: ${res.sumReturn.toLocaleString('ru-RU')}, выемка: ${res.cashEject.toLocaleString('ru-RU')}`; 
           
@@ -413,6 +413,8 @@ function parseResRaws(rows) {
           elementTypePay = 'кеш';
         } else if (element.paymenttypes[0] === '1') {
           elementTypePay = 'карта';
+        } else if (element.paymenttypes[0] === '4') {
+          elementTypePay = 'мобильный';  
         } else {
           elementTypePay = '';
         }

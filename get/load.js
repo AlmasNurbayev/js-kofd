@@ -27,15 +27,18 @@ async function load(period) {
   const tableSumAll = {
     sumSale: 0,
     sumSaleCard: 0,
+    sumSaleMobile: 0,
     sumSaleCash: 0,
     sumSaleMixed: 0,
     sumReturn: 0,
     sumReturnCard: 0,
+    sumReturnMobile: 0,
     sumReturnCash: 0,
     sumReturnMixed: 0,
     sumAll: 0,
     sumAllCard: 0,
     sumAllCash: 0,
+    sumAllMobile: 0,
     sumAllMixed: 0,
     countChecks: 0,
     availableSum: 0,
@@ -271,13 +274,16 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
     sumSale: 0,
     sumSaleCard: 0,
     sumSaleCash: 0,
+    sumSaleMobile: 0,
     sumSaleMixed: 0,
     sumReturn: 0,
     sumReturnCard: 0,
     sumReturnCash: 0,
+    sumReturnMobile: 0,
     sumReturnMixed: 0,
     sumAll: 0,
     sumAllCard: 0,
+    sumAllMobile: 0,
     sumAllCash: 0,
     sumAllMixed: 0,
     countChecks: 0,
@@ -309,7 +315,10 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
               tableSum.sumSaleCash += element2.sum;
             } else if (element2.paymentTypes[0] == 1) {
               tableSum.sumSaleCard += element2.sum;
+            } else if (element2.paymentTypes[0] == 4) {
+              tableSum.sumSaleMobile += element2.sum;
             }
+
           }
         }
         else if (element2.subType == 3) { // возврат
@@ -322,6 +331,8 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
               tableSum.sumReturnCash += element2.sum;
             } else if (element2.paymentTypes[0] == 1) {
               tableSum.sumReturnCard += element2.sum;
+            } else if (element2.paymentTypes[0] == 4) {
+              tableSum.sumReturnMobile += element2.sum;
             }
           }
         }
@@ -334,6 +345,7 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
       }
     });
     tableSum.sumAll = tableSum.sumSale - tableSum.sumReturn;
+    tableSum.sumAllMobile = tableSum.sumSaleMobile - tableSum.sumReturnMobile;
     tableSum.sumAllCard = tableSum.sumSaleCard - tableSum.sumReturnCard;
     tableSum.sumAllCash = tableSum.sumSaleCash - tableSum.sumReturnCash;
     tableSum.sumAllMixed = tableSum.sumSaleMixed - tableSum.sumReturnMixed;
@@ -356,14 +368,17 @@ function getSummary(tableSumAll, obj) {
     tableSumAll.sumSale += obj.sumSale;
     tableSumAll.sumSaleCard += obj.sumSaleCard;
     tableSumAll.sumSaleCash += obj.sumSaleCash;
+    tableSumAll.sumSaleMobile += obj.sumSaleMobile;
     tableSumAll.sumSaleMixed += obj.sumSaleMixed;
     tableSumAll.sumReturn += obj.sumReturn;
     tableSumAll.sumReturnCard += obj.sumReturnCard;
+    tableSumAll.sumReturnMobile += obj.sumReturnMobile;
     tableSumAll.sumReturnCash += obj.sumReturnCash;
     tableSumAll.sumReturnMixed += obj.sumReturnMixed;
     tableSumAll.sumAll += obj.sumAll;
     tableSumAll.sumAllCard += obj.sumAllCard;
     tableSumAll.sumAllCash += obj.sumAllCash;
+    tableSumAll.sumAllMobile += obj.sumAllMobile;
     tableSumAll.sumAllMixed += obj.sumAllMixed;
     tableSumAll.countChecks += obj.countChecks;
     tableSumAll.cashEject += obj.cashEject;
