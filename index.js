@@ -89,19 +89,19 @@ bot.on('text', async (ctx) => {
   //await ctx.reply(`Hello ${ctx.state.role}`);
 });
 
-(async () => {
-  await clearDirectory('logs/charts');
-  // чистим токены при рестарте
-  const clean_token = `TRUNCATE token`;
-  await getQuery(clean_token);
-})();
-
 bot.launch();
 console.log('starting bot');
 logger.info('starting bot');
 
 (async () => {
-  const agentTimer = setInterval(() => agent(bot), 180000);
+  const agentTimer = setInterval(() => {
+    agent(bot);
+    // чистим папку с диаграммами
+    clearDirectory('logs/charts');
+    // чистим токены созданные более 1 часа назад
+    const clean_old_token = `DELETE FROM token WHERE created_at < NOW() - INTERVAL '1 hour';`;
+    getQuery(clean_old_token);
+  }, 180000);
   // await listenRM('transactions', bot);
 })();
 
