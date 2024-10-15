@@ -1,19 +1,23 @@
-"use strict";
+'use strict';
 
 //const fs = require("fs");
 const { getJWT, getTransaction, getQuery, getCheck } = require('./api');
 //const { extractNames } = require('../bot/utils.js');
-const { writeError, writeLog, logger, isFileExist } = require('../logs/logs-utils.js');
+const {
+  writeError,
+  writeLog,
+  logger,
+  isFileExist,
+} = require('../logs/logs-utils.js');
 //const dotenv = require("dotenv");
 const count = 3000; // count of transaction get from kofd
 
-
 // clear all temporary files
-const name1 = "../logs/response-post.txt";
+const name1 = '../logs/response-post.txt';
 if (isFileExist(name1)) {
   //fs.unlink(name1, (err) => {writeError(err.stack, 'load - unlink')});
 }
-const name2 = "../logs/response.txt";
+const name2 = '../logs/response.txt';
 if (isFileExist(name2)) {
   //fs.unlink(name2, (err) => {writeError(err.stack, 'load - unlink')});
 }
@@ -21,8 +25,7 @@ if (isFileExist(name2)) {
 //fs.unlink("../logs/jwt.txt", (err) => {writeError(err.stack, 'load - unlink') });
 //fs.unlink("../logs/response-get.txt", (err) => {writeError(err.stack, 'load - unlink') });
 
-
-// get list of org & kassa form db 
+// get list of org & kassa form db
 async function load(period) {
   const tableSumAll = {
     sumSale: 0,
@@ -46,7 +49,7 @@ async function load(period) {
     cashEject: false,
     dateStart: '',
     dateEnd: '',
-    obj: []
+    obj: [],
   };
 
   let queryAllKassa = `select organization.bin, organization.name_org, kassa.*  FROM "public".organization
@@ -58,30 +61,28 @@ async function load(period) {
 
   let listKassa, listOrg;
 
-
   let arrJWT = [];
   let arrGet = [];
   try {
     logger.info('load - starting query of kassa and organization');
-    let res = await Promise.all([getQuery(queryAllKassa), getQuery(queryAllOrganization)]);
+    let res = await Promise.all([
+      getQuery(queryAllKassa),
+      getQuery(queryAllOrganization),
+    ]);
     listKassa = res[0].rows;
     listOrg = res[1].rows;
     //console.table(listKassa);
     //console.table(listOrg);
 
-    listOrg.forEach(element => {
+    listOrg.forEach((element) => {
       arrJWT.push(getJWT(element.bin, process.env.KOFDPASSWORD));
       //console.log('get jwt: ' + element.bin);
     });
-
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err.stack);
     writeError(err.stack, 'getTransaction - promise get kassa and org ');
     throw new Error(err);
   }
-
-
 
   try {
     //logger.info('load - starting of build array with JWT');
@@ -96,21 +97,34 @@ async function load(period) {
     // arrKnumber = [];
 
     listKassa.forEach((elementKassa) => {
-      listOrg.forEach(elementOrg => {
+      listOrg.forEach((elementOrg) => {
         if (elementKassa.bin === elementOrg.bin) {
           elementKassa['jwt'] = elementOrg.jwt;
           //setTimeout(() => {
-          arrGet.push(getTransaction(count, elementKassa.jwt, elementKassa.knumber, elementKassa.id, elementKassa.name_kassa, elementKassa.id_organization, elementKassa.bin, period));
+          arrGet.push(
+            getTransaction(
+              count,
+              elementKassa.jwt,
+              elementKassa.knumber,
+              elementKassa.id,
+              elementKassa.name_kassa,
+              elementKassa.id_organization,
+              elementKassa.bin,
+              period
+            )
+          );
           //}, index * 200);
           //arrKnumber.push(elementKassa.knumber);
           // get data for all kassa
         }
       });
     });
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err.stack);
-    writeError(JSON.stringify(err.stack), 'getTransaction - promise get jwt and transactions');
+    writeError(
+      JSON.stringify(err.stack),
+      'getTransaction - promise get jwt and transactions'
+    );
     throw new Error(err);
   }
 
@@ -118,20 +132,34 @@ async function load(period) {
     //logger.info('load - starting GET query receive transaction');
     let res2 = await Promise.all(arrGet);
 
-
     res2.forEach((element3) => {
       //console.log(element3.name_kassa + ", " + element3.data.length + ", " + element3.id_kassa + ",  " + element3.id_organization);
-      writeOperation(element3, element3.id_kassa, element3.name_kassa, element3.id_organization);
+      writeOperation(
+        element3,
+        element3.id_kassa,
+        element3.name_kassa,
+        element3.id_organization
+      );
       //writeLog(`response.txt`, element3, false);
-      getSummary(tableSumAll, getStat(element3, element3.id_kassa, element3.name_kassa, element3.id_organization, element3.dateStart, element3.dateEnd));
+      getSummary(
+        tableSumAll,
+        getStat(
+          element3,
+          element3.id_kassa,
+          element3.name_kassa,
+          element3.id_organization,
+          element3.dateStart,
+          element3.dateEnd
+        )
+      );
     });
     //fs.appendFile("get/response.txt", JSON.stringify(res) + "\n", (error2) => { });
     //writeLog(`tableSumAll.txt`, tableSumAll, false);
     //writeLog(`rows.txt`, res2, false);
     //console.log(tableSumAll);
     return {
-      'table': tableSumAll,
-      'rows': res2
+      table: tableSumAll,
+      rows: res2,
     };
   } catch (err) {
     writeError(err.stack, 'getTransaction - promise get summary');
@@ -143,35 +171,35 @@ async function load(period) {
 async function getCheckFromArray(res) {
   let arr = [];
   let arr_id = [];
-      res.data.forEach((element4) => {
-        arr.push(
-          getCheck(element4.id, res.knumber, res.token),
-        );
-        arr_id.push(element4.id);
-      });
+  res.data.forEach((element4) => {
+    arr.push(getCheck(element4.id, res.knumber, res.token));
+    arr_id.push(element4.id);
+  });
   let res_all = await Promise.all(arr);
 
-      res.data.forEach((element4) => {
-        let index = arr_id.findIndex((id) => id === element4.id);
-        if (index != -1) {
-          element4.cheque = res_all[index];
-          element4.names = extractNames(element4.cheque.data);
-        }
-      });
+  res.data.forEach((element4) => {
+    let index = arr_id.findIndex((id) => id === element4.id);
+    if (index != -1) {
+      element4.cheque = cutCheque(res_all[index]);
+      element4.names = extractNames(element4.cheque.data);
+    }
+  });
 }
 
-
-// insert to db from recieved transaction 
+// insert to db from recieved transaction
 async function writeOperation(res, id_kassa, name_kassa, id_organization) {
-  if (res.data.length == 0) { return }
+  if (res.data.length == 0) {
+    return;
+  }
 
   let arr_id = await getQuery('select id from public.transaction'); // получаем id всех тразнакций
   arr_id = arr_id.rows;
 
   res = structuredClone(res); // делаем копию для фильтрации
-  arr_id = arr_id.map(el => el.id);
+  arr_id = arr_id.map((el) => el.id);
 
-  for (let i = res.data.length - 1; i >= 0; i--) { // цикл в обратную сторону для проверки дублирования id
+  for (let i = res.data.length - 1; i >= 0; i--) {
+    // цикл в обратную сторону для проверки дублирования id
     if (arr_id.includes(res.data[i].id)) {
       res.data.splice(i, 1); // удаление дублей перед записью
     }
@@ -258,8 +286,7 @@ async function writeOperation(res, id_kassa, name_kassa, id_organization) {
       let res2 = await getQuery(sql);
       //writeLog(`writeOperation.txt`, JSON.stringify(res2), false);
       return res2;
-    }
-    catch (err) {
+    } catch (err) {
       writeError(err.stack, 'writeOperation');
       //console.error('query error', err.stack);
       throw new Error(err);
@@ -267,9 +294,15 @@ async function writeOperation(res, id_kassa, name_kassa, id_organization) {
   }
 }
 
-// count statistics from recieved transaction 
-function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) {
-
+// count statistics from recieved transaction
+function getStat(
+  res,
+  knumber,
+  name_kassa,
+  id_organization,
+  dateStart,
+  dateEnd
+) {
   let tableSum = {
     sumSale: 0,
     sumSaleCard: 0,
@@ -294,7 +327,7 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
     name_kassa: name_kassa,
     id_organization: id_organization,
     dateStart: dateStart,
-    dateEnd: dateEnd
+    dateEnd: dateEnd,
   };
 
   //logger.info(`load - starting get stat for ${knumber} / ${name_kassa}`);
@@ -302,13 +335,16 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
   try {
     res.data.forEach((element2, index) => {
       //console.log(element2);
-      if (index === 0) { tableSum.availableSum = element2.availableSum; }
+      if (index === 0) {
+        tableSum.availableSum = element2.availableSum;
+      }
       if (element2.type == 1) {
-        if (element2.subType == 2) { // продажа
+        if (element2.subType == 2) {
+          // продажа
           tableSum.countChecks++;
           tableSum.sumSale += element2.sum;
           //console.log(element2.paymentTypes);
-          if (typeof (element2.paymentTypes) == 'object') {
+          if (typeof element2.paymentTypes == 'object') {
             if (element2.paymentTypes.length == 2) {
               tableSum.sumSaleMixed += element2.sum;
             } else if (element2.paymentTypes[0] == 0) {
@@ -318,13 +354,12 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
             } else if (element2.paymentTypes[0] == 4) {
               tableSum.sumSaleMobile += element2.sum;
             }
-
           }
-        }
-        else if (element2.subType == 3) { // возврат
+        } else if (element2.subType == 3) {
+          // возврат
           tableSum.countChecks++;
           tableSum.sumReturn += element2.sum;
-          if (typeof (element2.paymentTypes) == 'object') {
+          if (typeof element2.paymentTypes == 'object') {
             if (element2.paymentTypes.length == 2) {
               tableSum.sumReturnMixed += element2.sum;
             } else if (element2.paymentTypes[0] == 0) {
@@ -336,10 +371,12 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
             }
           }
         }
-      } else if (element2.type == 2) { // смена
+      } else if (element2.type == 2) {
+        // смена
         tableSum.shiftClosed = true;
         //tableSum.availableSum = element2.availableSum;
-      } else if (element2.type == 6 && element2.subType == 1) { // выемка
+      } else if (element2.type == 6 && element2.subType == 1) {
+        // выемка
         tableSum.cashEject += element2.sum;
         //tableSum.availableSum = element2.availableSum;
       }
@@ -352,8 +389,7 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
     return tableSum;
     //console.log('Итоги по кассе ' + name_kassa + ':');
     //console.log(tableSum);
-  }
-  catch (err) {
+  } catch (err) {
     writeError(err.stack, 'getStat');
     //console.error('query error', err.stack);
     throw new Error(err);
@@ -361,7 +397,6 @@ function getStat(res, knumber, name_kassa, id_organization, dateStart, dateEnd) 
 }
 
 function getSummary(tableSumAll, obj) {
-
   //logger.info(`load - starting get summary for ${JSON.stringify(obj.name_kassa)}`);
 
   try {
@@ -385,8 +420,7 @@ function getSummary(tableSumAll, obj) {
     tableSumAll.dateStart = obj.dateStart;
     tableSumAll.dateEnd = obj.dateEnd;
     tableSumAll.obj.push(obj);
-  }
-  catch (err) {
+  } catch (err) {
     writeError(err.stack, 'getSummary');
     //console.error('query error', err.stack);
     throw new Error(err);
@@ -398,17 +432,31 @@ function extractNames(data) {
   let indexStart = 0;
   let indexEnd = 0;
   data.forEach((element, index) => {
-    if (element.text === '*********************************************** ' && indexStart === 0) {
+    if (
+      element.text === '*********************************************** ' &&
+      indexStart === 0
+    ) {
       indexStart = index;
     }
-    if (element.text === '------------------------------------------------' && indexEnd === 0) {
+    if (
+      element.text === '------------------------------------------------' &&
+      indexEnd === 0
+    ) {
       indexEnd = index;
     }
-    if (element.text === 'СКИДКА                                          ' && indexEnd === 0) {
+    if (
+      element.text === 'СКИДКА                                          ' &&
+      indexEnd === 0
+    ) {
       indexEnd = index;
     }
-
-  })
+    if (
+      element.text === 'ЖЕҢІЛДІК/СКИДКА                                 ' &&
+      indexEnd === 0
+    ) {
+      indexEnd = index;
+    }
+  });
   let data2 = data.slice(indexStart + 1, indexEnd);
   //console.log(data2);
   let dataEnd = [];
@@ -420,7 +468,7 @@ function extractNames(data) {
     names = names + element.text;
     if (findEnd !== -1) {
       dataEnd.push(index);
-      dataNames.push(names)
+      dataNames.push(names);
       names = '';
       // if (index === 0) {
       //     let row_name = element.text.slice(0, findEnd-1);
@@ -428,8 +476,7 @@ function extractNames(data) {
       //     dataNames.push(name)
       // }
     }
-
-  })
+  });
   dataNames = dataNames.map((e, index) => {
     let findEnd = e.indexOf(' (');
     let name1 = '';
@@ -439,19 +486,29 @@ function extractNames(data) {
       if (findDouble !== -1) {
         name1 = name1.replaceAll('  ', '');
       }
-
-    } else (delete dataNames[index])
+    } else delete dataNames[index];
     return name1;
-
-  })
+  });
   return dataNames;
-
 }
+
+function cutCheque(data) {
+  if (!data.hasOwnProperty('data')) return;
+  let indexEnd = data.data.length-1;
+  //let cuttedData = data;
+  data.data.forEach((element, index) => {
+    if (element.text.includes('БАРЛЫҒЫ/ИТОГО')) {
+      indexEnd = index + 1;
+    }
+  });
+  data.data = data.data.slice(0, indexEnd + 1);
+  return data;
+}
+
 
 (async () => {
   //console.log(await load('текущий день'));
 })();
-
 
 exports.extractNames = extractNames;
 exports.load = load;
