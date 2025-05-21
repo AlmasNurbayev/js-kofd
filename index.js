@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 const { Telegraf } = require('telegraf');
 const { agent } = require('./agent/agent.js');
@@ -9,7 +9,7 @@ const { hears, actions_oper, actions_check } = require('./bot/hears.js');
 // const amqplib = require('amqplib');
 //const { actions } = require('./bot/actions.js');
 
-const dotenv = require("dotenv");
+const dotenv = require('dotenv');
 const { getQuery } = require('./get/api');
 const { logger, clearDirectory } = require('./logs/logs-utils.js');
 dotenv.config();
@@ -41,7 +41,6 @@ dotenv.config();
 //   }
 // }
 
-
 //process.env.TZ = 'Asia/Almaty';
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
@@ -49,10 +48,17 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
 
-
 bot.start((ctx) => {
-  logger.info('index - bot start new user: ' + ' / ' + ctx.from.id + ' / ' + ctx.from.username);  
-  return ctx.reply('Добро пожаловать! Это бот для просмотра статистики касс. Нажмите кнопку меню для доступа к командам...');
+  logger.info(
+    'index - bot start new user: ' +
+      ' / ' +
+      ctx.from.id +
+      ' / ' +
+      ctx.from.username
+  );
+  return ctx.reply(
+    'Добро пожаловать! Это бот для просмотра статистики касс. Нажмите кнопку меню для доступа к командам...'
+  );
 });
 
 command('menu', bot);
@@ -90,7 +96,7 @@ bot.on('text', async (ctx) => {
 });
 
 bot.launch();
-console.log('starting bot');
+console.log(`starting bot: ${new Date().toLocaleString('ru-RU')}`);
 logger.info('starting bot');
 
 (async () => {
@@ -104,7 +110,6 @@ logger.info('starting bot');
   }, 180000);
   // await listenRM('transactions', bot);
 })();
-
 
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));
