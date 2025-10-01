@@ -27,9 +27,9 @@ async function checkNew(bot) {
     // получаем список пользователей
     let arrUsers = await getQuery('select * from telegram_users');
 
-    //получаем из БД транзакции именно продаж за 10 дней (если долго не было продаж или запусков агента)
+    //получаем из БД транзакции продаж за 5 дней (если долго не было продаж или запусков агента)
     const currentDay = moment()
-      .add(-10, 'd')
+      .add(-5, 'd')
       .startOf('day')
       .format('YYYY-MM-DD[T]HH:mm:ss');
     let sql_today = `
@@ -99,7 +99,11 @@ async function checkNew(bot) {
 async function agent(bot) {
   //console.log('======== ' + new Date().toLocaleString("ru-RU"));
   await startLoad();
-  await checkNew(bot);
+  if (process.env.IS_SENDING_NEW_OPERATIONS === "true") {
+    await checkNew(bot);
+  } else {
+    loggerAgent.info('agent - IS_SENDING_NEW_OPERATIONS is false, not checking new operations');
+  }
 }
 
 exports.agent = agent;
