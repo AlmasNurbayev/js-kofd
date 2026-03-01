@@ -107,7 +107,7 @@ logger.info('starting bot');
     // чистим токены созданные более 1 часа назад
     const clean_old_token = `DELETE FROM token WHERE created_at < NOW() - INTERVAL '1 hour';`;
     getQuery(clean_old_token);
-  }, 180000);
+  }, 1800000);
   // await listenRM('transactions', bot);
 })();
 
